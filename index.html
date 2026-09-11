@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Relógio de Precisão — o método como mecanismo</title>
+    <meta name="description" content="Um relógio mecânico montado peça por peça pelo ciclo de Van Aken: problema, pesquisa, planejamento, execução, avaliação e aprendizado." />
+    <meta name="theme-color" content="#06080b" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 120 120%27%3E%3Ccircle cx=%2760%27 cy=%2760%27 r=%2752%27 fill=%27none%27 stroke=%27%23d3a94f%27 stroke-width=%278%27/%3E%3Cpath d=%27M60 24v36h26%27 stroke=%27%23e9e4d8%27 stroke-width=%279%27 fill=%27none%27 stroke-linecap=%27round%27/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div id="preloader" class="preloader" aria-live="polite">
+      <div class="preloader__mark" aria-hidden="true">
+        <svg viewBox="0 0 120 120" width="96" height="96"><circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".5"/><circle class="preloader__arc" cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="326.7" stroke-dashoffset="326.7" transform="rotate(-90 60 60)"/><line x1="60" y1="60" x2="60" y2="22" stroke="currentColor" stroke-width="2"/><line x1="60" y1="60" x2="84" y2="60" stroke="currentColor" stroke-width="2"/></svg>
+      </div>
+      <div class="preloader__pct"><span id="preloader-pct">0</span>%</div>
+      <div class="preloader__label">Calibrando a experiência.</div>
+    </div>
+
+    <div id="unsupported" class="unsupported" hidden>
+      <div class="unsupported__inner">
+        <h1>Relógio de Precisão</h1>
+        <p>Seu navegador não tem WebGL disponível. A experiência completa precisa dele, mas o método fica aqui.</p>
+        <ol id="unsupported-list"></ol>
+      </div>
+    </div>
+
+    <canvas id="gl" aria-hidden="true"></canvas>
+
+    <div class="progress" id="progress" aria-hidden="true"><i></i></div>
+
+    <header class="hud">
+      <a class="hud__logo" href="#capitulo-0" aria-label="Relógio de Precisão, voltar ao início">
+        <svg viewBox="0 0 120 120" width="28" height="28" aria-hidden="true"><circle cx="60" cy="60" r="52" fill="none" stroke="currentColor" stroke-width="6"/><line x1="60" y1="60" x2="60" y2="24" stroke="currentColor" stroke-width="7" stroke-linecap="round"/><line x1="60" y1="60" x2="86" y2="60" stroke="currentColor" stroke-width="7" stroke-linecap="round"/></svg>
+        <span>Relógio de Precisão</span>
+      </a>
+      <div class="hud__right">
+        <button class="hud__mapa" id="mapa-btn" aria-expanded="false" aria-controls="mapa" title="Mapa do ciclo">Mapa</button>
+        <button class="hud__reg" id="reg-btn" aria-expanded="false" aria-controls="registro" title="Registro do ciclo">Registro <b id="reg-count">00</b></button>
+        <button class="hud__menu" id="menu-btn" aria-expanded="false" aria-controls="menu">Capítulos</button>
+      </div>
+    </header>
+
+    <nav class="dots" id="dots" aria-label="Capítulos"></nav>
+
+    <div class="menu" id="menu" hidden>
+      <ol class="menu__list" id="menu-list"></ol>
+      <p class="menu__foot">Seis etapas. Um método. Um relógio. <a href="#mapa" id="menu-mapa">Ver o mapa do ciclo</a></p>
+    </div>
+
+    <aside class="registro" id="registro" hidden aria-label="Registro do ciclo">
+      <div class="registro__head"><h2>Registro do ciclo</h2><p>O que você observou, decidiu e mediu. Fica só neste navegador.</p></div>
+      <ol class="registro__list" id="registro-list"></ol>
+      <p class="registro__empty" id="registro-empty">Observações e interações ficam registradas aqui.</p>
+      <div class="registro__foot"><button id="reg-export">Exportar JSON</button><button id="reg-clear" class="is-quiet">Limpar</button><button id="reg-close" class="is-quiet">Fechar</button></div>
+    </aside>
+
+    <aside class="ficha" id="ficha" aria-hidden="true">
+      <small class="ficha__fase" id="ficha-fase"></small>
+      <p class="ficha__essencia" id="ficha-essencia"></p>
+      <ol class="ficha__list" id="ficha-list"></ol>
+      <p class="ficha__f1" id="ficha-f1"><small>Na Fórmula 1</small><b id="ficha-f1-termo"></b><span id="ficha-f1-texto"></span></p>
+      <a class="ficha__mapa" id="ficha-mapa" href="#mapa">Ver o ciclo inteiro</a>
+    </aside>
+
+    <div class="mapa" id="mapa" hidden role="dialog" aria-modal="true" aria-label="Mapa do ciclo">
+      <button class="mapa__close" id="mapa-close">Fechar</button>
+      <div class="mapa__grid">
+        <div class="mapa__dial"><svg id="mapa-svg" viewBox="-118 -24 662 448" role="group" aria-label="Selecione uma das seis etapas"></svg></div>
+        <div class="mapa__panel" id="mapa-panel"></div>
+      </div>
+      <p class="mapa__foot">Cada hora é uma etapa. O aprendizado orienta o próximo ciclo.</p>
+    </div>
+
+    <footer class="creditos" id="creditos" aria-hidden="true"><b>Relógio de Precisão</b><span>Ciclo de Van Aken · dados ilustrativos · aula sobre método com IA</span></footer>
+
+    <div class="hint" id="hint" aria-hidden="true"><span>Role para dar corda</span><i></i></div>
+
+    <div class="scenarios" id="scenarios" hidden aria-label="Cenários de avaliação">
+      <svg class="scenarios__chart" id="drift" viewBox="0 0 280 64" aria-label="Deriva ao longo de 24 horas"></svg>
+      <button data-scenario="frio" class="is-active">Frio</button>
+      <button data-scenario="calor">Calor</button>
+      <button data-scenario="impacto">Impacto</button>
+      <button data-scenario="posicao">Posição</button>
+      <output id="deviation">+0,0 s/dia</output>
+    </div>
+
+    <div class="tooltip" id="tooltip" hidden></div>
+
+    <main id="scroll" class="scroll" aria-label="Narrativa"></main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
