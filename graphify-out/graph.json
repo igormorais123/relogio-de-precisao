@@ -10,7 +10,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_core_app",
-      "community": 1,
+      "community": 0,
       "norm_label": "app.js"
     },
     {
@@ -20,7 +20,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_core_app_app",
-      "community": 1,
+      "community": 0,
       "norm_label": "app"
     },
     {
@@ -30,7 +30,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_core_app_app_constructor",
-      "community": 1,
+      "community": 0,
       "norm_label": ".constructor()"
     },
     {
@@ -40,7 +40,7 @@
       "source_location": "L60",
       "_origin": "ast",
       "id": "src_core_app_app_resize",
-      "community": 1,
+      "community": 0,
       "norm_label": ".resize()"
     },
     {
@@ -50,7 +50,7 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "src_core_app_app_onupdate",
-      "community": 1,
+      "community": 0,
       "norm_label": ".onupdate()"
     },
     {
@@ -60,7 +60,7 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "src_core_app_app_start",
-      "community": 1,
+      "community": 0,
       "norm_label": ".start()"
     },
     {
@@ -70,7 +70,7 @@
       "source_location": "L89",
       "_origin": "ast",
       "id": "src_core_app_app_compile",
-      "community": 1,
+      "community": 0,
       "norm_label": ".compile()"
     },
     {
@@ -80,7 +80,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_core_background",
-      "community": 15,
+      "community": 0,
       "norm_label": "background.js"
     },
     {
@@ -90,7 +90,7 @@
       "source_location": "L35",
       "_origin": "ast",
       "id": "src_core_background_background",
-      "community": 15,
+      "community": 0,
       "norm_label": "background"
     },
     {
@@ -100,7 +100,7 @@
       "source_location": "L36",
       "_origin": "ast",
       "id": "src_core_background_background_constructor",
-      "community": 15,
+      "community": 0,
       "norm_label": ".constructor()"
     },
     {
@@ -110,7 +110,7 @@
       "source_location": "L49",
       "_origin": "ast",
       "id": "src_core_background_background_set",
-      "community": 15,
+      "community": 0,
       "norm_label": ".set()"
     },
     {
@@ -120,7 +120,7 @@
       "source_location": "L54",
       "_origin": "ast",
       "id": "src_core_background_background_update",
-      "community": 15,
+      "community": 0,
       "norm_label": ".update()"
     },
     {
@@ -130,7 +130,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_core_director",
-      "community": 3,
+      "community": 1,
       "norm_label": "director.js"
     },
     {
@@ -140,7 +140,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_core_director_ease",
-      "community": 3,
+      "community": 1,
       "norm_label": "ease()"
     },
     {
@@ -210,7 +210,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_core_post",
-      "community": 1,
+      "community": 0,
       "norm_label": "post.js"
     },
     {
@@ -220,7 +220,7 @@
       "source_location": "L8",
       "_origin": "ast",
       "id": "src_core_post_createpost",
-      "community": 1,
+      "community": 0,
       "norm_label": "createpost()"
     },
     {
@@ -230,7 +230,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_core_registro",
-      "community": 2,
+      "community": 1,
       "norm_label": "registro.js"
     },
     {
@@ -240,7 +240,7 @@
       "source_location": "L4",
       "_origin": "ast",
       "id": "src_core_registro_fases",
-      "community": 2,
+      "community": 1,
       "norm_label": "fases"
     },
     {
@@ -250,7 +250,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_core_registro_ler",
-      "community": 2,
+      "community": 1,
       "norm_label": "ler()"
     },
     {
@@ -260,7 +260,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_core_registro_gravar",
-      "community": 2,
+      "community": 1,
       "norm_label": "gravar()"
     },
     {
@@ -270,7 +270,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_core_registro_memoria",
-      "community": 2,
+      "community": 1,
       "norm_label": "memoria"
     },
     {
@@ -280,7 +280,7 @@
       "source_location": "L11",
       "_origin": "ast",
       "id": "src_core_registro_registro",
-      "community": 2,
+      "community": 1,
       "norm_label": "registro"
     },
     {
@@ -290,7 +290,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_core_scroll",
-      "community": 2,
+      "community": 1,
       "norm_label": "scroll.js"
     },
     {
@@ -300,7 +300,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_core_scroll_pesos",
-      "community": 2,
+      "community": 1,
       "norm_label": "pesos"
     },
     {
@@ -380,7 +380,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_core_studio",
-      "community": 1,
+      "community": 0,
       "norm_label": "studio.js"
     },
     {
@@ -390,7 +390,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_core_studio_studioscene",
-      "community": 1,
+      "community": 0,
       "norm_label": "studioscene()"
     },
     {
@@ -540,7 +540,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_data_narrativa",
-      "community": 2,
+      "community": 1,
       "norm_label": "narrativa.js"
     },
     {
@@ -550,7 +550,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "src_data_narrativa_capitulos",
-      "community": 2,
+      "community": 1,
       "norm_label": "capitulos"
     },
     {
@@ -560,7 +560,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_data_paginas",
-      "community": 0,
+      "community": 1,
       "norm_label": "paginas.js"
     },
     {
@@ -570,7 +570,7 @@
       "source_location": "L2",
       "_origin": "ast",
       "id": "src_data_paginas_paginas",
-      "community": 0,
+      "community": 1,
       "norm_label": "paginas"
     },
     {
@@ -740,7 +740,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_fx_constellation",
-      "community": 0,
+      "community": 2,
       "norm_label": "constellation.js"
     },
     {
@@ -750,7 +750,7 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "src_fx_constellation_constellation",
-      "community": 0,
+      "community": 2,
       "norm_label": "constellation"
     },
     {
@@ -760,7 +760,7 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "src_fx_constellation_constellation_constructor",
-      "community": 0,
+      "community": 2,
       "norm_label": ".constructor()"
     },
     {
@@ -770,7 +770,7 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "src_fx_constellation_constellation_set",
-      "community": 0,
+      "community": 2,
       "norm_label": ".set()"
     },
     {
@@ -780,7 +780,7 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "src_fx_constellation_constellation_update",
-      "community": 0,
+      "community": 2,
       "norm_label": ".update()"
     },
     {
@@ -790,7 +790,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_fx_crowndrag",
-      "community": 2,
+      "community": 1,
       "norm_label": "crowndrag.js"
     },
     {
@@ -960,7 +960,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_fx_finale",
-      "community": 1,
+      "community": 0,
       "norm_label": "finale.js"
     },
     {
@@ -970,7 +970,7 @@
       "source_location": "L30",
       "_origin": "ast",
       "id": "src_fx_finale_finale",
-      "community": 1,
+      "community": 0,
       "norm_label": "finale"
     },
     {
@@ -980,7 +980,7 @@
       "source_location": "L31",
       "_origin": "ast",
       "id": "src_fx_finale_finale_constructor",
-      "community": 1,
+      "community": 0,
       "norm_label": ".constructor()"
     },
     {
@@ -990,7 +990,7 @@
       "source_location": "L82",
       "_origin": "ast",
       "id": "src_fx_finale_finale_set",
-      "community": 1,
+      "community": 0,
       "norm_label": ".set()"
     },
     {
@@ -1000,7 +1000,7 @@
       "source_location": "L84",
       "_origin": "ast",
       "id": "src_fx_finale_finale_update",
-      "community": 1,
+      "community": 0,
       "norm_label": ".update()"
     },
     {
@@ -1010,7 +1010,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_fx_fog",
-      "community": 1,
+      "community": 0,
       "norm_label": "fog.js"
     },
     {
@@ -1020,7 +1020,7 @@
       "source_location": "L86",
       "_origin": "ast",
       "id": "src_fx_fog_fog",
-      "community": 1,
+      "community": 0,
       "norm_label": "fog"
     },
     {
@@ -1030,7 +1030,7 @@
       "source_location": "L87",
       "_origin": "ast",
       "id": "src_fx_fog_fog_constructor",
-      "community": 1,
+      "community": 0,
       "norm_label": ".constructor()"
     },
     {
@@ -1040,7 +1040,7 @@
       "source_location": "L121",
       "_origin": "ast",
       "id": "src_fx_fog_fog_set",
-      "community": 1,
+      "community": 0,
       "norm_label": ".set()"
     },
     {
@@ -1050,7 +1050,7 @@
       "source_location": "L123",
       "_origin": "ast",
       "id": "src_fx_fog_fog_update",
-      "community": 1,
+      "community": 0,
       "norm_label": ".update()"
     },
     {
@@ -1060,7 +1060,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_fx_hotspots",
-      "community": 2,
+      "community": 1,
       "norm_label": "hotspots.js"
     },
     {
@@ -1070,7 +1070,7 @@
       "source_location": "L15",
       "_origin": "ast",
       "id": "src_fx_hotspots_ancoras",
-      "community": 2,
+      "community": 1,
       "norm_label": "ancoras"
     },
     {
@@ -1190,7 +1190,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_fx_particles",
-      "community": 0,
+      "community": 2,
       "norm_label": "particles.js"
     },
     {
@@ -1200,7 +1200,7 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "src_fx_particles_particles",
-      "community": 0,
+      "community": 2,
       "norm_label": "particles"
     },
     {
@@ -1210,7 +1210,7 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "src_fx_particles_particles_constructor",
-      "community": 0,
+      "community": 2,
       "norm_label": ".constructor()"
     },
     {
@@ -1220,7 +1220,7 @@
       "source_location": "L59",
       "_origin": "ast",
       "id": "src_fx_particles_particles_update",
-      "community": 0,
+      "community": 2,
       "norm_label": ".update()"
     },
     {
@@ -1440,7 +1440,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_fx_index",
-      "community": 0,
+      "community": 2,
       "norm_label": "index.js"
     },
     {
@@ -1450,7 +1450,7 @@
       "source_location": "L3",
       "_origin": "ast",
       "id": "src_fx_index_modules",
-      "community": 0,
+      "community": 2,
       "norm_label": "modules"
     },
     {
@@ -1460,7 +1460,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_fx_index_registro",
-      "community": 0,
+      "community": 2,
       "norm_label": "registro"
     },
     {
@@ -1470,7 +1470,7 @@
       "source_location": "L18",
       "_origin": "ast",
       "id": "src_fx_index_createextrafx",
-      "community": 0,
+      "community": 2,
       "norm_label": "createextrafx()"
     },
     {
@@ -1480,7 +1480,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_main",
-      "community": 0,
+      "community": 2,
       "norm_label": "main.js"
     },
     {
@@ -1490,7 +1490,7 @@
       "source_location": "L5",
       "_origin": "ast",
       "id": "src_main_pct",
-      "community": 0,
+      "community": 2,
       "norm_label": "pct"
     },
     {
@@ -1500,7 +1500,7 @@
       "source_location": "L6",
       "_origin": "ast",
       "id": "src_main_arc",
-      "community": 0,
+      "community": 2,
       "norm_label": "arc"
     },
     {
@@ -1510,7 +1510,7 @@
       "source_location": "L7",
       "_origin": "ast",
       "id": "src_main_preloader",
-      "community": 0,
+      "community": 2,
       "norm_label": "preloader"
     },
     {
@@ -1520,7 +1520,7 @@
       "source_location": "L9",
       "_origin": "ast",
       "id": "src_main_setprogress",
-      "community": 0,
+      "community": 2,
       "norm_label": "setprogress()"
     },
     {
@@ -1530,7 +1530,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "src_main_tickprogress",
-      "community": 0,
+      "community": 2,
       "norm_label": "tickprogress()"
     },
     {
@@ -1540,7 +1540,7 @@
       "source_location": "L19",
       "_origin": "ast",
       "id": "src_main_haswebgl",
-      "community": 0,
+      "community": 2,
       "norm_label": "haswebgl()"
     },
     {
@@ -1550,7 +1550,7 @@
       "source_location": "L23",
       "_origin": "ast",
       "id": "src_main_fallback",
-      "community": 0,
+      "community": 2,
       "norm_label": "fallback()"
     },
     {
@@ -1560,8 +1560,38 @@
       "source_location": "L39",
       "_origin": "ast",
       "id": "src_main_boot",
-      "community": 0,
+      "community": 2,
       "norm_label": "boot()"
+    },
+    {
+      "label": "easterEggs.js",
+      "file_type": "code",
+      "source_file": "src/ui/easterEggs.js",
+      "source_location": "L1",
+      "_origin": "ast",
+      "id": "src_ui_eastereggs",
+      "community": 1,
+      "norm_label": "eastereggs.js"
+    },
+    {
+      "label": "segredos",
+      "file_type": "code",
+      "source_file": "src/ui/easterEggs.js",
+      "source_location": "L2",
+      "_origin": "ast",
+      "id": "src_ui_eastereggs_segredos",
+      "community": 1,
+      "norm_label": "segredos"
+    },
+    {
+      "label": "setupEasterEggs()",
+      "file_type": "code",
+      "source_file": "src/ui/easterEggs.js",
+      "source_location": "L8",
+      "_origin": "ast",
+      "id": "src_ui_eastereggs_setupeastereggs",
+      "community": 1,
+      "norm_label": "setupeastereggs()"
     },
     {
       "label": "ui.js",
@@ -1570,17 +1600,17 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "src_ui_ui",
-      "community": 2,
+      "community": 1,
       "norm_label": "ui.js"
     },
     {
       "label": "setupUI()",
       "file_type": "code",
       "source_file": "src/ui/ui.js",
-      "source_location": "L6",
+      "source_location": "L7",
       "_origin": "ast",
       "id": "src_ui_ui_setupui",
-      "community": 2,
+      "community": 1,
       "norm_label": "setupui()"
     },
     {
@@ -1720,7 +1750,7 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "vite_config",
-      "community": 16,
+      "community": 15,
       "norm_label": "vite.config.js"
     },
     {
@@ -1730,7 +1760,7 @@
       "source_location": "L10",
       "_origin": "ast",
       "id": "vite_config_manualchunks",
-      "community": 16,
+      "community": 15,
       "norm_label": "manualchunks()"
     },
     {
@@ -1741,7 +1771,7 @@
       "_origin": "import-reference",
       "external": true,
       "id": "ref_three",
-      "community": 1,
+      "community": 0,
       "norm_label": "three"
     },
     {
@@ -1751,7 +1781,7 @@
       "source_location": "L213",
       "_origin": "export-constant",
       "id": "src_data_narrativa_n",
-      "community": 2,
+      "community": 1,
       "norm_label": "n"
     },
     {
@@ -1762,7 +1792,7 @@
       "_origin": "import-reference",
       "external": true,
       "id": "ref_postprocessing",
-      "community": 1,
+      "community": 0,
       "norm_label": "postprocessing"
     },
     {
@@ -1773,7 +1803,7 @@
       "_origin": "import-reference",
       "external": true,
       "id": "ref_lenis",
-      "community": 2,
+      "community": 1,
       "norm_label": "lenis"
     },
     {
@@ -1784,7 +1814,7 @@
       "_origin": "import-reference",
       "external": true,
       "id": "ref_gsap",
-      "community": 2,
+      "community": 1,
       "norm_label": "gsap"
     },
     {
@@ -1795,7 +1825,7 @@
       "_origin": "import-reference",
       "external": true,
       "id": "ref_gsap_scrolltrigger",
-      "community": 2,
+      "community": 1,
       "norm_label": "gsap/scrolltrigger"
     },
     {
@@ -1859,7 +1889,7 @@
       "_origin": "import-reference",
       "external": true,
       "id": "ref_vite",
-      "community": 16,
+      "community": 15,
       "norm_label": "vite"
     },
     {
@@ -1869,7 +1899,7 @@
       "source_location": "L1",
       "_origin": "html-parser",
       "id": "entry_html",
-      "community": 0,
+      "community": 2,
       "norm_label": "index.html"
     },
     {
@@ -1879,7 +1909,7 @@
       "source_location": "L1",
       "_origin": "html-parser",
       "id": "html_resource_src_styles_css",
-      "community": 0,
+      "community": 2,
       "norm_label": "styles.css"
     }
   ],
@@ -4716,6 +4746,28 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/easterEggs.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_ui_eastereggs",
+      "target": "src_ui_eastereggs_segredos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/easterEggs.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_ui_eastereggs",
+      "target": "src_ui_eastereggs_setupeastereggs",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -4800,10 +4852,34 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/ui.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_ui_ui",
+      "target": "src_ui_eastereggs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/ui.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_ui_ui",
+      "target": "src_ui_eastereggs_setupeastereggs",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/ui/ui.js",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_ui_ui",
@@ -4816,11 +4892,23 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/ui/ui.js",
-      "source_location": "L52",
+      "source_location": "L54",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_ui_ui_setupui",
       "target": "src_data_narrativa_capitulos"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/ui/ui.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_ui_ui_setupui",
+      "target": "src_ui_eastereggs_setupeastereggs"
     },
     {
       "relation": "imports_from",
@@ -5159,7 +5247,6 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "b22627da261285a2e7d9633e46db5786db2822c8",
   "edges": [
     {
       "relation": "imports_from",
@@ -7993,6 +8080,28 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/easterEggs.js",
+      "source_location": "L2",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_ui_eastereggs",
+      "target": "src_ui_eastereggs_segredos",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/easterEggs.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_ui_eastereggs",
+      "target": "src_ui_eastereggs_setupeastereggs",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "imports_from",
       "context": "import",
       "confidence": "EXTRACTED",
@@ -8077,10 +8186,34 @@
       "confidence_score": 1.0
     },
     {
+      "relation": "imports_from",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/ui.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_ui_ui",
+      "target": "src_ui_eastereggs",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "src/ui/ui.js",
+      "source_location": "L4",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_ui_ui",
+      "target": "src_ui_eastereggs_setupeastereggs",
+      "confidence_score": 1.0
+    },
+    {
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/ui/ui.js",
-      "source_location": "L6",
+      "source_location": "L7",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_ui_ui",
@@ -8093,11 +8226,23 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/ui/ui.js",
-      "source_location": "L52",
+      "source_location": "L54",
       "weight": 1.0,
       "_origin": "ast",
       "source": "src_ui_ui_setupui",
       "target": "src_data_narrativa_capitulos"
+    },
+    {
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/ui/ui.js",
+      "source_location": "L8",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "src_ui_ui_setupui",
+      "target": "src_ui_eastereggs_setupeastereggs"
     },
     {
       "relation": "imports_from",

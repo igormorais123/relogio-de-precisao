@@ -151,6 +151,20 @@
         160,
         70
       ]
+    },
+    {
+      "id": "eggs",
+      "type": "frontend",
+      "label": "Descobertas opcionais",
+      "sublabel": "3 marcas • diálogo de aula",
+      "pos": [
+        830,
+        470
+      ],
+      "size": [
+        160,
+        70
+      ]
     }
   ],
   "connections": [
@@ -194,6 +208,10 @@
     {
       "from": "reading",
       "to": "record"
+    },
+    {
+      "from": "scroll",
+      "to": "eggs"
     }
   ],
   "cards": [
@@ -211,7 +229,7 @@
       "title": "Leitura e acessibilidade",
       "items": [
         "Avaliação inclui Engenharia de loop; Aprendizado inclui Engenharia de grafo.",
-        "Os dois especiais aparecem na rolagem; atalhos são opcionais.",
+        "Três marcas discretas abrem extras; fechar retoma a rolagem.",
         "Sem WebGL, main.js monta texto dos capítulos e especiais."
       ]
     },
