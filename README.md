@@ -1,5 +1,23 @@
 # Relógio de Precisão
 
+## Comece aqui, aluno
+
+Você pode usar esta apresentação para estudar, apresentar uma aula e criar uma versão sobre outro tema, citando a fonte e identificando suas alterações. Leia as [condições de uso e os créditos](CREDITOS-E-USO.md), inclusive as condições dos materiais de terceiros.
+
+Não precisa instalar nada para assistir: use o link da apresentação abaixo. Para aprender com ela, siga o [guia do aluno](docs/guia-do-aluno.md). Para editar sua própria cópia, siga as [instruções de instalação e adaptação](INSTRUCOES.md).
+
+| Quero… | Onde começar |
+| --- | --- |
+| Assistir e navegar | [Guia de uso](docs/uso.md) |
+| Aplicar o método a um problema | [Guia do aluno e atividade prática](docs/guia-do-aluno.md) |
+| Baixar, executar e resolver problemas de instalação | [Instruções](INSTRUCOES.md) |
+| Mudar assunto, textos, cores ou imagens | [Como adaptar o tema](docs/adaptar-tema.md) |
+| Pedir ajuda à IA sem perder o controle | [Roteiro e exemplo de pedido](docs/adaptar-tema.md#usar-ia-com-um-pedido-verificavel) |
+| Citar e compartilhar minha versão | [Créditos e condições de uso](CREDITOS-E-USO.md) |
+| Entender o código e testar mudanças maiores | [Arquitetura](docs/arquitetura.md) e [verificação](docs/verificacao-e-publicacao.md) |
+
+Este repositório funciona sem assinatura de IA, chave de API, conta de hospedagem ou ferramentas de geração de mapas. Essas ferramentas não são requisitos para assistir, editar ou compilar a aula.
+
 Uma aula visual sobre IA para resolver problemas complexos. Um relógio mecânico acompanha seis etapas: problema, pesquisa, planejamento, execução, avaliação e aprendizado. A leitura acontece por rolagem, com aprofundamentos em Engenharia de loop e Engenharia de grafo.
 
 **Produção:** [https://relogio-de-precisao.igor47306.chatgpt.site](https://relogio-de-precisao.igor47306.chatgpt.site) — publicado com acesso público; resposta HTTP 200 confirmada sem cookies em 11/09/2026.
