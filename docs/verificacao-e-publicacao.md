@@ -37,3 +37,7 @@ A verificação de produção deve abrir a URL publicada, confirmar o carregamen
 - Os dois diagramas Archify passaram nove verificações cada e foram inspecionados visualmente no navegador. Graphify: 187 nós e 284 relações; limitação de ciclos automáticos registrada no relatório.
 
 Limites: emulação móvel não substitui teste em aparelhos físicos; taxa de quadros não foi medida nesta revisão. O fallback sem WebGL foi exercitado no preview local, não repetido em produção. Os controles opcionais não são necessários para apresentar a sequência por rolagem.
+
+### Limitação do GitHub Actions
+
+Na integração final, o GitHub recusou iniciar o job por bloqueio de faturamento da conta. Não houve execução remota dos testes. A validação desta entrega utiliza os oito testes e o build executados localmente, além da inspeção da versão pública. A configuração de CI permanece disponível para quando o bloqueio da conta for resolvido.
