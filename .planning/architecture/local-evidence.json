@@ -1,0 +1,74 @@
+{
+  "html": [
+    {
+      "path": "index.html"
+    }
+  ],
+  "boot": [
+    {
+      "path": "src/main.js"
+    }
+  ],
+  "scroll": [
+    {
+      "path": "src/core/Scroll.js"
+    }
+  ],
+  "director": [
+    {
+      "path": "src/core/Director.js"
+    },
+    {
+      "path": "src/core/cameraPath.js",
+      "line": 43
+    }
+  ],
+  "watch": [
+    {
+      "path": "src/watch/Watch.js"
+    },
+    {
+      "path": "src/watch/gear.js"
+    }
+  ],
+  "data": [
+    {
+      "path": "src/data/narrativa.js"
+    },
+    {
+      "path": "src/data/paginas.js"
+    }
+  ],
+  "app": [
+    {
+      "path": "src/core/App.js"
+    },
+    {
+      "path": "src/core/Post.js"
+    },
+    {
+      "path": "src/core/Studio.js"
+    }
+  ],
+  "ui": [
+    {
+      "path": "src/ui/ui.js"
+    },
+    {
+      "path": "src/core/Registro.js"
+    }
+  ],
+  "fx": [
+    {
+      "path": "src/fx/index.js"
+    }
+  ],
+  "title": [
+    {
+      "path": "src/core/Title.js"
+    },
+    {
+      "path": "src/core/Background.js"
+    }
+  ]
+}

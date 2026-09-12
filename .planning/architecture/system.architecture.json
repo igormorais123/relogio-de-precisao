@@ -1,0 +1,244 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Relógio de Precisão",
+    "subtitle": "Arquitetura local • inicialização, rolagem e cena WebGL",
+    "quality_profile": "showcase",
+    "animation": "none",
+    "viewBox": [
+      1280,
+      700
+    ]
+  },
+  "components": [
+    {
+      "id": "html",
+      "type": "frontend",
+      "label": "Página e estilos",
+      "sublabel": "index.html • styles.css",
+      "pos": [
+        50,
+        270
+      ],
+      "size": [
+        170,
+        70
+      ]
+    },
+    {
+      "id": "boot",
+      "type": "frontend",
+      "label": "Inicialização",
+      "sublabel": "main.js • fallback WebGL",
+      "pos": [
+        290,
+        270
+      ],
+      "size": [
+        170,
+        70
+      ]
+    },
+    {
+      "id": "scroll",
+      "type": "frontend",
+      "label": "Rolagem",
+      "sublabel": "Lenis + ScrollTrigger",
+      "pos": [
+        530,
+        270
+      ],
+      "size": [
+        170,
+        70
+      ]
+    },
+    {
+      "id": "director",
+      "type": "frontend",
+      "label": "Direção da cena",
+      "sublabel": "Director.js • cameraPath.js",
+      "pos": [
+        770,
+        270
+      ],
+      "size": [
+        170,
+        70
+      ]
+    },
+    {
+      "id": "watch",
+      "type": "frontend",
+      "label": "Relógio procedural",
+      "sublabel": "Watch.js • gear.js",
+      "pos": [
+        1010,
+        270
+      ],
+      "size": [
+        180,
+        70
+      ]
+    },
+    {
+      "id": "data",
+      "type": "frontend",
+      "label": "Conteúdo da aula",
+      "sublabel": "narrativa.js • paginas.js",
+      "pos": [
+        530,
+        70
+      ],
+      "size": [
+        170,
+        70
+      ]
+    },
+    {
+      "id": "app",
+      "type": "frontend",
+      "label": "Renderização",
+      "sublabel": "App • Post • Studio",
+      "pos": [
+        290,
+        470
+      ],
+      "size": [
+        170,
+        70
+      ]
+    },
+    {
+      "id": "ui",
+      "type": "frontend",
+      "label": "Interface DOM",
+      "sublabel": "ui.js • Registro.js",
+      "pos": [
+        530,
+        470
+      ],
+      "size": [
+        170,
+        70
+      ]
+    },
+    {
+      "id": "fx",
+      "type": "frontend",
+      "label": "Efeitos didáticos",
+      "sublabel": "fx/index.js • módulos FX",
+      "pos": [
+        770,
+        470
+      ],
+      "size": [
+        170,
+        70
+      ]
+    },
+    {
+      "id": "title",
+      "type": "frontend",
+      "label": "Texto e fundo",
+      "sublabel": "Title • Background",
+      "pos": [
+        770,
+        70
+      ],
+      "size": [
+        170,
+        70
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Navegador • aplicação estática",
+      "wraps": [
+        "html",
+        "boot",
+        "scroll",
+        "director",
+        "watch",
+        "data",
+        "app",
+        "ui",
+        "fx",
+        "title"
+      ],
+      "pad": 28
+    }
+  ],
+  "connections": [
+    {
+      "from": "html",
+      "to": "boot",
+      "variant": "emphasis"
+    },
+    {
+      "from": "boot",
+      "to": "scroll",
+      "variant": "emphasis"
+    },
+    {
+      "from": "scroll",
+      "to": "director",
+      "variant": "emphasis"
+    },
+    {
+      "from": "director",
+      "to": "watch",
+      "variant": "emphasis"
+    },
+    {
+      "from": "data",
+      "to": "scroll"
+    },
+    {
+      "from": "boot",
+      "to": "app"
+    },
+    {
+      "from": "scroll",
+      "to": "ui"
+    },
+    {
+      "from": "director",
+      "to": "fx"
+    },
+    {
+      "from": "director",
+      "to": "title"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Caminho principal",
+      "items": [
+        "main.js inicializa módulos e conecta a atualização do Director ao loop do App.",
+        "Scroll transforma a rolagem em capítulo e progresso; Director escreve estados do relógio."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Dependências e fronteira",
+      "items": [
+        "Vite empacota; Three.js, GSAP, Lenis, postprocessing e Troika executam no navegador.",
+        "Não foi identificado backend de aplicação. Recursos estáticos e fontes são locais.",
+        "Registro.js persiste o ciclo no localStorage e permite exportação JSON; não envia dados."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Proveniência",
+      "items": [
+        "Componentes extraídos dos arquivos vivos; diagrama agrupa módulos secundários para leitura.",
+        "Grafo estrutural em graphify-out/graph.json; origens locais em local-evidence.json. Snapshot de 11/09/2026."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+Traversal: BFS depth=2 | Start: ['sampleCameraPose()', 'Director'] | 13 nodes found
+
+NODE sampleCameraPose() [src=src/core/cameraPath.js loc=L48 community=3]
+NODE Director [src=src/core/Director.js loc=L15 community=3]
+NODE .update() [src=src/core/Director.js loc=L55 community=3]
+NODE clamp() [src=src/core/cameraPath.js loc=L2 community=3]
+NODE pose() [src=src/core/cameraPath.js loc=L8 community=3]
+NODE smooth() [src=src/core/cameraPath.js loc=L3 community=3]
+NODE mix() [src=src/core/cameraPath.js loc=L5 community=3]
+NODE .constructor() [src=src/core/Director.js loc=L16 community=3]
+NODE .layout() [src=src/core/Director.js loc=L33 community=3]
+NODE .setScenario() [src=src/core/Director.js loc=L208 community=3]
+NODE segment() [src=src/core/cameraPath.js loc=L4 community=3]
+NODE seg() [src=src/core/Director.js loc=L8 community=3]
+NODE ease() [src=src/core/Director.js loc=L7 community=3]
+EDGE sampleCameraPose() --calls [EXTRACTED context=call]--> clamp() at=src/core/cameraPath.js:L50
+EDGE sampleCameraPose() --calls [EXTRACTED context=call]--> mix() at=src/core/cameraPath.js:L58
+EDGE sampleCameraPose() --calls [EXTRACTED context=call]--> pose() at=src/core/cameraPath.js:L51
+EDGE sampleCameraPose() --calls [EXTRACTED context=call]--> smooth() at=src/core/cameraPath.js:L55
+EDGE Director --method [EXTRACTED]--> .constructor() at=src/core/Director.js:L16
+EDGE Director --method [EXTRACTED]--> .layout() at=src/core/Director.js:L33
+EDGE Director --method [EXTRACTED]--> .setScenario() at=src/core/Director.js:L208
+EDGE Director --method [EXTRACTED]--> .update() at=src/core/Director.js:L55
+EDGE .update() --calls [EXTRACTED context=call]--> ease() at=src/core/Director.js:L96
+EDGE .update() --calls [EXTRACTED context=call]--> seg() at=src/core/Director.js:L71
+EDGE pose() --calls [EXTRACTED context=call]--> segment() at=src/core/cameraPath.js:L12

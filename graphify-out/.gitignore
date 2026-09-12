@@ -1,0 +1,13 @@
+*
+!.gitignore
+!graph.json
+!graph.html
+!GRAPH_REPORT.md
+!health.json
+!snapshot.json
+!cost.json
+!query-evidence.txt
+!query-fallback.txt
+!refresh_local.py
+!sanitize_public.py
+!shrink-audit.json
