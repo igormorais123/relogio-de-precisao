@@ -65,6 +65,13 @@ body { overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 /* Ficha: segundo tempo de cada capítulo. Essência + termos que o aluno leva. Revelada pelo scroll (ui.js). */
 .ficha { position: fixed; z-index: 18; left: 7vw; top: 50%; transform: translateY(-50%); width: min(430px, 38vw); pointer-events: none; color: var(--ink); text-shadow: 0 1px 10px rgba(6,8,11,.9); }
 .ficha[aria-hidden="true"] { visibility: hidden; }
+/* Pesquisa: mantém a leitura sobre as áreas claras do mecanismo. */
+body[data-chapter-index="1"] .ficha { isolation: isolate; color: #fff8eb; }
+body[data-chapter-index="1"] .ficha::before { content: ""; position: absolute; inset: -22px -24px; z-index: -1; background: rgba(6, 8, 11, .86); box-shadow: 0 0 32px 16px rgba(6, 8, 11, .42); border-radius: 3px; }
+body[data-chapter-index="1"] .ficha__fase,
+body[data-chapter-index="1"] .ficha__list i { color: #f3cf83; }
+body[data-chapter-index="1"] .ficha__list span { color: #f0e9dc; opacity: 1; }
+body[data-chapter-index="1"] .ficha__list li { border-top-color: rgba(240, 233, 220, .3); }
 .ficha__fase { display: block; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
 .ficha__essencia { font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 2.7vw, 40px); line-height: 1.02; letter-spacing: .03em; text-transform: uppercase; margin: 0 0 22px; }
 .ficha__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }

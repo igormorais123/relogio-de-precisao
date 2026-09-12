@@ -6,3 +6,4 @@ Conteúdo adaptado de **O Uso de IA no Processo de Resolução de Problemas — 
 
 Implementação: `src/ui/easterEggs.js`, integrada por `src/ui/ui.js`; estilos em `src/styles.css`. Não há coleta, persistência ou chamada a serviço de IA nesses extras.
 
+Quem descobrir os três easter eggs no site pode entrar em contato com o professor Igor para ganhar um prêmio.
