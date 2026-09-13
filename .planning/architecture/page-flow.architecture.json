@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Como a página funciona",
+    "subtitle": "Da abertura ao capítulo lido • fluxo local no navegador",
+    "quality_profile": "showcase",
+    "animation": "none",
+    "viewBox": [
+      1580,
+      700
+    ]
+  },
+  "components": [
+    {
+      "id": "open",
+      "type": "frontend",
+      "label": "Abrir a página",
+      "sublabel": "HTML + estilos + main.js",
+      "pos": [
+        50.0,
+        270
+      ],
+      "size": [
+        160,
+        70
+      ]
+    },
+    {
+      "id": "preload",
+      "type": "frontend",
+      "label": "Verificar e carregar",
+      "sublabel": "WebGL • fontes • módulos",
+      "pos": [
+        310.0,
+        270
+      ],
+      "size": [
+        160,
+        70
+      ]
+    },
+    {
+      "id": "init",
+      "type": "frontend",
+      "label": "Montar a cena",
+      "sublabel": "App • relógio • UI",
+      "pos": [
+        570.0,
+        270
+      ],
+      "size": [
+        160,
+        70
+      ]
+    },
+    {
+      "id": "scroll",
+      "type": "frontend",
+      "label": "Receber rolagem",
+      "sublabel": "capítulo + progresso",
+      "pos": [
+        830.0,
+        270
+      ],
+      "size": [
+        160,
+        70
+      ]
+    },
+    {
+      "id": "frame",
+      "type": "frontend",
+      "label": "Atualizar o quadro",
+      "sublabel": "Director → post.render",
+      "pos": [
+        1090.0,
+        270
+      ],
+      "size": [
+        160,
+        70
+      ]
+    },
+    {
+      "id": "reading",
+      "type": "frontend",
+      "label": "Ler e continuar",
+      "sublabel": "6 capítulos por rolagem",
+      "pos": [
+        1350.0,
+        270
+      ],
+      "size": [
+        160,
+        70
+      ]
+    },
+    {
+      "id": "fallback",
+      "type": "frontend",
+      "label": "Leitura sem WebGL",
+      "sublabel": "6 capítulos + 2 especiais",
+      "pos": [
+        310.0,
+        470
+      ],
+      "size": [
+        160,
+        70
+      ]
+    },
+    {
+      "id": "pose",
+      "type": "frontend",
+      "label": "Pose determinística",
+      "sublabel": "cameraPath + Watch.state",
+      "pos": [
+        1090.0,
+        70
+      ],
+      "size": [
+        160,
+        70
+      ]
+    },
+    {
+      "id": "special",
+      "type": "frontend",
+      "label": "Aprofundamentos",
+      "sublabel": "Loop • grafo",
+      "pos": [
+        1350.0,
+        470
+      ],
+      "size": [
+        160,
+        70
+      ]
+    },
+    {
+      "id": "record",
+      "type": "database",
+      "label": "Registro local",
+      "sublabel": "localStorage • JSON",
+      "pos": [
+        1350.0,
+        70
+      ],
+      "size": [
+        160,
+        70
+      ]
+    },
+    {
+      "id": "eggs",
+      "type": "frontend",
+      "label": "Descobertas opcionais",
+      "sublabel": "3 marcas • diálogo de aula",
+      "pos": [
+        830,
+        470
+      ],
+      "size": [
+        160,
+        70
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "from": "open",
+      "to": "preload",
+      "variant": "emphasis"
+    },
+    {
+      "from": "preload",
+      "to": "init",
+      "variant": "emphasis"
+    },
+    {
+      "from": "init",
+      "to": "scroll",
+      "variant": "emphasis"
+    },
+    {
+      "from": "scroll",
+      "to": "frame",
+      "variant": "emphasis"
+    },
+    {
+      "from": "frame",
+      "to": "reading",
+      "variant": "emphasis"
+    },
+    {
+      "from": "preload",
+      "to": "fallback"
+    },
+    {
+      "from": "pose",
+      "to": "frame"
+    },
+    {
+      "from": "reading",
+      "to": "special"
+    },
+    {
+      "from": "reading",
+      "to": "record"
+    },
+    {
+      "from": "scroll",
+      "to": "eggs"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Ciclo de quadros",
+      "items": [
+        "A roda é suavizada por Lenis; toque e teclado seguem o movimento nativo.",
+        "ScrollTrigger observa; não há snap que mova a página após a pausa.",
+        "A cada quadro, Director aplica a pose, os efeitos e o estado do relógio."
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Leitura e acessibilidade",
+      "items": [
+        "Avaliação inclui Engenharia de loop; Aprendizado inclui Engenharia de grafo.",
+        "Três marcas discretas abrem extras; fechar retoma a rolagem.",
+        "Sem WebGL, main.js monta texto dos capítulos e especiais."
+      ]
+    },
+    {
+      "dot": "slate",
+      "title": "Dados e limites",
+      "items": [
+        "Registro.js guarda eventos no navegador; exportação cria um arquivo JSON local.",
+        "Nenhum serviço de IA é chamado pela aplicação.",
+        "Este diagrama descreve o fluxo, não substitui a validação visual da versão publicada."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+Traversal: BFS depth=2 | Start: ['PAGINAS', 'main.js'] | 29 nodes found
+
+[!] TRUNCATED: showing 29 of 29 nodes (~1200-token budget). The answer may be among the 0 cut nodes — raise the token budget (CLI: --budget) or narrow the query (e.g. context_filter=['call'], or get_node for a specific symbol).
+
+NODE PAGINAS [src=src/data/paginas.js loc=L2 community=2]
+NODE main.js [src=src/main.js loc=L1 community=0]
+NODE boot() [src=src/main.js loc=L39 community=0]
+NODE CAPITULOS [src=src/data/narrativa.js loc=L2 community=2]
+NODE ui.js [src=src/ui/ui.js loc=L1 community=2]
+NODE narrativa.js [src=src/data/narrativa.js loc=L1 community=2]
+NODE paginas.js [src=src/data/paginas.js loc=L1 community=2]
+NODE fallback() [src=src/main.js loc=L23 community=0]
+NODE hasWebGL() [src=src/main.js loc=L19 community=0]
+NODE setProgress() [src=src/main.js loc=L9 community=0]
+NODE arc [src=src/main.js loc=L6 community=0]
+NODE pct [src=src/main.js loc=L5 community=0]
+NODE preloader [src=src/main.js loc=L7 community=0]
+NODE tickProgress() [src=src/main.js loc=L10 community=0]
+NODE Director.js [src=src/core/Director.js loc=L1 community=3]
+NODE Scroll.js [src=src/core/Scroll.js loc=L1 community=2]
+NODE Title.js [src=src/core/Title.js loc=L1 community=10]
+NODE Watch.js [src=src/watch/Watch.js loc=L1 community=7]
+NODE App.js [src=src/core/App.js loc=L1 community=1]
+NODE .update() [src=src/core/Director.js loc=L54 community=3]
+NODE index.js [src=src/fx/index.js loc=L1 community=0]
+NODE Background.js [src=src/core/Background.js loc=L1 community=1]
+NODE Constellation.js [src=src/fx/Constellation.js loc=L1 community=0]
+NODE Particles.js [src=src/fx/Particles.js loc=L1 community=0]
+NODE .compile() [src=src/core/App.js loc=L89 community=0]
+NODE .onUpdate() [src=src/core/App.js loc=L74 community=0]
+NODE .start() [src=src/core/App.js loc=L76 community=0]
+NODE .update() [src=src/fx/Constellation.js loc=L65 community=0]
+NODE .update() [src=src/fx/Particles.js loc=L59 community=0]
+EDGE main.js --imports_from [EXTRACTED context=import]--> narrativa.js at=src/main.js:L1
+EDGE main.js --imports [EXTRACTED context=import]--> CAPITULOS at=src/main.js:L1
+EDGE main.js --imports_from [EXTRACTED context=import]--> paginas.js at=src/main.js:L2
+EDGE main.js --contains [EXTRACTED]--> arc at=src/main.js:L6
+EDGE main.js --contains [EXTRACTED]--> boot() at=src/main.js:L39
+EDGE main.js --contains [EXTRACTED]--> fallback() at=src/main.js:L23
+EDGE main.js --contains [EXTRACTED]--> hasWebGL() at=src/main.js:L19
+EDGE main.js --contains [EXTRACTED]--> pct at=src/main.js:L5
+EDGE main.js --contains [EXTRACTED]--> preloader at=src/main.js:L7
+EDGE main.js --contains [EXTRACTED]--> setProgress() at=src/main.js:L9
+EDGE main.js --contains [EXTRACTED]--> tickProgress() at=src/main.js:L10
+EDGE boot() --imports_from [EXTRACTED context=import]--> App.js at=src/main.js:L43
+EDGE boot() --calls [EXTRACTED context=call]--> .compile() at=src/main.js:L64
+EDGE boot() --calls [EXTRACTED context=call]--> .onUpdate() at=src/main.js:L67
+EDGE boot() --calls [EXTRACTED context=call]--> .start() at=src/main.js:L74
+EDGE boot() --imports_from [EXTRACTED context=import]--> Background.js at=src/main.js:L43
+EDGE boot() --imports_from [EXTRACTED context=import]--> Director.js at=src/main.js:L44
+EDGE boot() --calls [EXTRACTED context=call]--> .update() at=src/main.js:L68
+EDGE boot() --imports_from [EXTRACTED context=import]--> Scroll.js at=src/main.js:L43
+EDGE boot() --imports_from [EXTRACTED context=import]--> Title.js at=src/main.js:L44
+EDGE boot() --imports_from [EXTRACTED context=import]--> Constellation.js at=src/main.js:L44
+EDGE boot() --calls [EXTRACTED context=call]--> .update() at=src/main.js:L71
+EDGE boot() --imports_from [EXTRACTED context=import]--> index.js at=src/main.js:L45
+EDGE boot() --imports_from [EXTRACTED context=import]--> Particles.js at=src/main.js:L44
+... (truncated — 0 more nodes cut by ~1200-token budget. Narrow with context_filter=['call'] or use get_node for a specific symbol)

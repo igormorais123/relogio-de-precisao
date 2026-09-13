@@ -1,9 +1,11 @@
 import { CAPITULOS, N } from '../data/narrativa.js'
 import { registro } from '../core/Registro.js'
 import { PAGINAS } from '../data/paginas.js'
+import { setupEasterEggs } from './easterEggs.js'
 
 // HUD em DOM: pontos de capítulo, menu, dica de scroll, cenários, tooltip. Fora do canvas, como no Corn Revolution.
 export function setupUI(scroll, director) {
+  setupEasterEggs(scroll)
   const dots = document.getElementById('dots')
   const menuList = document.getElementById('menu-list')
   const menu = document.getElementById('menu')

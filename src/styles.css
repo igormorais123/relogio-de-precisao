@@ -72,6 +72,13 @@ body { overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 /* Ficha: segundo tempo de cada capítulo. Essência + termos que o aluno leva. Revelada pelo scroll (ui.js). */
 .ficha { position: fixed; z-index: 18; left: 7vw; top: 50%; transform: translateY(-50%); width: min(430px, 38vw); pointer-events: none; color: var(--ink); text-shadow: 0 1px 10px rgba(6,8,11,.9); }
 .ficha[aria-hidden="true"] { visibility: hidden; }
+/* Pesquisa: mantém a leitura sobre as áreas claras do mecanismo. */
+body[data-chapter-index="1"] .ficha { isolation: isolate; color: #fff8eb; }
+body[data-chapter-index="1"] .ficha::before { content: ""; position: absolute; inset: -22px -24px; z-index: -1; background: rgba(6, 8, 11, .86); box-shadow: 0 0 32px 16px rgba(6, 8, 11, .42); border-radius: 3px; }
+body[data-chapter-index="1"] .ficha__fase,
+body[data-chapter-index="1"] .ficha__list i { color: #f3cf83; }
+body[data-chapter-index="1"] .ficha__list span { color: #f0e9dc; opacity: 1; }
+body[data-chapter-index="1"] .ficha__list li { border-top-color: rgba(240, 233, 220, .3); }
 .ficha__fase { display: block; font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
 .ficha__essencia { font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 2.7vw, 40px); line-height: 1.02; letter-spacing: .03em; text-transform: uppercase; margin: 0 0 22px; }
 .ficha__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
@@ -341,3 +348,18 @@ body { overflow-x: hidden; -webkit-font-smoothing: antialiased; }
   .aula-slide[data-aula="loop"] figure{grid-column:2;grid-row:1 / 3}
 }
 .mapa__dial .ph:focus-visible circle{stroke:var(--gold);stroke-width:3}
+
+/* Pequenas marcas opcionais; a aula principal continua pela rolagem. */
+.segredo-marca { position:fixed; z-index:42; right:24px; bottom:76px; width:44px; height:44px; padding:0; border:0; background:transparent; color:#bfa16c; font-size:27px; cursor:pointer; opacity:.72; }
+.segredo-marca:hover,.segredo-marca:focus-visible { opacity:1; text-shadow:0 0 14px #cda767; }
+.segredo-marca:focus-visible,.segredo-fechar:focus-visible { outline:2px solid #d8b97e; outline-offset:3px; }
+.segredo-marca[hidden] { display:none; }
+.segredo-dialog { box-sizing:border-box; width:min(540px,calc(100vw - 32px)); max-height:calc(100dvh - 40px); margin:auto; padding:42px 36px 28px; overflow:auto; overscroll-behavior:contain; color:#eee9df; background:#101215; border:1px solid #766343; border-radius:4px; box-shadow:0 20px 100px #0009; font-family:Lato,sans-serif; }
+.segredo-dialog::backdrop { background:rgb(3 5 7 / 82%); }
+.segredo-dialog small { color:#d8b97e; letter-spacing:.12em; text-transform:uppercase; font-size:10px; }
+.segredo-dialog h2 { font-family:Lato,sans-serif; font-size:27px; line-height:1.2; margin:18px 0; font-weight:400; }
+.segredo-dialog p,.segredo-dialog blockquote { font-size:16px; line-height:1.55; }
+.segredo-dialog blockquote { margin:24px 0; padding-left:18px; border-left:1px solid #bfa16c; color:#dac7a5; }
+.segredo-dialog .segredo-fonte { margin-bottom:0; font-size:11px; color:#a7a49e; }
+.segredo-fechar { position:absolute; right:10px; top:8px; width:44px; height:44px; border:0; color:#d8b97e; background:transparent; font-size:27px; cursor:pointer; }
+@media(max-width:600px) { .segredo-marca { right:10px; bottom:66px; } .segredo-dialog { padding:36px 22px 22px; } .segredo-dialog h2 { font-size:24px; } }

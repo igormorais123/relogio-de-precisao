@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": ".planning\\architecture\\system.architecture.json",
+  "output": ".planning\\architecture\\system-architecture.html",
+  "specification": {
+    "sha256": "99f8f0a3a9abf63fe0244934f1977962d8270581cf6751925fa202c544e075ed",
+    "bytes": 4910
+  },
+  "artifact": {
+    "sha256": "61877cd5fae6affb48fe94ab19dbbbd5f4a36886c6b91e8a111c20f4a77d129d",
+    "bytes": 609017
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

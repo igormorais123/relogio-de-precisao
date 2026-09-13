@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": ".planning\\architecture\\page-flow.architecture.json",
+  "output": ".planning\\architecture\\page-flow.html",
+  "specification": {
+    "sha256": "54b55ee6dba7b609bda6171389429ad2c3bb5bbbb65458c612c16560de0fa30c",
+    "bytes": 5007
+  },
+  "artifact": {
+    "sha256": "fd2e52673b74351143eb47b5137c1a0d705adf0d251d0a6ef517066c2fd15d61",
+    "bytes": 610293
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

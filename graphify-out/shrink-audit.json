@@ -1,0 +1,8 @@
+{
+  "reason": "ESPELHO constant removed in final camera implementation",
+  "removed_nodes": [
+    "src_core_director_espelho"
+  ],
+  "verified_source": "src/core/Director.js",
+  "source_contains_symbol": false
+}
