@@ -78,7 +78,7 @@ export function setupUI(scroll, director) {
     deviation.textContent = fmt(CAPITULOS[4].cenarios[b.dataset.scenario].desvio)
     drawDrift(b.dataset.scenario)
     const cen = CAPITULOS[4].cenarios[b.dataset.scenario]
-    registro.registrar(4, `Cenário ${b.textContent.trim().toLowerCase()}: ${fmt(cen.desvio)}`, cen.texto || cen.descricao || 'Desvio medido contra o padrão atômico.', 'resultado')
+    registro.registrar(4, `Cenário ${b.textContent.trim().toLowerCase()}: ${fmt(cen.desvio)}`, cen.texto, 'resultado')
   }))
   deviation.textContent = fmt(CAPITULOS[4].cenarios.frio.desvio)
   drawDrift('frio')
