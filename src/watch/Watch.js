@@ -165,8 +165,6 @@ export class Watch {
   // Ordem de montagem (execução): quem entra primeiro no encaixe.
   get assemblyOrder() { return ['fundo', 'caixa', 'platina', 'tambor-da-mola', 'roda-central', 'roda-terceira', 'roda-quarta', 'roda-escape', 'balanco', 'coroa', 'mostrador', 'ponteiro-horas', 'ponteiro-minutos', 'ponteiro-segundos', 'bisel', 'cristal'] }
 
-  setVisible(v) { this.group.visible = v }
-
   update(dt, t, pointer) {
     this.t = t
     const s = this.state

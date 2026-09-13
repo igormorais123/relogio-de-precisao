@@ -11,14 +11,14 @@ export function createPost(renderer, scene, camera, isMobile, overlay) {
 
   const dof = new DepthOfFieldEffect(camera, { worldFocusDistance: 6, worldFocusRange: 2.2, bokehScale: isMobile ? 1.8 : 3.4, resolutionScale: isMobile ? 0.5 : 0.6 })
   const bloom = new BloomEffect({ intensity: 0.28, luminanceThreshold: 1.0, luminanceSmoothing: 0.2, mipmapBlur: true, kernelSize: KernelSize.MEDIUM, radius: 0.6 })
-  const chroma = new ChromaticAberrationEffect({ offset: new Vector2(0.0008, 0.0006), radialModulation: true, modulationOffset: 0.35 })
+  const chroma = isMobile ? null : new ChromaticAberrationEffect({ offset: new Vector2(0.0008, 0.0006), radialModulation: true, modulationOffset: 0.35 })
   const noise = new NoiseEffect({ blendFunction: BlendFunction.SOFT_LIGHT, premultiply: false })
-  noise.blendMode.opacity.value = 0.08
-  const vignette = new VignetteEffect({ eskil: false, offset: 0.28, darkness: 0.62 })
-  const smaa = new SMAAEffect({ preset: SMAAPreset.HIGH })
+  noise.blendMode.opacity.value = isMobile ? 0.05 : 0.08
+  const vignette = new VignetteEffect({ eskil: false, offset: 0.28, darkness: isMobile ? 0.5 : 0.62 })
+  const smaa = new SMAAEffect({ preset: isMobile ? SMAAPreset.MEDIUM : SMAAPreset.HIGH })
 
   composer.addPass(new EffectPass(camera, dof, bloom))
-  composer.addPass(new EffectPass(camera, chroma))
+  if (chroma) composer.addPass(new EffectPass(camera, chroma))
   if (overlay) {
     // Passo de sobreposição sem limpar cor: os títulos entram já desfocados o fundo, nítidos eles mesmos.
     const over = new RenderPass(overlay, camera)
