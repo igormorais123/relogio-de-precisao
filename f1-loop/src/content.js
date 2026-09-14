@@ -10,8 +10,8 @@
 // avulsas de gestão pública, uma explicação por alternativa, na ordem de `choices`.
 export const CHAPTERS = [
   {id:'preparar',name:'Preparar',place:'01 / PREPARAR',title:'DEFINA O CRITÉRIO\nANTES DE PEDIR',
-   lead:'Sem critério escrito, qualquer resposta da IA parece boa. Decida antes como vai conferir.',
-   body:'Escolha uma tarefa real e pequena: um comunicado, um resumo de processo, uma resposta a ofício. Separe a fonte. Escreva o que conta como pronto de um jeito que outra pessoa consiga conferir na fonte, e o que não pode piorar. Só então peça à IA.',
+   lead:'Decida, antes de pedir, como vai conferir a resposta da IA na fonte.',
+   body:'Escolha uma tarefa real e pequena, como um comunicado interno ou a resposta a um ofício. Separe a fonte. Escreva o que conta como pronto de um jeito que outra pessoa consiga conferir na fonte, e o que não pode piorar. Só então peça à IA.',
    action:'Definir meu critério',field:'criterion',extra:['task','reference'],
    prompt:'Complete: “Está pronto quando ___” (algo que outra pessoa confere na fonte) e “Não pode piorar: ___”. Evite palavras como claro, melhor ou profissional.',
    example:'Tarefa: revisar o comunicado interno sobre o teste do novo formulário antes de circular. Fonte: o registro do teste de 14 de maio. Pronto quando: cada frase do comunicado tem apoio numa frase do registro. Não pode piorar: a data, as medianas de 12 e 9 minutos e os grupos de 50 pedidos.',
@@ -25,7 +25,7 @@ export const CHAPTERS = [
 
   {id:'hipotese',name:'Hipótese',place:'02 / HIPÓTESE',title:'TESTE UMA MUDANÇA\nDE CADA VEZ',
    lead:'Antes de testar, escreva o que espera ver e qual resultado mostraria que você errou.',
-   body:'Mude uma coisa por vez quando quiser saber o que funcionou. Escreva a previsão antes de conferir: o que deve mudar, por quê e que resultado faria você desistir da ideia. Previsão escrita depois do resultado vira justificativa.',
+   body:'Mude uma coisa por vez quando quiser saber o que funcionou. Escreva a previsão antes de conferir: o que deve mudar, por quê e que resultado faria você desistir da ideia.',
    action:'Escrever minha hipótese',field:'hypothesis',
    prompt:'Se eu mudar ___, espero ver ___, porque ___. Desisto da ideia se ___.',
    example:'Se eu retirar do comunicado a causa e a data que o registro não sustenta, mantendo os números, espero que toda frase tenha apoio na fonte. Desisto se a nova versão perder algum dado ou ainda afirmar algo que o registro não diz.',
@@ -39,7 +39,7 @@ export const CHAPTERS = [
 
   {id:'executar',name:'Executar',place:'03 / EXECUTAR',title:'GUARDE O PEDIDO\nE A RESPOSTA',
    lead:'Salve a fonte, o pedido e a resposta da IA sem edição antes de mudar qualquer coisa.',
-   body:'Dê à IA a fonte, o escopo e o critério. Registre o pedido exato e salve a resposta intacta, com outro nome, ao lado da fonte e da versão anterior. Não corrija enquanto lê. Rodar produz uma observação; ainda não diz se passou.',
+   body:'Dê à IA a fonte, o escopo e o critério. Registre o pedido exato e salve a resposta intacta, com outro nome, ao lado da fonte e da versão anterior. Não corrija enquanto lê: a conferência vem depois, com a resposta guardada.',
    action:'Preparar meu teste',field:'test',
    prompt:'Qual pedido vou usar, com qual fonte e em que ferramenta? Onde fica a resposta intacta? Qual é meu limite de tentativas ou de tempo?',
    example:'Pedido: “Redija um comunicado interno com base somente no registro de 14 de maio de 2026. Preserve a data, os grupos de 50 pedidos e as medianas de 12 e 9 minutos. Separe observação de causa. Não acrescente data ou autorização de adoção definitiva.” Ferramenta: assistente de IA autorizado pelo órgão. A resposta ficou salva, sem edição, como “comunicado_candidata”, ao lado do registro. Limite: duas tentativas.',
@@ -57,7 +57,7 @@ export const CHAPTERS = [
    action:'Registrar minha evidência',field:'evidence',
    prompt:'Para cada frase ou critério: sustentada, não sustentada ou não verificada? Qual trecho da fonte decide? O que ficou sem conferir?',
    example:'Frase 1 (medianas de 12 e 9 minutos, 50 pedidos): sustentada pela frase 2 do registro. Frase 2 (o formulário causou a redução): não sustentada; a frase 3 diz que formulário e equipe mudaram juntos. Frase 3 (adoção em 20 de maio): não sustentada; a frase 4 trata da adoção e diz que não há data nem autorização. Frase 4 (a equipe recebeu treinamento): não verificada; nenhuma frase do registro trata de treinamento. Critério: não passou.',
-   lesson:'A Mercedes descreve mais de 250 sensores possíveis no carro durante um fim de semana e aponta o desafio de priorizar a informação e revisar os dados certos. Quantidade não decide; decide a evidência que responde ao critério.',
+   lesson:'A Mercedes descreve mais de 250 sensores possíveis no carro durante um fim de semana e aponta o desafio de priorizar a informação e revisar os dados certos.',
    source:'https://www.mercedesamgf1.com/news/feature-data-and-electronics-in-f1-explained',sourceName:'Mercedes · Dados e eletrônica na F1',
    question:'Dois colegas e uma IA revisora aprovaram a nota. Nenhum abriu as folhas citadas. Qual é o estado do critério “cada fato com a folha que o sustenta”?',
    choices:['Atende: três revisões independentes chegaram à mesma conclusão.','Não atende: sem conferência, a nota deve ser reprovada.','Não verificado: falta abrir as folhas citadas.'],

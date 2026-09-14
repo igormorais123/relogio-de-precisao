@@ -11,11 +11,11 @@ const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),storageKey='inteia-f1-loop-notebook-v1';
 const state={values:{},answers:{},chapter:-1,reading:reduced.matches};
 const SCENE_LABELS=['BOX','BANCADA','TÚNEL DE VENTO','ESTAÇÃO DE DADOS','BOX','DEBRIEF'];
-const HOTSPOTS=['DEFINIR O PRONTO','UMA MUDANÇA','GUARDAR A VERSÃO','CONFERIR A PROVA','PEÇA REVISADA','REGISTRAR A DECISÃO'];
+const HOTSPOTS=['DEFINIR O CRITÉRIO','TESTAR UMA MUDANÇA','GUARDAR O PEDIDO','CONFERIR NA FONTE','CORRIGIR O QUE FALHOU','REGISTRAR A DECISÃO'];
 let frameId=null,loading=null,loadAbort=null,scene=null,positions=[],activeDialog=null,opener=null,currentLesson=0;
 let targetP=0,shownP=0,lastTime=performance.now(),lastInput=0,snap=true,pose=sampleStory(0);
 try{const saved=JSON.parse(localStorage.getItem(storageKey)||'{}');for(const [key] of FIELDS)if(typeof saved[key]==='string')state.values[key]=saved[key].slice(0,10000);if(['','aceitar','reverter','revisar','inconclusivo','decisao-necessaria'].includes(saved.decision))state.values.decision=saved.decision;}catch{/* Empty notebook is usable even when browser storage is unavailable. */}
-function save(){scene?.setNotebook(state.values,FIELDS);try{localStorage.setItem(storageKey,JSON.stringify(state.values));$('#storage-state').textContent='Anotações salvas somente neste navegador.';return true;}catch{$('#storage-state').textContent='Este navegador não permitiu salvar. Baixe uma cópia para preservar suas anotações.';if(activeDialog?.id==='lesson-dialog')$('#feedback').textContent='Não foi possível salvar neste navegador. A nota continua nesta sessão: abra Meu registro e baixe uma cópia antes de sair.';return false;}}
+function save(){scene?.setNotebook(state.values,FIELDS);try{localStorage.setItem(storageKey,JSON.stringify(state.values));$('#storage-state').textContent='As anotações ficam somente neste navegador.';return true;}catch{$('#storage-state').textContent='Este navegador não permitiu salvar. Baixe uma cópia para preservar suas anotações.';if(activeDialog?.id==='lesson-dialog')$('#feedback').textContent='Não foi possível salvar neste navegador. A nota continua nesta sessão: abra Meu registro e baixe uma cópia antes de sair.';return false;}}
 
 // Titles become per-letter spans for the reveal/dissolve; the heading keeps its text for assistive tech.
 for(const h of $$('.chapter h1, .chapter h2')){
@@ -34,7 +34,7 @@ function paintCopy(){
  $$('.chapter').forEach((s,i)=>{const r=s.getBoundingClientRect();if(r.bottom<-vh*.5||r.top>vh*1.3)return;
   // An opened "what changes in my work" note holds the copy on screen until it is closed.
   // On phones the copy appears only once the chapter is pinned, so it never slides up under the dots and footer.
-  const raw=-r.top/Math.max(1,r.height-vh),enter=i===0?1:(i===2||i===3)?(narrow?smooth((raw-.03)/.06):smooth((raw-.03)/.25)):narrow?smooth((raw+.03)/.03):smooth((raw+.34)/.3),leave=i===5||s.querySelector('.lesson[open]')?0:smooth((raw-.74)/.18);
+  const raw=-r.top/Math.max(1,r.height-vh),enter=i===0?1:(i===2||i===3)?smooth((raw-.02)/.08):narrow?smooth((raw+.03)/.03):smooth((raw+.34)/.3),leave=i===5||s.querySelector('.lesson[open]')?0:smooth((raw-.74)/.18);
   s.style.setProperty('--in',enter.toFixed(3));s.style.setProperty('--out',leave.toFixed(3));
   s.classList.toggle('dissolving',leave>.001);s.classList.toggle('copy-off',enter*(1-leave)<.04);shown=Math.max(shown,enter*(1-leave));});
  // Between reading windows the camera travels: the chapter dots recede so they never sit on the hero.
@@ -53,7 +53,8 @@ function placeHotspot(){
  const vis=a.ok&&!activeDialog?inWindow:0;
  if(hs.dataset.index!==String(i)){hs.dataset.index=String(i);$('#hotspot-label').textContent=HOTSPOTS[i];}
  // The disc floats in free air beside the part (up-left unless that enters the text column), tied to it by a leader line.
- const dx=a.x-120<innerWidth*.46?120:-120,dy=a.y-110<90?90:-90;
+ // Hipótese marks the floor under the opened body, so its disc climbs above the car instead of landing on the bodywork.
+ const dx=i===1?60:a.x-120<innerWidth*.46?120:-120,dy=i===1?-Math.min(260,a.y-120):a.y-110<90?90:-90;
  hs.style.setProperty('--len',(Math.hypot(dx,dy)-46).toFixed(1)+'px');hs.style.setProperty('--ang',Math.atan2(-dy,-dx).toFixed(3)+'rad');
  hs.style.transform=`translate3d(${(a.x+dx).toFixed(1)}px,${(a.y+dy).toFixed(1)}px,0) scale(${(.86+.14*vis).toFixed(3)})`;hs.style.opacity=vis.toFixed(3);hs.classList.toggle('off',vis<.05);
 }
@@ -70,7 +71,7 @@ function frame(now){
  if(snap||reduced.matches){shownP=targetP;snap=false;}else{shownP+=(targetP-shownP)*(1-Math.exp(-dt*5));if(Math.abs(targetP-shownP)<1e-4)shownP=targetP;}
  paint();
  if(state.reading||!scene)return;
- pose=sampleStory(shownP);const place=pose.track>.5?'PISTA':SCENE_LABELS[pose.index];if($('#scene-label').textContent!==place)$('#scene-label').textContent=place;scene.setPose(pose);scene.render(dt,now/1000,idle?1000/30:1000/60);placeHotspot();
+ pose=sampleStory(shownP);const place=pose.world==='track'?'PISTA':pose.world==='tunnel'?'TÚNEL DE VENTO':pose.index===2?'ESTAÇÃO DE DADOS':SCENE_LABELS[pose.index];if($('#scene-label').textContent!==place)$('#scene-label').textContent=place;scene.setPose(pose);scene.render(dt,now/1000,idle?1000/30:1000/60);placeHotspot();
  schedule();
 }
 function setReading(on){state.reading=on;document.body.classList.toggle('reading',on);$('#reading').setAttribute('aria-pressed',String(on));$('#reading').textContent=on?'Modo cinema':'Modo leitura';$$('.lesson').forEach(d=>d.open=on);$$('.chapter').forEach(s=>{s.style.removeProperty('--in');s.style.removeProperty('--out');s.classList.remove('copy-off','dissolving');});measure();if(on){$('#load-state').textContent='Leitura · movimento pausado';$('#hotspot').classList.add('off');paint();}else{if(scene)$('#load-state').textContent='';else loadScene();snap=true;schedule();}}
@@ -79,8 +80,10 @@ $('#preload-read').addEventListener('click',()=>{if(loading)loadAbort?.abort();s
 reduced.addEventListener('change',e=>setReading(e.matches));
 function openDialog(dialog){if(dialog.open)return;opener=document.activeElement;activeDialog=dialog;document.body.classList.add('modal-open');dialog.showModal();}
 function closeDialog(dialog){dialog.close();}
-$$('dialog').forEach(d=>{d.addEventListener('close',()=>{document.body.classList.remove('modal-open');activeDialog=null;opener?.focus({preventScroll:true});measure();});d.querySelector('[data-close]').onclick=()=>closeDialog(d);});
-function openLesson(index,fromLab){if(fromLab)document.getElementById(CHAPTERS[index].id).scrollIntoView();else learningLab.updateChapter(index);currentLesson=index;const c=CHAPTERS[index];$('#dialog-step').textContent=`0${index+1} / ${c.name}`;$('#dialog-title').textContent=c.title.replaceAll('\n',' ');$('#dialog-body').textContent=c.body;$('#dialog-f1').textContent=c.lesson;$('#dialog-source').textContent=c.sourceName+' ↗';$('#dialog-source').href=c.source;$('#question').textContent=c.question;$('#quick-label').textContent=c.prompt;$('#dialog-example').hidden=!c.example||!learningLab.getState().completed.includes(index);$('#dialog-example').textContent=c.example||'';$('#quick-note').value=state.values[c.field]||'';$('#feedback').textContent='';$('#choices').replaceChildren();
+$$('dialog').forEach(d=>{d.addEventListener('close',()=>{document.body.classList.remove('modal-open');activeDialog=null;
+ // "Continue" may have moved the page on: focus returns to the action of the chapter now on screen, not to one scrolled away.
+ const back=opener?.matches?.('[data-open]')&&Number(opener.dataset.open)!==state.chapter?$(`[data-open="${state.chapter}"]`):opener;back?.focus({preventScroll:true});measure();});d.querySelector('[data-close]').onclick=()=>closeDialog(d);});
+function openLesson(index,fromLab){if(fromLab)document.getElementById(CHAPTERS[index].id).scrollIntoView();else learningLab.updateChapter(index);currentLesson=index;const c=CHAPTERS[index];$('#dialog-step').textContent=`0${index+1} / ${c.name}`;$('#dialog-title').textContent=c.title.replaceAll('\n',' ');$('#dialog-f1').textContent=c.lesson;$('#dialog-source').textContent=c.sourceName+' ↗';$('#dialog-source').href=c.source;$('#question').textContent=c.question;$('#quick-label').textContent=c.prompt;$('#dialog-example').hidden=!c.example||!learningLab.getState().completed.includes(index);$('#dialog-example').textContent=c.example||'';$('#quick-note').value=state.values[c.field]||'';$('#feedback').textContent='';$('#choices').replaceChildren();
  const choose=i=>{state.answers[c.id]=i;$$('#choices button').forEach((el,n)=>el.setAttribute('aria-pressed',String(n===i)));const result=assessChoice(c,i);$('#feedback').textContent=result.correct?result.message:`Reveja a decisão. A alternativa mais sustentada é “${c.choices[c.correct]}”. ${result.message}`;};
  c.choices.forEach((choice,i)=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.setAttribute('aria-pressed','false');b.onclick=()=>choose(i);$('#choices').append(b);});
  if(state.answers[c.id]!==undefined)choose(state.answers[c.id]);
@@ -94,14 +97,15 @@ $$('[data-open]').forEach(b=>b.onclick=()=>openLesson(Number(b.dataset.open)));
 // The worked example is a model answer: it appears only after the student completes this chapter's practice step.
 $('#lesson-dialog').addEventListener('learning-action',()=>{$('#dialog-example').hidden=!CHAPTERS[currentLesson].example||!learningLab.getState().completed.includes(currentLesson);});
 $$('.lesson-close').forEach(b=>b.onclick=()=>{b.closest('details').open=false;});
-$('#hotspot').onclick=()=>{const index=Number($('#hotspot').dataset.index||0);if(index===3){$('#notebook').click();$('#field-evidence').focus();$('#field-evidence').scrollIntoView({block:'center'});}else openLesson(index);};
+$('#hotspot').onclick=()=>openLesson(Number($('#hotspot').dataset.index||0));
 $('#quick-note').addEventListener('input',e=>{state.values[CHAPTERS[currentLesson].field]=e.target.value;save();});
 $('#save-note').onclick=()=>{state.values[CHAPTERS[currentLesson].field]=$('#quick-note').value;if(save())closeDialog($('#lesson-dialog'));};
 $('#notebook').onclick=()=>{for(const [key] of FIELDS)$('#field-'+key).value=state.values[key]||'';$('#decision').value=state.values.decision||'';openDialog($('#notebook-dialog'));};
 $('#notebook-form').addEventListener('input',e=>{if(e.target.name){state.values[e.target.name]=e.target.value;save();}});
 $('#notebook-form').addEventListener('submit',e=>e.preventDefault());
 $('#export').onclick=()=>{const data=exportNotebook(state.values);const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='meu-loop-inteia.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-$('#prompt').onclick=()=>{const v=k=>state.values[k]?.trim()||'[preencher]',decision=state.values.decision?$('#decision').querySelector(`option[value="${state.values.decision}"]`).textContent:'[ainda não decidi]';$('#prompt-output').value=`Atue como revisor crítico da minha tarefa. Procure falhas concretas e confira a evidência disponível. Não invente resultados nem aprove pelo estilo do texto.\n\nTarefa: ${v('task')}\nFonte e versão de referência: ${v('reference')}\nCritério e o que não pode piorar: ${v('criterion')}\nHipótese: ${v('hypothesis')}\nTeste e limite: ${v('test')}\nEvidência já observada: ${v('evidence')}\nCorreção feita: ${v('correction')}\nPendências: ${v('next')}\nDecisão provisória: ${decision}\n\nSaída a revisar:\n[cole aqui a versão candidata]\n\nTrecho da fonte para conferência:\n[cole aqui o trecho ou indique onde encontrá-lo]\n\nPara cada crítica, indique o trecho ou teste que a sustenta. Separe observado, inferido e não verificado. Se houver falha demonstrada, proponha a menor correção útil e como conferir regressões; se não encontrar falha, diga o que verificou e o que ficou sem verificar, sem inventar problema. Se faltar acesso à fonte ou execução, declare inconclusivo e diga o que falta. Não altere os critérios para acomodar a resposta. Termine com a próxima decisão que a evidência permite.`;$('#prompt-wrap').hidden=false;$('#prompt-output').focus();$('#prompt-output').select();};
+$('#prompt').onclick=()=>{const v=k=>state.values[k]?.trim()||'[preencher]',decision=state.values.decision?$('#decision').querySelector(`option[value="${state.values.decision}"]`).textContent:'[ainda não decidi]';$('#prompt-output').value=`Atue como revisor crítico da minha tarefa. Procure falhas concretas e confira a evidência disponível. Não invente resultados nem aprove pelo estilo do texto.\n\nTarefa: ${v('task')}\nFonte e versão de referência: ${v('reference')}\nCritério e o que não pode piorar: ${v('criterion')}\nHipótese: ${v('hypothesis')}\nTeste e limite: ${v('test')}\nEvidência já observada: ${v('evidence')}\nCorreção feita: ${v('correction')}\nPendências: ${v('next')}\nDecisão provisória: ${decision}\n\nMinhas anotações acima não são prova: confira cada uma na fonte e marque, por critério, atende, não atende ou não verificado.\n\nSaída a revisar:\n[cole aqui a versão candidata]\n\nTrecho da fonte para conferência:\n[cole aqui o trecho ou indique onde encontrá-lo]\n\nPara cada crítica, indique o trecho ou teste que a sustenta. Separe observado, inferido e não verificado. Se houver falha demonstrada, proponha a menor correção útil e como conferir regressões; se não encontrar falha, diga o que verificou e o que ficou sem verificar, sem inventar problema. Se faltar acesso à fonte ou execução, declare inconclusivo e diga o que falta. Não altere os critérios para acomodar a resposta. Termine com a próxima decisão que a evidência permite.`;$('#prompt-wrap').hidden=false;$('#copy-row').hidden=false;$('#copy-state').textContent='';$('#prompt-output').focus();$('#prompt-output').select();};
+$('#copy-prompt').onclick=()=>navigator.clipboard.writeText($('#prompt-output').value).then(()=>{$('#copy-state').textContent='Copiado';},()=>{$('#prompt-output').select();$('#copy-state').textContent='Texto selecionado: copie com Ctrl+C';});
 window.addEventListener('scroll',()=>{schedule();},{passive:true});
 window.addEventListener('resize',()=>{measure();scene?.resize();snap=true;schedule();});
 window.addEventListener('hashchange',()=>{measure();snap=true;schedule();});
