@@ -200,6 +200,11 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 16).rotateX(-Math.PI / 2),
     new THREE.MeshStandardMaterial({map: floorMap, color: '#9fb2bb', metalness: .55, roughness: .52, envMapIntensity: .55}));
   floor.name = 'Piso'; floor.receiveShadow = true; floorGroup.add(floor);
+  // Chão escuro além da seção de ensaio: quando a câmera sai pelas paredes recolhidas, ela não vê
+  // a borda da laje nem o vazio abaixo dela; a névoa termina o plano.
+  const apron = new THREE.Mesh(new THREE.PlaneGeometry(48, 48).rotateX(-Math.PI / 2),
+    new THREE.MeshStandardMaterial({color: '#080d10', metalness: .2, roughness: .85, envMapIntensity: .25}));
+  apron.position.y = -.02; apron.name = 'Piso externo'; floorGroup.add(apron);
 
   // Prato giratório com marcações angulares.
   const disk = (ctx, w, emissive) => {
@@ -262,8 +267,6 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
     new THREE.MeshStandardMaterial({map: beltMap, color: '#c8d2d6', metalness: 0, roughness: .82, envMapIntensity: .35}));
   belt.position.y = .007; belt.name = 'Esteira rolante'; belt.receiveShadow = true;
   floorGroup.add(belt);
-
-  // O aviso "visualização didática, não é CFD" fica no rodapé da página, não no piso.
 
   const floorLeds = [];
   for (const s of [-1, 1]) {
@@ -521,6 +524,10 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
         // Thin the foreground over the car while retaining depth behind it.
         float bodyCrossing=(1.-smoothstep(2.1,3.2,abs(W.z)))*smoothstep(.05,.85,W.x);
         vAlpha*=mix(1.,.32,bodyCrossing);
+        // Seen from the flank each lane lines up into one long, solid band that the depth of
+        // field widens into a white arc over the car; the side view keeps a quarter of it.
+        float flank=smoothstep(.72,.97,abs(normalize(cameraPosition-W).x));
+        vAlpha*=mix(1.,.25,flank);
         vLight=smoothstep(.1,1.2,W.y);
         vWake=wake; vSeed=position.z;
       #ifdef USE_FOG

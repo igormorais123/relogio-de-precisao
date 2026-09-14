@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import * as THREE from 'three';
 import { sampleStory } from '../src/story.js';
 import { carExtent, speedProfile } from '../tools/camera-metrics.mjs';
@@ -30,11 +31,24 @@ test('the tunnel is the stage of Executar and nowhere else', () => {
   for (const p of [0.3, 1.3, 3.4, 4.3, 5]) assert.equal(sampleStory(p).tunnel, 0);
 });
 
-test('the diagonal wipes straddle the seams into (2) and out of (3) the tunnel', () => {
-  for (const [p, incoming] of [[1.95, 'tunnel'], [2, 'tunnel'], [2.05, 'tunnel'], [2.95, 'garage'], [3, 'garage'], [3.05, 'garage']]) {
+// Round 2 left a limbo at 1.72–2.06: the next chapter's title was legible while the old world
+// was still leaving. The wipe now lives in the text-free travel and is done on the seam, so the
+// copy of 03 and 04 (opened by main.js after the seam) always lands on a single world.
+test('each diagonal wipe runs in the travel before a tunnel seam and is over on the seam', () => {
+  for (const [p, incoming] of [[1.8, 'tunnel'], [1.9, 'tunnel'], [1.98, 'tunnel'], [2.8, 'garage'], [2.9, 'garage'], [2.98, 'garage']]) {
     assert.equal(sampleStory(p).incoming, incoming, `wipe at ${p}`);
   }
-  for (const p of [1.8, 2.2, 2.8, 3.2]) assert.equal(sampleStory(p).incoming, null, `no wipe at ${p}`);
+  for (const p of [1.7, 2, 2.02, 2.2, 2.7, 3, 3.02, 3.2]) assert.equal(sampleStory(p).incoming, null, `no wipe at ${p}`);
+  for (const seam of [2, 3]) {
+    let peak = 0, at = 0;
+    for (let p = seam - .3; p < seam; p += .001) { const w = sampleStory(p).wipe; if (w > peak) { peak = w; at = p; } }
+    assert.ok(peak > .99 && at <= seam - .1, `wipe into ${seam} peaks at ${at.toFixed(3)}`);
+  }
+});
+
+test('dark haze covers every wipe and clears before the reading pauses', () => {
+  for (const pose of samples) if (pose.incoming) assert.equal(pose.haze, 1, `no haze during the wipe at ${pose.index + pose.local}`);
+  for (const p of [0, .3, 1.3, 2.3, 3.3, 4.3, 5]) assert.equal(sampleStory(p).haze, 0, `haze at ${p}`);
 });
 
 test('lens, focus and highlights stay physically usable across the take', () => {
@@ -84,18 +98,72 @@ test('while copy is on screen the car stays clear of the text column and the cha
   }
 });
 
-test('Avaliar reads the island monitors while the car sits outside the depth of field', () => {
+// Desktop frame as scene.js builds it (text column on the left: view offset −15% x, −3% y).
+const frame = new THREE.PerspectiveCamera(30, 1440 / 900, .05, 80);
+frame.setViewOffset(1440, 900, -216, -27, 1440, 900);
+function shoot(pose) {
+  frame.fov = pose.fov; frame.updateProjectionMatrix(); frame.position.fromArray(pose.camera);
+  frame.lookAt(new THREE.Vector3().fromArray(pose.target)); frame.updateMatrixWorld();
+  return frame;
+}
+function screenBox(pose, lo, hi) {
+  const camera = shoot(pose), v = new THREE.Vector3();
+  let x0 = Infinity, x1 = -Infinity;
+  for (let i = 0; i < 8; i++) { v.set(i & 1 ? hi[0] : lo[0], i & 2 ? hi[1] : lo[1], i & 4 ? hi[2] : lo[2]).project(camera); x0 = Math.min(x0, (v.x + 1) / 2); x1 = Math.max(x1, (v.x + 1) / 2); }
+  return {x0, x1, width: x1 - x0, centre: (x0 + x1) / 2};
+}
+
+// Round 2 racked to monitors that were 6–10% of the width and blurred the hero for nothing.
+// Now the car is the sharp subject through the copy, the push-in makes the central monitor
+// legible (35–40% of the width), and the focus only settles on it once it is that big.
+test('Avaliar keeps the car sharp through the copy, pushes in to the central monitor, then racks to it', () => {
   const monitors = new THREE.Vector3(-4.72, 1.52, -1.35), car = new THREE.Vector3(0, .5, 0);
-  const camera = new THREE.PerspectiveCamera(30, 1440 / 900, .05, 80);
-  camera.setViewOffset(1440, 900, -216, -27, 1440, 900);
-  for (const p of [3.3, 3.4, 3.5, 3.6, 3.7]) {
-    const pose = sampleStory(p), eye = new THREE.Vector3().fromArray(pose.camera);
-    assert.ok(new THREE.Vector3().fromArray(pose.focus).distanceTo(monitors) < .01, `focus on the monitors at ${p}`);
-    const range = pose.focusRange ?? 3.4 + (1.15 - 3.4) * pose.bokeh;   // scene.js focus range
-    assert.ok(Math.abs(eye.distanceTo(car) - eye.distanceTo(monitors)) > range, `car inside the focus range at ${p}`);
-    camera.fov = pose.fov; camera.updateProjectionMatrix(); camera.position.copy(eye); camera.lookAt(new THREE.Vector3().fromArray(pose.target)); camera.updateMatrixWorld();
-    const s = monitors.clone().project(camera), x = (s.x + 1) / 2, y = (1 - s.y) / 2;
-    assert.ok(x > .42 && x < .92 && y > .12 && y < .88, `monitors at ${(x * 100).toFixed(0)}%,${(y * 100).toFixed(0)}% on screen at ${p}`);
+  const lo = [monitors.x, monitors.y - .32, monitors.z - .57], hi = [monitors.x, monitors.y + .32, monitors.z + .57];
+  for (const p of [3, 3.1, 3.2, 3.3, 3.4, 3.45]) {
+    const pose = sampleStory(p), eye = new THREE.Vector3().fromArray(pose.camera), focus = new THREE.Vector3().fromArray(pose.focus);
+    assert.ok(focus.distanceTo(car) < 1.5, `focus left the car at ${p}`);
+    assert.ok(Math.abs(eye.distanceTo(focus) - eye.distanceTo(car)) < pose.focusRange, `car outside the depth of field at ${p}`);
+  }
+  for (let p = 3.45; p <= 3.9; p += .01) {
+    const pose = sampleStory(p);
+    if (new THREE.Vector3().fromArray(pose.focus).distanceTo(monitors) < .01) {
+      const m = screenBox(pose, lo, hi);
+      assert.ok(m.width >= .3, `focus settles on a monitor only ${(m.width * 100).toFixed(0)}% wide at ${p.toFixed(2)}`);
+    }
+  }
+  let held = 0;
+  for (let p = 3.68; p <= 3.82; p += .01) {
+    const pose = sampleStory(p), m = screenBox(pose, lo, hi);
+    if (m.width >= .35 && m.width <= .4 && m.centre >= .45 && m.centre <= .65) held++;
+  }
+  assert.ok(held >= 6, `central monitor at 35–40% of the width for only ${held} of 15 samples`);
+  const pose = sampleStory(3.74), eye = new THREE.Vector3().fromArray(pose.camera), e = carExtent(pose);
+  assert.ok(new THREE.Vector3().fromArray(pose.focus).distanceTo(monitors) < .01, 'focus on the monitor at the peak');
+  assert.ok(!e || e.min > 1 || e.max < 0 || Math.abs(eye.distanceTo(car) - eye.distanceTo(monitors)) > pose.focusRange, 'a car in frame at the peak must be out of focus');
+});
+
+// Round 2 "closes" cropped the whole car under the chapter dots. A close is one part, centred,
+// sharp, with the rest of the car soft and never past 88% of the width (the dots column).
+const HULL = JSON.parse(readFileSync(new URL('../tools/car-hull.json', import.meta.url), 'utf8')).parts;
+const DELAY = {wheels: 0, aero: .12, suspension: .18, body: .24, cockpit: .3, details: .32};
+const ease = (x, a, b) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+function partBox(indices, explode) {
+  const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity];
+  for (const i of indices) {
+    const [category, box, dir] = HULL[i], t = ease(explode, DELAY[category], 1);
+    for (let k = 0; k < 3; k++) { lo[k] = Math.min(lo[k], box[k] + dir[k] * t); hi[k] = Math.max(hi[k], box[k + 3] + dir[k] * t); }
+  }
+  return [lo, hi];
+}
+test('each text-free close centres one part at 45–65%, locks a short focus on it and keeps the car off the dots', () => {
+  const closes = [[.72, [0, 1, 2, 3, 4, 5, 6, 7, 8], 'rear wing'], [1.64, [25], 'floor'], [2.7, [67, 69], 'rear wheel']];
+  for (const [p, indices, name] of closes) {
+    const pose = sampleStory(p), [lo, hi] = partBox(indices, pose.explode), s = screenBox(pose, lo, hi), e = carExtent(pose);
+    assert.ok(s.centre >= .45 && s.centre <= .65, `${name} centred at ${(s.centre * 100).toFixed(0)}% at ${p}`);
+    assert.ok(e && e.max <= .88, `${name} close lets the car reach ${(e?.max * 100).toFixed(0)}% at ${p}`);
+    const eye = new THREE.Vector3().fromArray(pose.camera), centre = new THREE.Vector3(...lo.map((v, k) => (v + hi[k]) / 2));
+    assert.ok(Math.abs(eye.distanceTo(new THREE.Vector3().fromArray(pose.focus)) - eye.distanceTo(centre)) < .5, `${name} is not the focal plane at ${p}`);
+    assert.ok(pose.focusRange <= 1.6 && pose.bokeh >= .45, `${name} close keeps a deep focus (range ${pose.focusRange.toFixed(2)}, bokeh ${pose.bokeh.toFixed(2)})`);
   }
 });
 

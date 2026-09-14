@@ -166,6 +166,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   onProgress(.9, 'Acendendo o box');
   const garage = createGarage({renderer, scene, mobile});
   const tunnel = createTunnel({renderer, scene, mobile});
+  const worlds = {garage, tunnel};
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envGarage = pmrem.fromScene(garage.envScene, .02);
   const envTunnel = pmrem.fromScene(tunnel.envScene, .02);
@@ -180,6 +181,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   const pointer = {x: 0, y: 0, sx: 0, sy: 0}, lastCamera = new THREE.Vector3();
   const gradeGarage = [[.9, .99, 1.07], [1.06, 1, .92]], gradeTunnel = [[.84, 1, 1.14], [.97, 1.02, 1.07]], gradeDebrief = [[.97, .92, 1.02], [1.05, .98, .93]];
   const dustWarm = new THREE.Color('#ffd9b8'), dustCold = new THREE.Color('#bfe9ff'), dustColor = new THREE.Color();
+  const fogBase = new THREE.Color(FOG), fogHaze = new THREE.Color('#0a1218');
   let pose = null, width = 1, height = 1;
 
   function resize() {
@@ -234,14 +236,14 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     blobMaterial.opacity = .85 * (1 - smooth(pose.explode * 4));
 
     const inTunnel = t >= .5;
-    if (pose.incoming) {
-      wipeUniforms.uWipePos.value = mix(-WIPE_RANGE, WIPE_RANGE, pose.sweep);
-      if (garage) { garage.root.visible = true; garage.clip.side = pose.incoming === 'garage' ? 1 : -1; }
-      if (tunnel) { tunnel.root.visible = true; tunnel.clip.side = pose.incoming === 'tunnel' ? 1 : -1; }
-    } else {
-      wipeUniforms.uWipePos.value = -9;
-      if (garage) { garage.root.visible = !inTunnel; garage.clip.side = 0; }
-      if (tunnel) { tunnel.root.visible = inTunnel; tunnel.clip.side = 0; }
+    // Worlds by name (story WIPES): a settled frame renders only pose.world; during a wipe the
+    // incoming world keeps the swept side (+1) and the outgoing one the rest (−1).
+    wipeUniforms.uWipePos.value = pose.incoming ? mix(-WIPE_RANGE, WIPE_RANGE, pose.sweep) : -9;
+    for (const [name, world] of Object.entries(worlds)) {
+      if (!world) continue;
+      const side = !pose.incoming ? 0 : name === pose.incoming ? 1 : name === pose.outgoing ? -1 : 0;
+      world.root.visible = pose.incoming ? side !== 0 : name === pose.world;
+      world.clip.side = side;
     }
     scene.environment = (inTunnel ? envTunnel : envGarage).texture;
     tunnel?.setFlow(t);
@@ -264,8 +266,13 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     focus.fromArray(pose.focus);
     // Focus range and bokeh scale come from the story pose.
     post.focus(camera.position.distanceTo(focus), pose.focusRange, pose.bokehScale);
+    // Seams (story haze): the far box floor and the tunnel shell sink into dark haze with no horizon,
+    // and the dust thins so the empty background never reads as a starry sky.
+    const h = pose.haze || 0;
+    scene.fog.near = mix(15, 12, h); scene.fog.far = mix(40, 21, h);
+    scene.fog.color.lerpColors(fogBase, fogHaze, h); scene.background.copy(scene.fog.color);
     dustColor.lerpColors(dustWarm, dustCold, t);
-    dust.update(time, pixelRatio * height / 900, 1 - .5 * t, dustColor);
+    dust.update(time, pixelRatio * height / 900, (1 - .5 * t) * (1 - .8 * h), dustColor);
     debug?.after?.();
   }
   // ?debug=1 exposes the rig to tools/probe.mjs for isolating a look problem.
