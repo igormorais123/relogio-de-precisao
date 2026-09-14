@@ -86,12 +86,14 @@ function frame(now){
  pose=sampleStory(Math.min(shownP,5));
  const engineLocal=Math.max(0,shownP-6);pose.engineChapter=shownP>=6;pose.engineProgress=engineLocal;pose.enginePaused=enginePaused;
  document.body.classList.toggle('in-engine-chapter',pose.engineChapter);
- if(pose.engineChapter){const beat=engineBeat(engineLocal),lesson=ENGINE_LESSONS[beat],inside=engineLocal>.27;
- $('#title-motor-do-loop').textContent=inside?lesson.title:ENGINE_INTRO.title;
- $('#engine-chapter-text').textContent=inside?lesson.text:ENGINE_INTRO.text;
- $('#engine-part-label').textContent=inside?lesson.part:ENGINE_INTRO.part;$('#engine-source').hidden=inside;
- $('#engine-lesson-count').textContent=inside?`${beat+1} / 3`:'Motor V6';
- $('[data-engine-chapter="next"]').textContent=engineLocal<.27?'Entrar no motor →':beat<2?'Próxima →':'Voltar ao início ↗';
+ // Outside the chapter the copy returns to the opening, so a later pass through Encerrar never shows a lesson left from an earlier visit.
+ {const put=(s,v)=>{const e=$(s);if(e.textContent!==v)e.textContent=v;};
+ const beat=copyBeat(engineLocal),lesson=ENGINE_LESSONS[beat],inside=pose.engineChapter&&engineLocal>.27;
+ put('#title-motor-do-loop',inside?lesson.title:ENGINE_INTRO.title);
+ put('#engine-chapter-text',inside?lesson.text:ENGINE_INTRO.text);
+ put('#engine-part-label',inside?lesson.part:ENGINE_INTRO.part);$('#engine-source').hidden=inside;
+ put('#engine-lesson-count',inside?`${beat+1} / 3`:'Motor V6');
+ put('[data-engine-chapter="next"]',!inside?'Entrar no motor →':beat<2?'Próxima →':'Voltar ao início ↗');
  }
  pose.monitorScene=monitor.active?monitor.weight:0;pose.monitorReading=monitor.active?monitor.reading:null;const place=pose.engineChapter?'MOTOR DO LOOP':monitor.active&&monitor.weight>.5?'ANÁLISE NO BOX':pose.world==='track'?'PISTA':pose.world==='tunnel'?'TÚNEL DE VENTO':pose.index===2?'ESTAÇÃO DE DADOS':SCENE_LABELS[pose.index];if($('#scene-label').textContent!==place)$('#scene-label').textContent=place;scene.setPose(pose);scene.render(dt,now/1000,idle?1000/30:1000/60);placeHotspot();
  schedule();
@@ -99,8 +101,10 @@ function frame(now){
 function setReading(on){state.reading=on;if(on){$('#title-motor-do-loop').textContent=ENGINE_INTRO.title;$('#engine-chapter-text').textContent=ENGINE_INTRO.text;$('#engine-part-label').textContent=ENGINE_INTRO.part;$('#engine-source').hidden=false;}document.body.classList.remove('in-engine-chapter');document.body.classList.remove('monitor-focused');document.body.classList.toggle('reading',on);$('#reading').setAttribute('aria-pressed',String(on));$('#reading').textContent=on?'Modo cinema':'Modo leitura';$$('.lesson').forEach(d=>d.open=on);$$('.chapter').forEach(s=>{s.style.removeProperty('--in');s.style.removeProperty('--out');s.classList.remove('copy-off','dissolving');});measure();if(on){$('#load-state').textContent='Leitura · movimento pausado';$('#hotspot').classList.add('off');paint();}else{if(scene)$('#load-state').textContent='';else loadScene();snap=true;schedule();}}
 let enginePaused=false;
 function goEngine(p){const el=$('#motor-do-loop');window.scrollTo({top:el.offsetTop+p*(el.offsetHeight-innerHeight),behavior:reduced.matches?'instant':'smooth'});snap=reduced.matches;schedule();}
-$('[data-engine-chapter="next"]').onclick=()=>{const p=Math.max(0,shownP-6),beat=engineBeat(p);if(p<.27)goEngine(.35);else if(beat<2)goEngine(beat===0?.58:.82);else $('#preparar').scrollIntoView();};
-$('[data-engine-chapter="back"]').onclick=()=>{const p=Math.max(0,shownP-6),beat=engineBeat(p);if(p<.27)$('#encerrar').scrollIntoView();else goEngine(beat===2?.58:beat===1?.35:0);};
+// Each lesson's copy and its Next/Back targets switch shortly after the camera settles on the part (windows in engine-shot.js).
+function copyBeat(p){return engineBeat(Math.max(0,p-.05));}
+$('[data-engine-chapter="next"]').onclick=()=>{const p=Math.max(0,shownP-6),beat=copyBeat(p);if(p<.27)goEngine(.35);else if(beat<2)goEngine(beat===0?.58:.82);else $('#preparar').scrollIntoView();};
+$('[data-engine-chapter="back"]').onclick=()=>{const p=Math.max(0,shownP-6),beat=copyBeat(p);if(p<.27)$('#encerrar').scrollIntoView();else goEngine(beat===2?.58:beat===1?.35:0);};
 $('#engine-motion').onclick=()=>{enginePaused=!enginePaused;$('#engine-motion').setAttribute('aria-pressed',String(enginePaused));$('#engine-motion').textContent=enginePaused?'Mover motor':'Pausar motor';};
 $('#reading').addEventListener('click',()=>{const id=(CHAPTERS[state.chapter]?.id||'motor-do-loop');setReading(!state.reading);document.getElementById(id).scrollIntoView();measure();snap=true;paint();});
 $('#preload-read').addEventListener('click',()=>{if(loading)loadAbort?.abort();setReading(true);document.body.classList.add('scene-ready');const h=$('#title-preparar');h.tabIndex=-1;h.focus({preventScroll:true});});
