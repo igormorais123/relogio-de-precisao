@@ -11,7 +11,8 @@ import {createWipeClip} from '../fx/wipe-clip.js';
 // Carro, luz-chave com sombra, névoa e pós pertencem à cena principal.
 
 const DISPLAY = 'Bebas, "Bebas Neue", "Arial Narrow", Impact, sans-serif';
-const BODY = 'Lato, Arial, sans-serif';
+// Barlow, a mesma do corpo da interface: as telas não podem parecer coladas de outro site.
+const BODY = 'Barlow, Arial, sans-serif';
 const RED = '#D92135';
 const DECISIONS = {aceitar: 'Aceitar', reverter: 'Reverter', revisar: 'Revisar', inconclusivo: 'Inconclusivo', 'decisao-necessaria': 'Decisão necessária'};
 const FALLBACK_LABELS = {task: 'Tarefa', reference: 'Fonte e versão de referência', criterion: 'Critério', hypothesis: 'Hipótese', test: 'Teste e limite', evidence: 'Evidência observada', correction: 'Correção e regressões', next: 'Pendência e próxima volta', decision: 'Decisão'};
@@ -229,7 +230,8 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   box(STATIC, .03, .42, 4.1, IX - .38, .5, -1.4, graphite);
   // Trilho de monitores apoiado em dois postes presos ao tampo.
   for (const z of [-3.42, .62]) { cyl(STATIC, .028, .028, .96, -4.86, 1.27, z, steel); box(STATIC, .16, .02, .16, -4.86, .8, z, black); }
-  box(STATIC, .05, .07, 4.12, -4.86, 1.62, -1.4, steel, {r: .01});
+  // Trilho fino: no plano da tela ele atravessava o quadro como uma barra preta.
+  box(STATIC, .035, .04, 4.12, -4.86, 1.62, -1.4, steel, {r: .008});
   for (const z of MON_Z) {
     box(STATIC, .045, MON.h + .05, MON.w + .05, MON.x - .02, MON.y, z, black, {r: .01});
     box(STATIC, .1, .08, .08, -4.8, 1.6, z, charcoal);
@@ -393,6 +395,13 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   const redWash = new THREE.PointLight('#ff2a40', 0, 6.5, 2);
   redWash.position.set(0, .75, -5.0);
   lights.add(monitorWash, monitorWash.target, redWash);
+  // Leitura no monitor: a tela derrama luz fria na mesa e um lavador rasante dá à parede de ripas
+  // uma poça de luz com queda, em vez de cortina azul uniforme.
+  const screenSpill = new THREE.SpotLight('#8fb4ff', 0, 2.6, .95, 1, 2);
+  screenSpill.position.set(-4.62, 1.22, -1.35); screenSpill.target.position.set(-3.95, .78, -1.35);
+  const wallGrazer = new THREE.SpotLight('#d6e4ff', 0, 3.6, .85, 1, 2);
+  wallGrazer.position.set(-5.22, 2.75, -1.1); wallGrazer.target.position.set(-5.47, .7, -1.5);
+  lights.add(screenSpill, screenSpill.target, wallGrazer, wallGrazer.target);
   const lightBase = new Map([overhead, benchLamp, monitorGlow, deskLamp].filter(Boolean).map(l => [l, l.intensity]));
 
   // --------------------------------------------------------- cena de ambiente
@@ -407,6 +416,28 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   for (const m of materials) {
     if (m.isMeshStandardMaterial) { m.envMap = envTarget?.texture || null; m.envMapIntensity = m.userData.env; }
     clip.patch(m);
+  }
+  // Vidro das telas da ilha: reflexo sutil do box somado à imagem, fraco o bastante para não
+  // competir com o texto.
+  // No plano frontal o reflexo do ambiente é escuro; um brilho diagonal largo e a luz do teto
+  // no alto da tela dizem "vidro" sem cobrir o texto.
+  for (const screen of notebookScreens) {
+    const material = screen.material, previous = material.onBeforeCompile, key = material.customProgramCacheKey.bind(material);
+    material.envMap = envTarget?.texture || null;
+    material.combine = THREE.AddOperation;
+    material.reflectivity = .12;
+    material.onBeforeCompile = function (shader, renderer) {
+      previous.call(this, shader, renderer);
+      shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+{
+  vec2 q = vMapUv;
+  float band = 1. - smoothstep(0., .24, abs(q.x * .6 + q.y - 1.08));
+  float top = smoothstep(.72, 1., q.y);
+  diffuseColor.rgb += vec3(.62, .72, .86) * (.05 * band + .025 * top);
+}`);
+    };
+    material.customProgramCacheKey = () => key() + '-glass-v1';
+    material.needsUpdate = true;
   }
 
   // --------------------------------------------------------------- desenho
@@ -435,7 +466,8 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   drawRear();
   setNotebook({}, []);
   if (typeof document !== 'undefined' && document.fonts?.load) {
-    Promise.all([document.fonts.load(`80px ${DISPLAY}`), document.fonts.load(`40px ${BODY}`)])
+    // Os dois pesos da Barlow precisam estar prontos; sem isso o canvas desenha em Arial.
+    Promise.all([document.fonts.load(`80px ${DISPLAY}`), document.fonts.load(`400 40px ${BODY}`), document.fonts.load(`600 40px ${BODY}`)])
       .then(() => { if (!disposed) { drawRear(); setNotebook(lastValues, lastFields); } })
       .catch(() => {});
   }
@@ -449,7 +481,11 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   // debrief: teto apagado, contraluz vermelha baixa e telas traseiras; evaluate:
   // sala de análise à noite, com os monitores da ilha como luz dominante.
   // fix: Corrigir (piso quase preto); focus: close de peça na bancada (faixas do box apagadas).
-  function setMood({debrief = 0, evaluate = 0, fix = 0, focus = 0} = {}) {
+  // monitor: peso da cena dedicada de leitura no monitor (monitor-scene.js).
+  function setMood({debrief = 0, evaluate = 0, fix = 0, focus = 0, monitor = 0} = {}) {
+    const mon = THREE.MathUtils.clamp(monitor, 0, 1);
+    screenSpill.intensity = 7 * mon;
+    wallGrazer.intensity = 5 * mon;
     const d = THREE.MathUtils.clamp(debrief, 0, 1), e = THREE.MathUtils.clamp(evaluate, 0, 1);
     // focus satura cedo: o close de 1,64 ainda está no fim do destaque.
     const f = THREE.MathUtils.clamp(fix, 0, 1), s = THREE.MathUtils.clamp(focus * 1.6, 0, 1);
@@ -460,8 +496,8 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     overhead.intensity = lightBase.get(overhead) * (1 - .85 * e) * (1 - .95 * d);
     benchLamp.intensity = lightBase.get(benchLamp) * (1 - .85 * e) * (1 - .75 * d);
     if (deskLamp) deskLamp.intensity = lightBase.get(deskLamp) * (1 - .8 * e) * (1 - .5 * d);
-    monitorGlow.intensity = lightBase.get(monitorGlow) * (1 + 1.4 * e + .4 * d);
-    monitorWash.intensity = 34 * e + 2 * d;
+    monitorGlow.intensity = lightBase.get(monitorGlow) * (1 + 1.4 * e + .4 * d) * (1 - .6 * mon);
+    monitorWash.intensity = (34 * e + 2 * d) * (1 - .4 * mon);
     redWash.intensity = 14 * d * (1 - e);
     const islandGain = 1 + .35 * e + .15 * d, rearGain = (1 + .7 * d) * (1 - .25 * e);
     for (const s of notebookScreens) s.material.color.copy(s.material.userData.base).multiplyScalar(islandGain);
@@ -618,11 +654,11 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     const cards = [
       {title:'O QUE O TESTE MOSTROU', lines:['12 → 9 min'], detail:['Mediana de atendimento', '50 pedidos em cada versão'], source:'REGISTRO · FRASE 2'},
       {title:'O QUE MUDOU JUNTO', lines:['FORMULÁRIO', '+ EQUIPE'], detail:['Duas mudanças no mesmo teste.'], source:'REGISTRO · FRASE 3'},
-      {title:'O QUE PODEMOS CONCLUIR', lines:['TEMPO MENOR', 'CAUSA NÃO ISOLADA'], detail:['O teste mostra a redução, mas não', 'separa o formulário da equipe.'], source:'REGISTRO · FRASES 2 E 3'},
+      {title:'SÍNTESE DO TESTE', lines:['REDUÇÃO OBSERVADA', '12 → 9 MIN'], detail:['Formulário e equipe mudaram juntos'], source:'REGISTRO · FRASES 2 E 3'},
     ];
     const card = cards[lessonBeat];
     ctx.textAlign='left';ctx.textBaseline='alphabetic';
-    ctx.fillStyle='#8ea6b4';ctx.font=`${30*s}px ${BODY}`;
+    ctx.fillStyle='#8ea6b4';ctx.font=`600 ${30*s}px ${BODY}`;
     ctx.fillText(card.title,m,78*s);
     ctx.fillStyle='#ffd447';ctx.font=`${(lessonBeat===0?174:lessonBeat===1?108:86)*s}px ${DISPLAY}`;
     card.lines.forEach((line,i)=>ctx.fillText(line,m,(lessonBeat===0?292:244+i*102)*s));
@@ -670,19 +706,18 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
       texture.needsUpdate = true;
       return;
     }
-    const m = screenHeader(ctx, W, s, 'DECISÃO', 'AGUARDA CONFERÊNCIA');
-    ctx.fillStyle = '#eef3f6';
-    ctx.font = `${150 * s}px ${DISPLAY}`;
-    ctx.fillText('PENDENTE', m, 290 * s);
-    ctx.fillStyle = RED;
-    ctx.fillRect(m, 314 * s, 140 * s, 8 * s);
-    ctx.fillStyle = '#dfe7ec';
-    ctx.font = `${32 * s}px ${BODY}`;
-    ctx.fillText('Cada frase do comunicado tem apoio?', m, 382 * s);
-    ctx.fillText('A decisão vem depois da conferência.', m, 426 * s);
+    // Sem registro do aluno, telemetria da sessão, como as telas do fundo.
+    const m = screenHeader(ctx, W, s, 'PRESSÕES', 'PSI · QUENTE');
+    [['DE', '23.4', .78], ['DD', '23.6', .8], ['TE', '21.2', .7], ['TD', '21.5', .72]].forEach(([label, value, fraction], i) => {
+      const x = (i % 2 ? 540 : 52) * s, y = (i < 2 ? 196 : 360) * s;
+      ctx.fillStyle = '#8ea6b4'; ctx.font = `600 ${26 * s}px ${BODY}`; ctx.fillText(label, x, y);
+      ctx.fillStyle = '#eef3f6'; ctx.font = `${104 * s}px ${DISPLAY}`; ctx.fillText(value, x, y + 104 * s);
+      ctx.fillStyle = '#21343e'; ctx.fillRect(x + 220 * s, y + 28 * s, 14 * s, 80 * s);
+      ctx.fillStyle = i < 2 ? '#b8cbd4' : '#b4464f'; ctx.fillRect(x + 220 * s, y + (28 + 80 * (1 - fraction)) * s, 14 * s, 80 * fraction * s);
+    });
     ctx.fillStyle = '#8ea6b4';
     ctx.font = `${24 * s}px ${BODY}`;
-    ctx.fillText('Registro de 14 de maio · 4 frases', m, 540 * s);
+    ctx.fillText('TL2 · VOLTA 04 · ALVO DIANT. 23.5 · TRAS. 21.3', m, 548 * s);
     texture.needsUpdate = true;
   }
 
