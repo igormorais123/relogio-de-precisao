@@ -3,6 +3,7 @@ import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js'
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {drawBrand} from '../../materia-prima/modulos-atualizados/identity.js';
 import {createWipeClip} from '../fx/wipe-clip.js';
+import {CLAIMS} from '../learning/model.js';
 
 // Box INTEIA procedural, derivado do box do laboratório (11 × 15 m).
 // Mundo frio e escuro (grafite, gelo apagado, LED frio no teto) com pontos
@@ -25,12 +26,18 @@ const CASE_SOURCE = [
   'Não há data nem autorização para adoção definitiva.',
 ];
 const VERDICT = {ok: '#6fe0a8', no: '#ff4b5c', unk: '#ffb54a'};
+const CLAIM_STYLE = {
+  sustentada: {verdict: ['SUSTENTADA'], tone: 'ok'},
+  'nao-sustentada': {verdict: ['NÃO SUSTENTADA'], tone: 'no'},
+  'nao-verificada': {verdict: ['NÃO VERIFICADA'], tone: 'unk'},
+};
+// The world and the exercise share verdicts; only these shorter screen captions differ.
 const CASE_CLAIMS = [
-  {text: 'Medianas de 12 e 9 min, 50 por versão', where: 'Registro, frase 2', verdict: ['SUSTENTADA'], tone: 'ok'},
-  {text: 'O novo formulário causou a redução', where: 'Registro, frase 3', verdict: ['NÃO SUSTENTADA'], tone: 'no'},
-  {text: 'Adoção definitiva em 20 de maio', where: 'Registro, frase 4', verdict: ['NÃO SUSTENTADA', 'OU NÃO VERIFICADA'], tone: 'no'},
-  {text: 'Equipe treinada antes do teste', where: 'Nenhuma frase do registro', verdict: ['NÃO VERIFICADA'], tone: 'unk'},
-];
+  {text: 'Medianas de 12 e 9 min, 50 por versão', where: 'Registro, frase 2'},
+  {text: 'O novo formulário causou a redução', where: 'Registro, frase 3'},
+  {text: 'Adoção definitiva em 20 de maio', where: 'Registro, frase 4'},
+  {text: 'Equipe treinada antes do teste', where: 'Nenhuma frase do registro'},
+].map((caption, index) => ({...caption, ...CLAIM_STYLE[CLAIMS[index].verdict]}));
 const STUDENT_FIELDS = ['evidence', 'criterion', 'decision'];
 
 export function createGarage({renderer, scene, mobile = false} = {}) {
@@ -594,7 +601,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     });
     ctx.fillStyle = '#8ea6b4';
     ctx.font = `${24 * s}px ${BODY}`;
-    ctx.fillText('Caso fictício da aula · comunicado interno', m, 552 * s);
+    ctx.fillText('Comunicado interno · caso fictício', m, 552 * s);
     texture.needsUpdate = true;
   }
 
@@ -651,7 +658,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     paintScreenBase(ctx, W, H);
     const filled = STUDENT_FIELDS.map(key => [key, typeof values[key] === 'string' ? values[key].trim() : '']).filter(([, v]) => v);
     if (filled.length) {
-      const m = screenHeader(ctx, W, s, 'SEU REGISTRO', 'NÃO VERIFICADO AUTOMATICAMENTE');
+      const m = screenHeader(ctx, W, s, 'REGISTRO', 'PENDENTE DE CONFERÊNCIA');
       let y = 186 * s;
       for (const [key, value] of filled) {
         ctx.fillStyle = '#8ea6b4';
