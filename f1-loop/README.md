@@ -6,6 +6,8 @@ Pasta separada do Relógio de Precisão. Sem afiliação FIA ou equipes. Sem mar
 
 - **Aula publicada:** https://igormorais123.github.io/relogio-de-precisao/f1-loop/
 - **Continuar o trabalho:** [PROXIMOS-PASSOS.md](PROXIMOS-PASSOS.md) (revisão, decisões e plano de construção)
+- **Laboratório 3D INTEIA:** https://igormorais123.github.io/INTEIA-laboratorio-3d/
+- **Republicar:** `bash f1-loop/tools/publicar-gh-pages.sh` na raiz do repositório (o GitHub Actions está bloqueado na conta por faturamento)
 
 ## Como rodar
 
