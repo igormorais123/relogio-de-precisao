@@ -181,9 +181,24 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   tube(ROOF, [[3.3, 3.75, -4.6], ...coil], .011, redPaint, 220);
 
   // -------------------------------------------------------- portal de entrada
-  for (const x of [-5.35, 5.35]) box(ENTRANCE, .22, 3.7, .24, x, 1.85, 5.6, charcoal);
+  for (const x of [-5.35, 5.35]) {
+    box(ENTRANCE, .22, 3.7, .24, x, 1.85, 5.6, charcoal);
+    // Sapata e contato de piso tornam legível onde o montante termina.
+    box(ENTRANCE, .7, .006, .72, x, -.001, 5.6, black);
+    box(ENTRANCE, .48, .14, .5, x, .067, 5.6, graphite);
+  }
   box(ENTRANCE, 10.92, .24, .24, 0, 3.62, 5.6, charcoal);
 
+  // Pátio e fachada oposta contextualizam a tomada por trás do box aberto.
+  box(STATIC, 34, .1, 22, 0, -.07, 16, epoxy);
+  box(STATIC, 34, 7, .3, 0, 3.5, 9.5, graphite);
+  for (const x of [-12, -6, 0, 6, 12]) {
+    box(STATIC, 5.4, 4.4, .08, x, 2.3, 9.3, charcoal);
+    for (let y = .4; y < 4.5; y += .4) box(STATIC, 5.3, .024, .025, x, y, 9.24, steel);
+    box(STATIC, 5.5, .08, .1, x, 5.1, 9.2, ledCool);
+    box(STATIC, .12, 6.7, .3, x - 2.85, 3.35, 9.2, steel);
+  }
+  box(STATIC, 33, .07, .08, 0, 5.8, 9.25, stripeRed);
   // ------------------------------------------------ armários e bancada traseira
   function cabinet(B, x, z, w = 1.35, facing = 1) {
     box(B, w, .95, .72, x, .53, z, graphite, {r: .014});
