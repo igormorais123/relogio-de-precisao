@@ -448,8 +448,10 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   const mood = {debrief: 0, evaluate: 0};
   // debrief: teto apagado, contraluz vermelha baixa e telas traseiras; evaluate:
   // sala de análise à noite, com os monitores da ilha como luz dominante.
-  function setMood({debrief = 0, evaluate = 0} = {}) {
+  // fix: Corrigir (piso quase preto); focus: close de peça na bancada (faixas do box apagadas).
+  function setMood({debrief = 0, evaluate = 0, fix = 0, focus = 0} = {}) {
     const d = THREE.MathUtils.clamp(debrief, 0, 1), e = THREE.MathUtils.clamp(evaluate, 0, 1);
+    const f = THREE.MathUtils.clamp(fix, 0, 1), s = THREE.MathUtils.clamp(focus, 0, 1);
     mood.debrief = d; mood.evaluate = e;
     const ceilingGain = (1 - .94 * e) * (1 - .96 * d);
     ledCool.color.copy(ledCool.userData.base).multiplyScalar(ceilingGain);
@@ -468,16 +470,20 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     bandRed.emissiveIntensity = 2.4 * d;
     const albedo = (1 - .6 * e) * (1 - .72 * d);
     for (const m of dimmable) m.color.copy(m.userData.albedo).multiplyScalar(albedo);
-    for (const m of moodTargets) m.envMapIntensity = m.userData.env * (1 - .7 * e) * (1 - .7 * d);
+    // No close da bancada as faixas desfocadas viravam barras vermelhas ao lado da peça estudada.
+    redPaint.color.multiplyScalar(1 - .94 * s);
+    for (const m of moodTargets) m.envMapIntensity = m.userData.env * (1 - .7 * e) * (1 - .7 * d) * (1 - .5 * f);
+    redPaint.envMapIntensity *= 1 - .9 * s;
     floorUniforms.uLedGain.value = ceilingGain;
     floorUniforms.uScreenGain.value = rearGain;
     floorUniforms.uMonitorGain.value = 1 + 2.2 * e + .3 * d;
     floorUniforms.uBand.value = d;
     // Base .4: o brilho largo das luzes da cena (key quente, rim âmbar) lavava o epóxi de marrom.
-    floorUniforms.uDirectSpec.value = .4 * (1 - .8 * e) * (1 - .85 * d);
+    floorUniforms.uDirectSpec.value = .4 * (1 - .8 * e) * (1 - .85 * Math.max(d, f));
     // As direcionais da cena (key, rim âmbar, kicker) foram feitas para o carro; no epóxi
-    // elas levantavam o preto. A sombra de contato mantém a proporção, só o nível desce.
-    floorUniforms.uDirectDiffuse.value = .36 * (1 - .4 * d);
+    // elas levantavam o preto (marrom em Corrigir e Encerrar). A sombra de contato mantém a
+    // proporção, só o nível desce; o reflexo analítico das fontes do box continua.
+    floorUniforms.uDirectDiffuse.value = .36 * (1 - .88 * Math.max(f, d));
   }
 
   // -------------------------------------------------------- oclusão por câmera
@@ -595,7 +601,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     });
     ctx.fillStyle = '#8ea6b4';
     ctx.font = `${24 * s}px ${BODY}`;
-    ctx.fillText('Comunicado interno · caso fictício', m, 552 * s);
+    ctx.fillText('Setor de atendimento · 100 pedidos', m, 552 * s);
     texture.needsUpdate = true;
   }
 
@@ -723,7 +729,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
       });
     }
     ctx.fillStyle = '#78909d'; ctx.font = `${21 * s}px ${BODY}`;
-    ctx.fillText('SESSÃO FICTÍCIA · DADOS ILUSTRATIVOS', m, 548 * s);
+    ctx.fillText('TL2 · VOLTA 04 · PISTA 38 °C · AR 26 °C', m, 548 * s);
     texture.needsUpdate = true;
   }
 }
