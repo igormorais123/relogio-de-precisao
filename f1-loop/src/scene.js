@@ -14,6 +14,8 @@ import {createSurfaceLibrary} from './fx/surface-library.js';
 import {createChoreo} from './fx/choreo.js';
 import {createGarage} from './world/garage.js';
 import {createTunnel} from './world/tunnel.js';
+import {createTrack} from './world/track.js';
+import {speedCamera, createWheelBlur, createSparks} from './fx/speed.js';
 
 const FOG = '#0b1014';
 const mix = (a, b, t) => a + (b - a) * t;
@@ -167,7 +169,14 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   onProgress(.9, 'Acendendo o box');
   const garage = createGarage({renderer, scene, mobile});
   const tunnel = createTunnel({renderer, scene, mobile});
-  const worlds = {garage, tunnel};
+  // Night circuit: the world runs past the parked car, so it shares the car coordinates.
+  const track = createTrack({THREE, renderer, mobile});
+  scene.add(track.root);
+  const wheelBlur = createWheelBlur({THREE, mechanics});
+  const sparks = createSparks({THREE, renderer, mobile});
+  scene.add(sparks.object);
+  const shake = {x: 0, y: 0, z: 0, pitch: 0, yaw: 0, roll: 0, fovKick: 0, fov: 30};
+  const worlds = {garage, tunnel, track};
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envGarage = pmrem.fromScene(garage.envScene, .02);
   const envTunnel = pmrem.fromScene(tunnel.envScene, .02);
@@ -180,7 +189,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
 
   const target = new THREE.Vector3(), focus = new THREE.Vector3(), offset = new THREE.Vector3(), side = new THREE.Vector3(), point = new THREE.Vector3(), buffer = new THREE.Vector2();
   const pointer = {x: 0, y: 0, sx: 0, sy: 0}, lastCamera = new THREE.Vector3();
-  const gradeGarage = [[.9, .99, 1.07], [1.06, 1, .92]], gradeTunnel = [[.84, 1, 1.14], [.97, 1.02, 1.07]], gradeDebrief = [[.97, .92, 1.02], [1.05, .98, .93]];
+  const gradeGarage = [[.9, .99, 1.07], [1.06, 1, .92]], gradeTunnel = [[.84, 1, 1.14], [.97, 1.02, 1.07]], gradeDebrief = [[.97, .92, 1.02], [1.05, .98, .93]], gradeTrack = [[.86, 1, 1.12], [1.05, 1, .93]];
   const dustWarm = new THREE.Color('#ffd9b8'), dustCold = new THREE.Color('#bfe9ff'), dustColor = new THREE.Color();
   const fogBase = new THREE.Color(FOG), fogHaze = new THREE.Color('#0a1218');
   let pose = null, width = 1, height = 1;
@@ -217,20 +226,39 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     const t = pose.tunnel, d = pose.debrief, e = pose.exposure, v = pose.evaluate;
     camera.position.fromArray(pose.camera);
     target.fromArray(pose.target);
-    if (mobile) { offset.subVectors(camera.position, target).multiplyScalar(1.4 + pose.explode * .45); camera.position.copy(target).add(offset); }
+    // Portrait is narrow: the phone pulls back, more when the car is open or on a lateral track take (pose.pull).
+    if (mobile) { offset.subVectors(camera.position, target).multiplyScalar(1.4 + pose.explode * .45 + (pose.pull || 0)); camera.position.copy(target).add(offset); }
     // Handheld breathing and pointer parallax stay small so the take remains legible.
     const follow = 1 - Math.exp(-dt * 3);
     pointer.sx += (pointer.x - pointer.sx) * follow; pointer.sy += (pointer.y - pointer.sy) * follow;
     side.subVectors(target, camera.position).cross(camera.up).normalize();
     camera.position.addScaledVector(side, pointer.sx * .16 + Math.sin(time * .31) * .025);
     camera.position.y += -pointer.sy * .08 + Math.sin(time * .23 + 1.3) * .018;
-    camera.fov = pose.fov * (mobile ? 1.32 : 1);
+    // Track run: the frame drops the text-column offset and centres the car; the speed camera adds
+    // millimetre shake, a slow sway and the FOV kick on top of the take.
+    const c = pose.center || 0, run = pose.speed || 0, r = pose.track || 0;
+    camera.setViewOffset(width, height, mobile ? 0 : -width * .15 * (1 - c), (mobile ? height * .2 : -height * .03) * (1 - c), width, height);
+    speedCamera(time, run, shake, pose.fov);
+    const s = pose.shake || 0;
+    camera.fov = (pose.fov + shake.fovKick * s) * (mobile ? 1.32 : 1);
+    camera.far = r > 0 ? track.cameraFar : 80;
     camera.updateProjectionMatrix();
     camera.lookAt(target);
+    if (s > 0) {
+      camera.translateX(shake.x * s); camera.translateY(shake.y * s); camera.translateZ(shake.z * s);
+      camera.rotateX(shake.pitch * s); camera.rotateY(shake.yaw * s); camera.rotateZ(shake.roll * s);
+    }
 
     mechanics.setAmount(pose.explode);
     mechanics.setSpin(t > .01);
     mechanics.update(dt * (1 + 20 * t), time * 1000, true);
+    // The circuit integrates its own roll; the wheels follow it (after mechanics rewrote the spin).
+    if (r > 0 || run > 0) {
+      const motion = track.update(time, dt, run);
+      if (run > 0) for (const w of mechanics.wheels) w.spinPivot.rotation.x = motion.wheelAngle;
+    }
+    wheelBlur.update(run);
+    sparks.update(time, run * r);
     floor.set(pose.highlight, time, pose.index);
     carLook.update(dt, time, pose);
     choreo.update(dt, time, pose);
@@ -246,13 +274,13 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       world.root.visible = pose.incoming ? side !== 0 : name === pose.world;
       world.clip.side = side;
     }
-    scene.environment = (inTunnel ? envTunnel : envGarage).texture;
+    scene.environment = r >= .5 && track.envTexture ? track.envTexture : (inTunnel ? envTunnel : envGarage).texture;
     tunnel?.setFlow(t);
     garage.setMood({debrief: d, evaluate: v});
     garage?.update(dt, camera, time);
     tunnel?.update(dt, camera, time);
 
-    key.color.lerpColors(warmKey, coldKey, t);
+    key.color.lerpColors(warmKey, coldKey, Math.max(t, r));
     // Corrigir (≈3.9–4.75) gets its own light: fill down, blacks back to black, car the brightest thing.
     const fix = smooth((pose.index + pose.local - 3.9) / .2) * (1 - smooth((pose.index + pose.local - 4.6) / .25));
     key.intensity = (3.1 - .8 * t) * (1 - .6 * d) * (1 - .65 * v) * (1 - .2 * fix) * e;
@@ -263,9 +291,20 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     hemi.intensity = .28 * (1 - .5 * v) * (1 - .6 * fix) * (1 - .5 * d) * e;
     kicker.intensity = 1.4 * (1 - t) * (1 + .6 * d) * e;
     scene.environmentIntensity = (.9 + .15 * t) * (1 - .35 * d) * (1 - .4 * v) * (1 - .3 * fix) * e;
+    // Track (levels from the track lab): a cold, lower key; the amber rim and kicker draw the edge
+    // that the circuit's long light strips run along.
+    if (r > 0) {
+      key.intensity *= mix(1, .42, r);
+      rim.color.lerp(warmRim, r); rim.intensity = mix(rim.intensity, 1.5 * e, r);
+      front.intensity *= 1 - .6 * r; hemi.intensity *= 1 - .5 * r;
+      kicker.intensity = mix(kicker.intensity, .55 * e, r);
+      scene.environmentIntensity = mix(scene.environmentIntensity, .95 * e, r);
+    }
     const g = t > 0 ? [0, 1].map(k => gradeGarage[k].map((v, i) => mix(v, gradeTunnel[k][i], t))) : gradeGarage.map((row, k) => row.map((v, i) => mix(v, gradeDebrief[k][i], d)));
+    if (r > 0) for (let k = 0; k < 2; k++) for (let i = 0; i < 3; i++) g[k][i] = mix(g[k][i], gradeTrack[k][i], r);
     post.setGrade(g[0], g[1], 1);
-    post.setBloom(.5 + .35 * t + .3 * d);
+    post.setBloom(mix(.5 + .35 * t + .3 * d, .62, r));
+    post.setSpeed(run, run * .7);
     post.setBand(pose.incoming ? pose.wipe : 0, time);
     focus.fromArray(pose.focus);
     // Focus range and bokeh scale come from the story pose.
@@ -273,14 +312,15 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     // Seams (story haze): the far box floor and the tunnel shell sink into dark haze with no horizon,
     // and the dust thins so the empty background never reads as a starry sky.
     const h = pose.haze || 0;
-    scene.fog.near = mix(15, 12, h); scene.fog.far = mix(40, 21, h);
-    scene.fog.color.lerpColors(fogBase, fogHaze, h); scene.background.copy(scene.fog.color);
+    // The track has its own sky and a 150 m horizon: as it sweeps in, fog moves out to its range.
+    scene.fog.near = mix(mix(15, 12, h), track.fog.near, r); scene.fog.far = mix(mix(40, 21, h), track.fog.far, r);
+    scene.fog.color.lerpColors(fogBase, fogHaze, h * (1 - r)); scene.background.copy(scene.fog.color);
     dustColor.lerpColors(dustWarm, dustCold, t);
-    dust.update(time, pixelRatio * height / 900, (1 - .5 * t) * (1 - .8 * h), dustColor);
+    dust.update(time, pixelRatio * height / 900, (1 - .5 * t) * (1 - .8 * h) * (1 - r), dustColor);
     debug?.after?.();
   }
   // ?debug=1 exposes the rig to tools/probe.mjs for isolating a look problem.
-  const debug = params.has('debug') ? (window.__scene = {scene, key, rim, front, hemi, garage, tunnel, post, mechanics}) : null;
+  const debug = params.has('debug') ? (window.__scene = {scene, camera, key, rim, front, hemi, garage, tunnel, track, sparks, wheelBlur, post, mechanics, model, renderer}) : null;
 
   // Adapt only after warmup and sustained slow real frames, never simulation dt.
   const adaptive = params.get('quality') !== 'high';
@@ -304,14 +344,20 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   // Each world carries its own lights, so box, tunnel and the wipe (both) are three shader
   // variants. Compile all of them behind the preloader instead of freezing on the first tunnel entry.
   // Programs are keyed by the active target too: compile against the composer's half-float buffer, not the canvas.
-  onProgress(.96, 'Preparando o túnel');
+  onProgress(.96, 'Preparando o túnel e a pista');
   renderer.setRenderTarget(post.composer.inputBuffer);
-  for (const [inBox, inTunnel] of [[true, true], [false, true], [true, false]]) {
-    garage.root.visible = inBox; tunnel.root.visible = inTunnel;
-    scene.environment = (inTunnel && !inBox ? envTunnel : envGarage).texture;
+  // Every pair a wipe can show, plus each world alone; the track's lights change the light count.
+  for (const disc of wheelBlur.discs) disc.visible = true;
+  sparks.object.visible = true;
+  for (const [inBox, inTunnel, onTrack] of [[1, 1, 0], [0, 1, 0], [1, 0, 0], [0, 1, 1], [0, 0, 1], [1, 0, 1]]) {
+    garage.root.visible = !!inBox; tunnel.root.visible = !!inTunnel; track.root.visible = !!onTrack;
+    scene.environment = onTrack && !inBox && !inTunnel && track.envTexture ? track.envTexture : (inTunnel && !inBox ? envTunnel : envGarage).texture;
     try { await renderer.compileAsync(scene, camera); } catch { renderer.compile(scene, camera); }
   }
   renderer.setRenderTarget(null);
+  // One frame at full speed behind the preloader, so the first run does not stall on the speed pass.
+  post.setSpeed(1, 1); post.render(0); post.setSpeed(0, 0); post.resetMotion();
+  track.root.visible = false; wheelBlur.update(0); sparks.update(0, 0);
   onProgress(1, 'Pronto');
   return {
     setPose(next) { pose = next; },
@@ -333,6 +379,6 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       if (!stage.dataset.loaded) { stage.dataset.loaded = 'true'; stage.classList.add('loaded'); }
       adapt(time * 1000, budgetMs);
     },
-    dispose() { post.dispose(); dust.dispose(); floor.dispose(); carLook.dispose(); surfaceLibrary.dispose(); carMaterials.dispose(); garage?.dispose(); tunnel?.dispose(); envGarage.dispose(); envTunnel.dispose(); renderer.dispose(); },
+    dispose() { post.dispose(); dust.dispose(); floor.dispose(); carLook.dispose(); surfaceLibrary.dispose(); carMaterials.dispose(); garage?.dispose(); tunnel?.dispose(); track.dispose(); wheelBlur.dispose(); sparks.dispose(); envGarage.dispose(); envTunnel.dispose(); renderer.dispose(); },
   };
 }

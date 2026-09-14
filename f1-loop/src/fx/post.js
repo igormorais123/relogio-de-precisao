@@ -6,6 +6,8 @@ import {
 import {HalfFloatType, Matrix4, Uniform, Vector2, Vector3} from 'three';
 import {EffectAttribute} from 'postprocessing';
 import {WIPE_GLSL, wipeUniforms} from './wipe-clip.js';
+import {SpeedEffect} from './speed.js';
+import {TRACK_TOP_SPEED} from '../world/track.js';
 
 // Film skin (R9) plus the diagonal wipe edge (R6) and a per-chapter grade (R10):
 // cold shadows, warm highlights. Runs after tone mapping, before grain.
@@ -91,6 +93,13 @@ export function createPost(renderer, scene, camera, {mobile}) {
   composer.addPass(new EffectPass(camera, ...(motion ? [motion] : []), new SanitizeEffect()));
   const viewProj = new Matrix4(), previous = new Matrix4();
   let fresh = true;
+  // Track speed (src/fx/speed.js): world shutter and radial drag in HDR, after sanitize and before
+  // DOF/bloom. Off unless the track is running; the lesson cameras follow the car, so no camera blur
+  // here (MotionBlurEffect above keeps that job).
+  const speed = new SpeedEffect(camera, {samples: mobile ? 7 : 12, topSpeed: TRACK_TOP_SPEED, cameraBlur: false});
+  const speedPass = new EffectPass(camera, speed);
+  speedPass.enabled = false;
+  composer.addPass(speedPass);
   const dof =mobile ? null : new DepthOfFieldEffect(camera, {focusDistance: 7, focusRange: 2.4, bokehScale: 3, resolutionScale: .6});
   const bloom = new BloomEffect({intensity: .55, luminanceThreshold: .82, luminanceSmoothing: .25, mipmapBlur: true, kernelSize: KernelSize.MEDIUM, radius: .68});
   composer.addPass(new EffectPass(camera, ...(dof ? [dof, bloom] : [bloom])));
@@ -105,8 +114,10 @@ export function createPost(renderer, scene, camera, {mobile}) {
   composer.addPass(new EffectPass(camera, new SMAAEffect({preset: mobile ? SMAAPreset.MEDIUM : SMAAPreset.HIGH})));
   const u = name => cinema.uniforms.get(name);
   return {
-    composer, dof, bloom,
+    composer, dof, bloom, speed,
     setSize(w, h) { composer.setSize(w, h); },
+    // amount 0..1 (1 = TRACK_TOP_SPEED); the pass only runs while something moves.
+    setSpeed(amount, radial = amount) { speed.setAmount(amount, radial); speedPass.enabled = speed.amount > 0 || speed.radial > 0; },
     render(dt) {
       if (motion) {
         camera.updateMatrixWorld();

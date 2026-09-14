@@ -80,7 +80,8 @@ export function createChoreo({model, mechanics, mobile = false, scene} = {}) {
 
   function update(dt, time, pose) {
     const amount = mechanics.amount ?? pose?.explode ?? 0;
-    const tunnel = Math.min(1, Math.max(0, pose?.tunnel || 0));
+    // Load comes from the tunnel airflow or from the track speed (pose.speed, 1 = 80 m/s).
+    const tunnel = Math.min(1, Math.max(0, pose?.tunnel || 0, (pose?.speed || 0) * 1.1));
     // Load in the tunnel: static squat plus heave and pitch at two frequencies (a few mm, a fraction of a degree).
     const load = tunnel * scale;
     const heave = load ? load * (-.009 + .0022 * Math.sin(time * 31) + .0014 * Math.sin(time * 47.3 + 1.1) + .003 * Math.sin(time * 2.3)) : 0;
