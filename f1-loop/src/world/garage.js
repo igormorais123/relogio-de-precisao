@@ -412,8 +412,8 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   // --------------------------------------------------------------- desenho
   let lastValues = {}, lastFields = [];
   let lessonBeat = 0;
-  function setLessonProgress(progress) {
-    const beat = progress < 3.70 ? 0 : progress < 3.77 ? 1 : 2;
+  function setLessonProgress(progress, reading = null) {
+    const beat = reading === null ? (progress < 3.70 ? 0 : progress < 3.77 ? 1 : 2) : Math.min(2,Math.floor(reading*3));
     if (beat === lessonBeat) return;
     lessonBeat = beat;
     drawCaseScreen(notebookScreens[1]);

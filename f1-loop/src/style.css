@@ -54,3 +54,17 @@ body.reading #hotspot{display:none}
 
 /* Executar keeps the optional engine action above the mobile navigation. */
 @media(max-width:760px){.enhanced:not(.reading) #executar .chapter-inner{padding-top:46svh}}@media(max-width:760px) and (max-height:740px){.enhanced:not(.reading) #executar .chapter-inner{padding-top:46svh}.enhanced:not(.reading) #executar .copy{display:grid;grid-template-columns:1fr 1fr;column-gap:12px}.enhanced:not(.reading) #executar .copy>*{grid-column:1/-1}.enhanced:not(.reading) #executar h2{font-size:36px}.enhanced:not(.reading) #executar .primary{grid-column:1;grid-row:4;font-size:10px;gap:6px;min-height:46px}.enhanced:not(.reading) #executar .primary span{width:30px;height:30px}.enhanced:not(.reading) #executar #inspect-engine{grid-column:2;grid-row:4;margin-top:0;font-size:12px;padding:10px;align-items:center;justify-content:center;min-height:46px}}
+
+/* A separate chapter-length scene, paced by the reader rather than a timed pass. */
+.monitor-scene{padding:70px 8%;background:#0b1014}.monitor-scene h2{font-size:32px}.monitor-reading-text{max-width:700px;line-height:1.8}.monitor-scene-controls{display:none}
+.enhanced:not(.reading) .monitor-scene{height:600svh;padding:0;background:transparent}
+.enhanced:not(.reading) .monitor-scene-pin{position:sticky;top:0;height:100svh;display:flex;flex-direction:column;justify-content:space-between;padding:104px 8% 95px;box-sizing:border-box;pointer-events:none}
+.enhanced:not(.reading) .monitor-reading-text{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.enhanced:not(.reading) .monitor-scene-heading{opacity:0}.enhanced:not(.reading).monitor-focused .monitor-scene-heading{opacity:1}
+.monitor-scene-heading p{font-size:10px;letter-spacing:2px;color:#ffd447;margin:0 0 8px}.monitor-scene-heading h2{font-size:clamp(18px,2vw,27px);font-family:Lato,Arial,sans-serif;letter-spacing:0;margin:0;text-transform:none}
+.enhanced:not(.reading).monitor-focused .monitor-scene-controls{display:flex;align-items:center;justify-content:center;gap:24px;pointer-events:auto}.monitor-scene-controls button{min-height:46px;padding:10px 16px;background:#10191f;color:#f0f2f3;border:1px solid #ffffff40;font:inherit;cursor:pointer}.monitor-scene-controls button:focus-visible{outline:2px solid #ffd447;outline-offset:4px}.monitor-scene-controls span{font-size:12px;color:#ffd447}
+.monitor-focused .chapters-nav,.monitor-focused #hotspot{visibility:hidden!important}.monitor-focused .shade{opacity:.12}
+@media(max-width:760px){.enhanced:not(.reading) .monitor-scene-pin{padding:100px 18px 95px}.monitor-scene-controls{gap:8px!important;flex-wrap:wrap}.monitor-scene-controls span{order:-1;width:100%;text-align:center}.monitor-scene-controls button{font-size:12px}}
+@media print{.monitor-scene{height:auto!important;padding:20px!important}.monitor-scene-pin{position:static!important;height:auto!important}.monitor-reading-text{position:static!important;width:auto!important;height:auto!important;clip-path:none!important}.monitor-scene-controls{display:none!important}}
+
+.enhanced:not(.reading) .monitor-scene-heading h2{font-size:clamp(18px,2vw,27px);line-height:1.25}
