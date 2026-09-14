@@ -409,3 +409,5 @@ Commit a77c7f6 incorpora b53cea7 e as revisões de aprendizagem 1d54255. Nova se
 
 Publicação enviada: gh-pages a81546f, source a77c7f6. Runtime integrado em 390x667: sete capítulos/links, controles dentro da tela, retorno fecha o carro, modo leitura acessível, zero pageerror. Aguardo propagação do Pages para validar ao vivo.
 
+Validação pública concluída: release.json confirma a77c7f6; Pages run 34861692258 success. Navegador público 390x667: 7 capítulos, 7 links, retorno fecha carro, modo leitura presente, zero pageerror. A checagem Verificar aula 34861673304 NÃO executou: GitHub informou bloqueio de cobrança da conta; não é falha de teste. Os 55 testes foram executados e passaram no build exato publicado. Evidência visual externa: engine-live-short.png.
+
