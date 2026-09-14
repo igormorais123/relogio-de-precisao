@@ -35,3 +35,13 @@ test('tab suspension and resize discard stale pressure samples', () => {
   meter.reset();
   assert.deepEqual(run(meter, 39000, 42000, 100), []);
 });
+test('intentional 30 fps idle rendering does not sacrifice resolution', () => {
+  const meter = createFrameQuality();
+  const results = [];
+  for (let t = 0; t < 16000; t += 1000 / 30) {
+    const sample = meter.observe(t, true, 1000 / 30);
+    if (sample) results.push(sample);
+  }
+  assert.ok(results.length >= 5);
+  assert.ok(results.every(x => !x.reduce));
+});

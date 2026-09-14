@@ -277,9 +277,9 @@ export async function createScene(stage, {onProgress, onError, signal}) {
 
   // Adapt only after warmup and sustained slow real frames, never simulation dt.
   const adaptive = params.get('quality') !== 'high';
-  function adapt(now) {
+  function adapt(now, budgetMs) {
     if (!adaptive) return;
-    const sample = frameQuality.observe(now, !document.hidden);
+    const sample = frameQuality.observe(now, !document.hidden, budgetMs);
     if (!sample) return;
     stage.dataset.frameMeanMs = sample.meanMs.toFixed(1);
     if (sample.reduce && pixelRatio > .9) {
@@ -315,7 +315,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       return {x: (p.x + 1) / 2 * width, y: (1 - p.y) / 2 * height, ok: p.z > -1 && p.z < 1 && Math.abs(p.x) < .92 && Math.abs(p.y) < .86};
     },
     resize,
-    render(dt, time) {
+    render(dt, time, budgetMs = 1000 / 60) {
       if (!pose) return;
       apply(dt, time);
       if (lastCamera.distanceTo(camera.position) > 1.2) post.resetMotion();
@@ -324,7 +324,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       post.render(dt);
       stage.dataset.calls = String(renderer.info.render.calls);
       if (!stage.dataset.loaded) { stage.dataset.loaded = 'true'; stage.classList.add('loaded'); }
-      adapt(time * 1000);
+      adapt(time * 1000, budgetMs);
     },
     dispose() { post.dispose(); dust.dispose(); floor.dispose(); carLook.dispose(); surfaceLibrary.dispose(); carMaterials.dispose(); garage?.dispose(); tunnel?.dispose(); envGarage.dispose(); envTunnel.dispose(); renderer.dispose(); },
   };

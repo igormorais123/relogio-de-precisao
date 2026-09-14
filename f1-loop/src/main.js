@@ -54,13 +54,14 @@ function frame(now){
  frameId=null;
  targetP=progress();
  // At rest (camera settled, no pointer for 1.5 s) the ambient motion runs at ~30 fps to spare the GPU.
- if(scene&&!state.reading&&shownP===targetP&&!snap&&now-lastInput>1500&&now-lastTime<32){schedule();return;}
+ const idle=scene&&!state.reading&&shownP===targetP&&!snap&&now-lastInput>1500;
+ if(idle&&now-lastTime<32){schedule();return;}
  const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));lastTime=now;
  // The camera trails the scroll with a damped follow: inertia without hijacking the page.
  if(snap||reduced.matches){shownP=targetP;snap=false;}else{shownP+=(targetP-shownP)*(1-Math.exp(-dt*5));if(Math.abs(targetP-shownP)<1e-4)shownP=targetP;}
  paint();
  if(state.reading||!scene)return;
- pose=sampleStory(shownP);scene.setPose(pose);scene.render(dt,now/1000);placeHotspot();
+ pose=sampleStory(shownP);scene.setPose(pose);scene.render(dt,now/1000,idle?1000/30:1000/60);placeHotspot();
  schedule();
 }
 function setReading(on){state.reading=on;document.body.classList.toggle('reading',on);$('#reading').setAttribute('aria-pressed',String(on));$('#reading').textContent=on?'Modo cinema':'Modo leitura';$$('.lesson').forEach(d=>d.open=on);$$('.chapter').forEach(s=>{s.style.removeProperty('--in');s.style.removeProperty('--out');s.classList.remove('copy-off','dissolving');});measure();if(on){$('#load-state').textContent='Leitura · movimento pausado';$('#hotspot').classList.add('off');paint();}else{if(scene)$('#load-state').textContent='97 peças · modelo didático';else loadScene();snap=true;schedule();}}
