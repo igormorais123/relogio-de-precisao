@@ -153,12 +153,12 @@ const CAR_BOXES = [
 ];
 const glf = v => v.toFixed(3);
 const CAR_OCCLUDER = /* glsl */`
-float carAhead(vec3 w){
+float carAhead(vec3 w, float pad){
   vec3 d=w-cameraPosition;
   d+=vec3(equal(d,vec3(0.)))*1e-5;
   vec3 inv=1./d;
   float hit=0.;
-${CAR_BOXES.map(([x0, y0, z0, x1, y1, z1]) => `  {vec3 a=(vec3(${glf(x0)},${glf(y0)},${glf(z0)})-cameraPosition)*inv, b=(vec3(${glf(x1)},${glf(y1)},${glf(z1)})-cameraPosition)*inv;
+${CAR_BOXES.map(([x0, y0, z0, x1, y1, z1]) => `  {vec3 a=(vec3(${glf(x0)},${glf(y0)},${glf(z0)})-pad-cameraPosition)*inv, b=(vec3(${glf(x1)},${glf(y1)},${glf(z1)})+pad-cameraPosition)*inv;
    vec3 n=min(a,b), x=max(a,b);
    hit=max(hit, step(max(max(max(n.x,n.y),n.z),1.), min(min(x.x,x.y),x.z)));}`).join('\n')}
   return hit;
@@ -544,8 +544,9 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
         float puff=.5+.5*sin(t*53.+lane*2.3+sin(t*17.+lane)*1.7);
         float pulse=.35+.65*puff;
         vAlpha=uFlow*uGain*fade*pulse*mix(1.,.22,wake)*clamp(10./thick,.2,1.)*smoothstep(1.2,1.9,-mv.z);
-        // In front of the body the smoke keeps 12%: the paint never reads translucent.
-        vAlpha*=mix(1.,.12,carAhead(W));
+        // In front of the body the smoke keeps 8%: the paint never reads translucent. The boxes grow by
+        // the puff radius, since a particle centred just off the silhouette still spreads over it.
+        vAlpha*=mix(1.,.08,carAhead(W,.06+.2*wake));
         // Seen from the flank each lane lines up into one long, solid band that the depth of
         // field widens into a white arc over the car; the side view keeps a quarter of it.
         float flank=smoothstep(.72,.97,abs(normalize(cameraPosition-W).x));
@@ -667,7 +668,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
         gl_Position=c;
         vU=tail?aU.y:aU.x; vAcross=position.y; vThin=clamp(worldPx/uMinPx,0.,1.);
         vNear=smoothstep(1.2,1.9,-m.z);
-        vOcc=carAhead(tail?aEnd:aStart);
+        vOcc=carAhead(tail?aEnd:aStart,0.);
       #ifdef USE_FOG
         vFogDepth=-m.z;
       #endif
