@@ -43,11 +43,11 @@ Pedido do Igor (14/09/2026): todas as IAs melhoram o MESMO sistema, somando esfo
 | Túnel (`tunnel.js`) | Concluída |
 | Acabamento do carro (`car-look.js`) | Concluída: rodas com raios, discos e pinças, pneus com faixa, pintura com verniz |
 | Pedagogia (`content.js`) | Concluída: títulos, exemplos do caso fictício e feedbacks. Desalinhamentos com a prática passados ao Codex |
-| Câmera e coreografia (`story.js`, `choreo.js`) | Em andamento: foco pela pose (`focusRange`, `bokehScale`), velocidade 2,8–3,2, carro maior em p≈4,2 e no celular |
+| Câmera e coreografia (`story.js`, `choreo.js`) | Concluída (c02611e): viagens contínuas (pico 1,67× a mediana), closes em 0,72/1,64/2,70, foco pela pose, carro entre 42% e 92% nas leituras, rotação por peça com retorno exato, constelação no desktop. Fraco: Avaliar e carro sob os pontos de capítulo em 0,84–0,90, 2,90–2,95 e 3,90 |
 | Motor e interface (integração) | Cena preta corrigida (NaN do aço espalhado por bloom/DOF; `SanitizeEffect`), sem congelamento no túnel (pré-compilação), impressão, leitura sem 3D, perda de contexto, exemplo no diálogo |
 | Codex | Aço sem anisotropia, orçamento de quadro, janelas de foco provisórias em `scene.js` (saem quando `story.js` emitir os campos) |
 
-Próximo passo da rodada: quando a câmera terminar, captura completa (desktop e celular), montagem cega e os três juízes.
+Próximo passo da rodada (01:30): captura completa feita em `shots/r2` (sem pageerror), pares cegos em `shots/r2/cego`; juízes de cinema, técnico e aprendizagem avaliando. Depois: corrigir BLOQUEADORES e GRAVES e repetir até 3 rodadas.
 
 Integração do Codex em `main.js`, `render-page.mjs` ou `style.css`: anunciar em `COORDENACAO-CODEX.md` com o trecho exato; a integração Claude aplica ou responde lá. A atividade contínua fica em `src/learning/`; `src/content.js` fica com os textos dos capítulos.
 
