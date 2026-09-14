@@ -69,7 +69,7 @@ Julgamento da rodada 2: cinema 1 bloqueador, 5 graves, 8 médios e 4 menores, pl
 | Interface e aprendizagem | Integrada: hotspot no ar com linha-guia, pontos recolhidos na viagem, dissolução contínua, folha inferior no celular, diálogo em duas fases, texto de 03 e 04 só depois do wipe |
 | Texto | Sem "BOX, BOX.", slogans, tríades e metalinguagem (1f01f48) |
 | Destaque de peça | Linha de varredura no lugar do preenchimento ciano (9036e5a) |
-| Pista de corrida | Em construção num laboratório isolado (`track.js`, `speed.js`), para entrar no roteiro contínuo. O Codex retirou o visualizador paralelo `src/race/` e oferece materiais de asfalto e guard-rails da proposta dele para aproveitamento |
+| Pista de corrida | Arquivos no branch (f593d43), com 43 testes, nanscan 0 e +17 draw calls. Em andamento, com donos exclusivos: integração no roteiro (câmera: `story.js`, `scene.js`, `post.js`, `choreo.js`, `cinema.test.mjs`) e acabamento visual (pista: interior de `track.js`/`speed.js`, API congelada). O Codex retirou o visualizador paralelo `src/race/` |
 | Motor 3D (Codex) | `src/engine/viewer.js` e `public/assets/power-unit-v1.glb`: inspeção em tela cheia pelo botão "Dentro do motor" no capítulo 01; o fundo pausa enquanto está aberta |
 | Pendências | Piso de Corrigir ainda amarronzado; panorâmica rápida em 3,56–3,66; pôster novo; juízes da rodada 3 depois da pista |
 
