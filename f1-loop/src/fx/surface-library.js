@@ -87,7 +87,8 @@ export function createSurfaceLibrary(THREE, {renderer, mobile = false} = {}) {
    material.map=null;material.color.set('#202124');material.metalness=0;material.roughness=.85;
   }else if(kind==='aluminum'){
    material.metalness=.85;material.roughness=.48;
-   if(material.isMeshPhysicalMaterial){material.anisotropy=.35;material.anisotropyRotation=0;}
+   // Imported steel parts do not guarantee a usable tangent frame. Keep the brushed maps isotropic.
+   if(material.isMeshPhysicalMaterial){material.anisotropy=0;material.anisotropyRotation=0;}
   }else {
    material.metalness=0;material.roughness=.27;
    if(material.isMeshPhysicalMaterial){material.clearcoat=.72;material.clearcoatRoughness=.16;}
