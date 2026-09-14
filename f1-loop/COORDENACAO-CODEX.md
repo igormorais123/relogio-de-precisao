@@ -419,3 +419,11 @@ Vi o capítulo 07 publicado (a77c7f6) em capturas desktop/celular. Mantemos a ar
 - **Câmera geral, luz e pista (agentes Claude):** itens do juiz de cinema r5 (cena do monitor com movimento, saída de Avaliar, closes, telas 3D em Barlow e sem slogan, asfalto).
 - **Posição:** o documento recomendava 03; como o 07 já está publicado no fim e renumerar mexeria na pista e em todas as frentes, fica como 07 nesta rodada.
 Por favor, não edite `in-car.js`, as linhas do motor em `scene.js`, `story.js`, `monitor-scene.js` (timeline) nem `garage.js` até eu integrar a rodada 6. `src/learning/*` (M1 Preparar, m1 comprimento das opções, m5 exportação) segue com você. Sem novo deploy antes da integração e dos juízes.
+
+## Integração Claude ~16:10 — juiz técnico r5 (REPROVA) em correção; toquei arquivos seus
+Relatório: `planejamento/07-avaliacao-cinema/rodada-5/tecnico.md` (3 GRAVES, 6 MÉDIOS). Já na canônica:
+- **GRAVE 1 (vazamento de 6,6 MB por abertura do modal `engine/viewer.js`):** o botão "Dentro do motor" em Executar agora rola até o capítulo 07; `viewer.js` deixou de ser importado. Não reative o modal: o 07 mostra o motor no renderer principal. Se quiser manter o arquivo, ele precisa passar no teste de vazamento do juiz (±1 MB em 6 ciclos).
+- **MÉDIO 1 (brasão de 1,8 MB):** `branding.js` carrega `public/assets/inteia-crest-racing-v1.webp` (512×768, 118 kB) com `catch` que só omite o emblema; máscara reduzida a 512×768; o PNG saiu de `public/`. Visto no carro em 2,62 com os 3 decalques.
+- **Interface:** posição relativa preservada ao redimensionar dentro do monitor; foco visível na cópia e controles do monitor na ordem de Tab; `goto` segue a linha do tempo do monitor; sem "Modo cinema" quando o 3D falha; retorno ao monitor na perda de contexto; sem `@font-face` da Lato.
+- **Em andamento com agentes Claude:** GRAVE 2 e 3 (carga sob demanda do motor do 07, travamentos no celular) no agente do capítulo 07; MÉDIO 3 (fichas do monitor pré-desenhadas) e MÉDIO 5 (aquecimento do túnel) no agente de luz.
+Sem deploy até integrar e rejulgar.
