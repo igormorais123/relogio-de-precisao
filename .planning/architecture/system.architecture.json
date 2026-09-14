@@ -2,242 +2,251 @@
   "schema_version": 1,
   "diagram_type": "architecture",
   "meta": {
-    "title": "Relógio de Precisão",
-    "subtitle": "Arquitetura local • inicialização, rolagem e cena WebGL",
-    "quality_profile": "showcase",
+    "title": "Relógio de Precisão + F1 Loop",
+    "subtitle": "Snapshot local · aula pausa na inspeção do motor e retoma ao fechar",
+    "quality_profile": "standard",
     "animation": "none",
     "viewBox": [
       1280,
-      700
+      1130
     ]
   },
   "components": [
     {
-      "id": "html",
+      "id": "root-page",
       "type": "frontend",
-      "label": "Página e estilos",
-      "sublabel": "index.html • styles.css",
+      "label": "Página Relógio",
+      "sublabel": "src/main.js",
       "pos": [
-        50,
-        270
+        60,
+        150
       ],
       "size": [
-        170,
-        70
+        230,
+        76
       ]
     },
     {
-      "id": "boot",
+      "id": "root-scroll",
       "type": "frontend",
-      "label": "Inicialização",
-      "sublabel": "main.js • fallback WebGL",
+      "label": "Rolagem e direção",
+      "sublabel": "Lenis · Director",
       "pos": [
-        290,
-        270
+        360,
+        150
       ],
       "size": [
-        170,
-        70
+        230,
+        76
       ]
     },
     {
-      "id": "scroll",
+      "id": "root-webgl",
       "type": "frontend",
-      "label": "Rolagem",
-      "sublabel": "Lenis + ScrollTrigger",
+      "label": "Relógio WebGL",
+      "sublabel": "App · Watch · Post",
       "pos": [
-        530,
-        270
+        660,
+        150
       ],
       "size": [
-        170,
-        70
+        230,
+        76
       ]
     },
     {
-      "id": "director",
+      "id": "root-lesson",
       "type": "frontend",
-      "label": "Direção da cena",
-      "sublabel": "Director.js • cameraPath.js",
+      "label": "Conteúdo e interface",
+      "sublabel": "narrativa · paginas · ui",
       "pos": [
-        770,
-        270
+        960,
+        150
       ],
       "size": [
-        170,
-        70
+        230,
+        76
       ]
     },
     {
-      "id": "watch",
+      "id": "f1-main",
       "type": "frontend",
-      "label": "Relógio procedural",
-      "sublabel": "Watch.js • gear.js",
+      "label": "Aula F1 Loop",
+      "sublabel": "f1-loop/src/main.js",
       "pos": [
-        1010,
-        270
+        60,
+        450
       ],
       "size": [
-        180,
-        70
+        230,
+        76
       ]
     },
     {
-      "id": "data",
+      "id": "f1-story",
       "type": "frontend",
-      "label": "Conteúdo da aula",
-      "sublabel": "narrativa.js • paginas.js",
+      "label": "Progresso e câmera",
+      "sublabel": "story.js · progressão absoluta",
       "pos": [
-        530,
-        70
+        360,
+        450
       ],
       "size": [
-        170,
-        70
+        230,
+        76
       ]
     },
     {
-      "id": "app",
+      "id": "f1-scene",
       "type": "frontend",
-      "label": "Renderização",
-      "sublabel": "App • Post • Studio",
+      "label": "Cena cinematográfica",
+      "sublabel": "scene.js · fx/ · superfícies",
       "pos": [
-        290,
-        470
+        660,
+        450
       ],
       "size": [
-        170,
-        70
+        230,
+        76
       ]
     },
     {
-      "id": "ui",
+      "id": "f1-world",
       "type": "frontend",
-      "label": "Interface DOM",
-      "sublabel": "ui.js • Registro.js",
+      "label": "Mundo e 97 peças",
+      "sublabel": "world/ · mechanics.js",
       "pos": [
-        530,
-        470
+        960,
+        450
       ],
       "size": [
-        170,
-        70
+        230,
+        76
       ]
     },
     {
-      "id": "fx",
+      "id": "f1-notes",
       "type": "frontend",
-      "label": "Efeitos didáticos",
-      "sublabel": "fx/index.js • módulos FX",
+      "label": "Caderno local",
+      "sublabel": "localStorage · exportação JSON",
       "pos": [
-        770,
-        470
+        360,
+        680
       ],
       "size": [
-        170,
-        70
+        230,
+        76
       ]
     },
     {
-      "id": "title",
+      "id": "f1-learning",
       "type": "frontend",
-      "label": "Texto e fundo",
-      "sublabel": "Title • Background",
+      "label": "Conteúdo e atividades",
+      "sublabel": "content.js · learning/",
       "pos": [
-        770,
-        70
+        60,
+        680
       ],
       "size": [
-        170,
-        70
+        230,
+        76
       ]
+    },
+    {
+      "id": "engine-inspect",
+      "type": "frontend",
+      "label": "Inspeção do motor",
+      "sublabel": "engine/viewer.js + CSS · lazy",
+      "pos": [
+        960,
+        680
+      ],
+      "size": [
+        230,
+        76
+      ]
+    },
+    {
+      "id": "engine-asset",
+      "type": "external",
+      "label": "Asset do motor",
+      "sublabel": "Blender → meshopt → GLB",
+      "pos": [
+        960,
+        920
+      ],
+      "size": [
+        230,
+        76
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "from": "root-page",
+      "to": "root-scroll"
+    },
+    {
+      "from": "root-scroll",
+      "to": "root-webgl"
+    },
+    {
+      "from": "root-webgl",
+      "to": "root-lesson"
+    },
+    {
+      "from": "f1-main",
+      "to": "f1-story"
+    },
+    {
+      "from": "f1-story",
+      "to": "f1-scene"
+    },
+    {
+      "from": "f1-scene",
+      "to": "f1-world"
+    },
+    {
+      "from": "f1-main",
+      "to": "f1-learning"
+    },
+    {
+      "from": "f1-main",
+      "to": "f1-notes"
+    },
+    {
+      "from": "f1-main",
+      "to": "engine-inspect",
+      "fromSide": "bottom",
+      "toSide": "top"
+    },
+    {
+      "from": "engine-asset",
+      "to": "engine-inspect"
     }
   ],
   "boundaries": [
     {
       "kind": "region",
-      "label": "Navegador • aplicação estática",
+      "label": "Relógio · rota /",
       "wraps": [
-        "html",
-        "boot",
-        "scroll",
-        "director",
-        "watch",
-        "data",
-        "app",
-        "ui",
-        "fx",
-        "title"
-      ],
-      "pad": 28
-    }
-  ],
-  "connections": [
-    {
-      "from": "html",
-      "to": "boot",
-      "variant": "emphasis"
-    },
-    {
-      "from": "boot",
-      "to": "scroll",
-      "variant": "emphasis"
-    },
-    {
-      "from": "scroll",
-      "to": "director",
-      "variant": "emphasis"
-    },
-    {
-      "from": "director",
-      "to": "watch",
-      "variant": "emphasis"
-    },
-    {
-      "from": "data",
-      "to": "scroll"
-    },
-    {
-      "from": "boot",
-      "to": "app"
-    },
-    {
-      "from": "scroll",
-      "to": "ui"
-    },
-    {
-      "from": "director",
-      "to": "fx"
-    },
-    {
-      "from": "director",
-      "to": "title"
-    }
-  ],
-  "cards": [
-    {
-      "dot": "cyan",
-      "title": "Caminho principal",
-      "items": [
-        "main.js inicializa módulos e conecta a atualização do Director ao loop do App.",
-        "Scroll transforma a rolagem em capítulo e progresso; Director escreve estados do relógio."
+        "root-page",
+        "root-scroll",
+        "root-webgl",
+        "root-lesson"
       ]
     },
     {
-      "dot": "amber",
-      "title": "Dependências e fronteira",
-      "items": [
-        "Vite empacota; Three.js, GSAP, Lenis, postprocessing e Troika executam no navegador.",
-        "Não foi identificado backend de aplicação. Recursos estáticos e fontes são locais.",
-        "Registro.js persiste o ciclo no localStorage e permite exportação JSON; não envia dados."
-      ]
-    },
-    {
-      "dot": "slate",
-      "title": "Proveniência",
-      "items": [
-        "Componentes extraídos dos arquivos vivos; diagrama agrupa módulos secundários para leitura.",
-        "Grafo estrutural em graphify-out/graph.json; origens locais em local-evidence.json. Snapshot de 11/09/2026."
+      "kind": "region",
+      "label": "F1 Loop · navegador do aluno · sem backend de aprendizagem",
+      "wraps": [
+        "f1-main",
+        "f1-story",
+        "f1-scene",
+        "f1-world",
+        "f1-notes",
+        "f1-learning",
+        "engine-inspect"
       ]
     }
   ]

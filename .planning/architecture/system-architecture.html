@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="generator" content="archify 2.13.0">
-  <title>Relógio de Precisão Diagram</title>
+  <title>Relógio de Precisão + F1 Loop Diagram</title>
   <script>
     // Resolve the theme before first paint so light-preference users don't
     // see a dark flash. The toolbar script below re-applies with UI state.
@@ -4496,9 +4496,9 @@
     <div class="header">
       <div class="header-row">
         <div class="pulse-dot"></div>
-        <h1>Relógio de Precisão</h1>
+        <h1>Relógio de Precisão + F1 Loop</h1>
       </div>
-      <p class="subtitle">Arquitetura local • inicialização, rolagem e cena WebGL</p>
+      <p class="subtitle">Snapshot local · aula pausa na inspeção do motor e retoma ao fechar</p>
     </div>
 
     <script id="archify-guided-views-data" type="application/json">[]</script>
@@ -4544,9 +4544,9 @@
 
     <!-- Main Diagram -->
     <div class="diagram-container" data-detail-level="read">
-      <svg viewBox="0 0 1280 700" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="showcase">
-        <title id="archify-diagram-title">Relógio de Precisão</title>
-        <desc id="archify-diagram-description">Arquitetura local • inicialização, rolagem e cena WebGL</desc>
+      <svg viewBox="0 0 1280 1130" role="img" aria-labelledby="archify-diagram-title archify-diagram-description" data-preset="classic" data-quality-profile="standard">
+        <title id="archify-diagram-title">Relógio de Precisão + F1 Loop</title>
+        <desc id="archify-diagram-description">Snapshot local · aula pausa na inspeção do motor e retoma ao fechar</desc>
         <!-- Definitions -->
         <defs>
           <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
@@ -4570,159 +4570,189 @@
         <rect width="100%" height="100%" fill="url(#grid)" />
 
         <!-- Boundaries (behind everything) -->
-        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" x="22" y="42" width="1196" height="518" rx="12" class="c-region" stroke-width="1"/>
-        <text x="30" y="60" class="t-cloud" font-size="9" font-weight="600">Navegador • aplicação estática</text>
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="0" x="30" y="120" width="1190" height="126" rx="12" class="c-region" stroke-width="1"/>
+        <text x="38" y="138" class="t-cloud" font-size="9" font-weight="600">Relógio · rota /</text>
+
+        <rect data-graph-role="structural-frame" data-composition-frame-kind="region" data-composition-frame-id="1" x="30" y="420" width="1190" height="356" rx="12" class="c-region" stroke-width="1"/>
+        <text x="38" y="438" class="t-cloud" font-size="9" font-weight="600">F1 Loop · navegador do aluno · sem backend de aprendizagem</text>
 
         <!-- Connection paths (before components for correct z-order) -->
-        <path data-edge-from="html" data-edge-to="boot" data-edge-key="0" data-composition-points="220,305;290,305" d="M 220 305 L 290 305" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="boot" data-edge-to="scroll" data-edge-key="1" data-composition-points="460,305;530,305" d="M 460 305 L 530 305" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="scroll" data-edge-to="director" data-edge-key="2" data-composition-points="700,305;770,305" d="M 700 305 L 770 305" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="director" data-edge-to="watch" data-edge-key="3" data-composition-points="940,305;1010,305" d="M 940 305 L 1010 305" class="a-emphasis" stroke-width="1.8" marker-end="url(#arrowhead-emphasis)"/>
-        <path data-edge-from="data" data-edge-to="scroll" data-edge-key="4" data-composition-points="615,140;615,270" d="M 615 140 L 615 270" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="boot" data-edge-to="app" data-edge-key="5" data-composition-points="375,340;375,470" d="M 375 340 L 375 470" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="scroll" data-edge-to="ui" data-edge-key="6" data-composition-points="615,340;615,470" d="M 615 340 L 615 470" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="director" data-edge-to="fx" data-edge-key="7" data-composition-points="855,340;855,470" d="M 855 340 L 855 470" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
-        <path data-edge-from="director" data-edge-to="title" data-edge-key="8" data-composition-points="855,270;855,140" d="M 855 270 L 855 140" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="root-page" data-edge-to="root-scroll" data-edge-key="0" data-composition-points="290,188;360,188" d="M 290 188 L 360 188" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="root-scroll" data-edge-to="root-webgl" data-edge-key="1" data-composition-points="590,188;660,188" d="M 590 188 L 660 188" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="root-webgl" data-edge-to="root-lesson" data-edge-key="2" data-composition-points="890,188;960,188" d="M 890 188 L 960 188" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="f1-main" data-edge-to="f1-story" data-edge-key="3" data-composition-points="290,481;314,481;314,504;336,504;336,488;360,488" d="M 290 481 L 306 481 Q 314 481 314 489 L 314 496 Q 314 504 322 504 L 328 504 Q 336 504 336 496 L 336 496 Q 336 488 344 488 L 360 488" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="f1-story" data-edge-to="f1-scene" data-edge-key="4" data-composition-points="590,488;660,488" d="M 590 488 L 660 488" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="f1-scene" data-edge-to="f1-world" data-edge-key="5" data-composition-points="890,488;960,488" d="M 890 488 L 960 488" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="f1-main" data-edge-to="f1-learning" data-edge-key="6" data-composition-points="168,526;168,550;191,550;191,656;175,656;175,680" d="M 168 526 L 168 542 Q 168 550 176 550 L 183 550 Q 191 550 191 558 L 191 648 Q 191 656 183 656 L 183 656 Q 175 656 175 664 L 175 680" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="f1-main" data-edge-to="f1-notes" data-edge-key="7" data-composition-points="290,495;325,495;325,718;360,718" d="M 290 495 L 317 495 Q 325 495 325 503 L 325 710 Q 325 718 333 718 L 360 718" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="f1-main" data-edge-to="engine-inspect" data-edge-key="8" data-composition-points="182,526;182,603;1075,603;1075,680" d="M 182 526 L 182 595 Q 182 603 190 603 L 1067 603 Q 1075 603 1075 611 L 1075 680" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <path data-edge-from="engine-asset" data-edge-to="engine-inspect" data-edge-key="9" data-composition-points="1075,920;1075,756" d="M 1075 920 L 1075 756" class="a-default" stroke-width="1.5" marker-end="url(#arrowhead)"/>
 
         <!-- Components -->
-        <g id="node-html" data-node-id="html" data-node-label="Página e estilos" tabindex="0" role="button" aria-label="Focus Página e estilos, index.html • styles.css, Navegador • aplicação estática" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="index.html • styles.css" data-node-context="Navegador • aplicação estática">
-          <title>Página e estilos · index.html • styles.css · Navegador • aplicação estática</title>
-          <rect x="50" y="270" width="170" height="70" rx="6" class="c-mask"/>
-          <rect x="50" y="270" width="170" height="70" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(56 276) scale(0.6875)">
+        <g id="node-root-page" data-node-id="root-page" data-node-label="Página Relógio" tabindex="0" role="button" aria-label="Focus Página Relógio, src/main.js, Relógio · rota /" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="src/main.js" data-node-context="Relógio · rota /">
+          <title>Página Relógio · src/main.js · Relógio · rota /</title>
+          <rect x="60" y="150" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="60" y="150" width="230" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(66 156) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="135" y="303" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Página e estilos</text>
-        <text data-detail="context" x="135" y="319" class="t-muted" font-size="9" text-anchor="middle">index.html • styles.css</text>
+          <text data-detail-anchor x="175" y="186" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Página Relógio</text>
+        <text data-detail="context" x="175" y="202" class="t-muted" font-size="9" text-anchor="middle">src/main.js</text>
         </g>
 
-        <g id="node-boot" data-node-id="boot" data-node-label="Inicialização" tabindex="0" role="button" aria-label="Focus Inicialização, main.js • fallback WebGL, Navegador • aplicação estática" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="main.js • fallback WebGL" data-node-context="Navegador • aplicação estática">
-          <title>Inicialização · main.js • fallback WebGL · Navegador • aplicação estática</title>
-          <rect x="290" y="270" width="170" height="70" rx="6" class="c-mask"/>
-          <rect x="290" y="270" width="170" height="70" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(296 276) scale(0.6875)">
+        <g id="node-root-scroll" data-node-id="root-scroll" data-node-label="Rolagem e direção" tabindex="0" role="button" aria-label="Focus Rolagem e direção, Lenis · Director, Relógio · rota /" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Lenis · Director" data-node-context="Relógio · rota /">
+          <title>Rolagem e direção · Lenis · Director · Relógio · rota /</title>
+          <rect x="360" y="150" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="360" y="150" width="230" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(366 156) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="375" y="303" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Inicialização</text>
-        <text data-detail="context" x="375" y="319" class="t-muted" font-size="9" text-anchor="middle">main.js • fallback WebGL</text>
+          <text data-detail-anchor x="475" y="186" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Rolagem e direção</text>
+        <text data-detail="context" x="475" y="202" class="t-muted" font-size="9" text-anchor="middle">Lenis · Director</text>
         </g>
 
-        <g id="node-scroll" data-node-id="scroll" data-node-label="Rolagem" tabindex="0" role="button" aria-label="Focus Rolagem, Lenis + ScrollTrigger, Navegador • aplicação estática" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Lenis + ScrollTrigger" data-node-context="Navegador • aplicação estática">
-          <title>Rolagem · Lenis + ScrollTrigger · Navegador • aplicação estática</title>
-          <rect x="530" y="270" width="170" height="70" rx="6" class="c-mask"/>
-          <rect x="530" y="270" width="170" height="70" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(536 276) scale(0.6875)">
+        <g id="node-root-webgl" data-node-id="root-webgl" data-node-label="Relógio WebGL" tabindex="0" role="button" aria-label="Focus Relógio WebGL, App · Watch · Post, Relógio · rota /" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="App · Watch · Post" data-node-context="Relógio · rota /">
+          <title>Relógio WebGL · App · Watch · Post · Relógio · rota /</title>
+          <rect x="660" y="150" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="660" y="150" width="230" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(666 156) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="615" y="303" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Rolagem</text>
-        <text data-detail="context" x="615" y="319" class="t-muted" font-size="9" text-anchor="middle">Lenis + ScrollTrigger</text>
+          <text data-detail-anchor x="775" y="186" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Relógio WebGL</text>
+        <text data-detail="context" x="775" y="202" class="t-muted" font-size="9" text-anchor="middle">App · Watch · Post</text>
         </g>
 
-        <g id="node-director" data-node-id="director" data-node-label="Direção da cena" tabindex="0" role="button" aria-label="Focus Direção da cena, Director.js • cameraPath.js, Navegador • aplicação estática" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Director.js • cameraPath.js" data-node-context="Navegador • aplicação estática">
-          <title>Direção da cena · Director.js • cameraPath.js · Navegador • aplicação estática</title>
-          <rect x="770" y="270" width="170" height="70" rx="6" class="c-mask"/>
-          <rect x="770" y="270" width="170" height="70" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(776 276) scale(0.6875)">
+        <g id="node-root-lesson" data-node-id="root-lesson" data-node-label="Conteúdo e interface" tabindex="0" role="button" aria-label="Focus Conteúdo e interface, narrativa · paginas · ui, Relógio · rota /" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="narrativa · paginas · ui" data-node-context="Relógio · rota /">
+          <title>Conteúdo e interface · narrativa · paginas · ui · Relógio · rota /</title>
+          <rect x="960" y="150" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="960" y="150" width="230" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(966 156) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="855" y="303" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Direção da cena</text>
-        <text data-detail="context" x="855" y="319" class="t-muted" font-size="9" text-anchor="middle">Director.js • cameraPath.js</text>
+          <text data-detail-anchor x="1075" y="186" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Conteúdo e interface</text>
+        <text data-detail="context" x="1075" y="202" class="t-muted" font-size="9" text-anchor="middle">narrativa · paginas · ui</text>
         </g>
 
-        <g id="node-watch" data-node-id="watch" data-node-label="Relógio procedural" tabindex="0" role="button" aria-label="Focus Relógio procedural, Watch.js • gear.js, Navegador • aplicação estática" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Watch.js • gear.js" data-node-context="Navegador • aplicação estática">
-          <title>Relógio procedural · Watch.js • gear.js · Navegador • aplicação estática</title>
-          <rect x="1010" y="270" width="180" height="70" rx="6" class="c-mask"/>
-          <rect x="1010" y="270" width="180" height="70" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(1016 276) scale(0.6875)">
+        <g id="node-f1-main" data-node-id="f1-main" data-node-label="Aula F1 Loop" tabindex="0" role="button" aria-label="Focus Aula F1 Loop, f1-loop/src/main.js, F1 Loop · navegador do aluno · sem backend de aprendizagem" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="f1-loop/src/main.js" data-node-context="F1 Loop · navegador do aluno · sem backend de aprendizagem">
+          <title>Aula F1 Loop · f1-loop/src/main.js · F1 Loop · navegador do aluno · sem backend de aprendizagem</title>
+          <rect x="60" y="450" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="60" y="450" width="230" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(66 456) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="1100" y="303" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Relógio procedural</text>
-        <text data-detail="context" x="1100" y="319" class="t-muted" font-size="9" text-anchor="middle">Watch.js • gear.js</text>
+          <text data-detail-anchor x="175" y="486" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Aula F1 Loop</text>
+        <text data-detail="context" x="175" y="502" class="t-muted" font-size="9" text-anchor="middle">f1-loop/src/main.js</text>
         </g>
 
-        <g id="node-data" data-node-id="data" data-node-label="Conteúdo da aula" tabindex="0" role="button" aria-label="Focus Conteúdo da aula, narrativa.js • paginas.js, Navegador • aplicação estática" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="narrativa.js • paginas.js" data-node-context="Navegador • aplicação estática">
-          <title>Conteúdo da aula · narrativa.js • paginas.js · Navegador • aplicação estática</title>
-          <rect x="530" y="70" width="170" height="70" rx="6" class="c-mask"/>
-          <rect x="530" y="70" width="170" height="70" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(536 76) scale(0.6875)">
+        <g id="node-f1-story" data-node-id="f1-story" data-node-label="Progresso e câmera" tabindex="0" role="button" aria-label="Focus Progresso e câmera, story.js · progressão absoluta, F1 Loop · navegador do aluno · sem backend de aprendizagem" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="story.js · progressão absoluta" data-node-context="F1 Loop · navegador do aluno · sem backend de aprendizagem">
+          <title>Progresso e câmera · story.js · progressão absoluta · F1 Loop · navegador do aluno · sem backend de aprendizagem</title>
+          <rect x="360" y="450" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="360" y="450" width="230" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(366 456) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="615" y="103" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Conteúdo da aula</text>
-        <text data-detail="context" x="615" y="119" class="t-muted" font-size="9" text-anchor="middle">narrativa.js • paginas.js</text>
+          <text data-detail-anchor x="475" y="486" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Progresso e câmera</text>
+        <text data-detail="context" x="475" y="502" class="t-muted" font-size="9" text-anchor="middle">story.js · progressão absoluta</text>
         </g>
 
-        <g id="node-app" data-node-id="app" data-node-label="Renderização" tabindex="0" role="button" aria-label="Focus Renderização, App • Post • Studio, Navegador • aplicação estática" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="App • Post • Studio" data-node-context="Navegador • aplicação estática">
-          <title>Renderização · App • Post • Studio · Navegador • aplicação estática</title>
-          <rect x="290" y="470" width="170" height="70" rx="6" class="c-mask"/>
-          <rect x="290" y="470" width="170" height="70" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(296 476) scale(0.6875)">
+        <g id="node-f1-scene" data-node-id="f1-scene" data-node-label="Cena cinematográfica" tabindex="0" role="button" aria-label="Focus Cena cinematográfica, scene.js · fx/ · superfícies, F1 Loop · navegador do aluno · sem backend de aprendizagem" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="scene.js · fx/ · superfícies" data-node-context="F1 Loop · navegador do aluno · sem backend de aprendizagem">
+          <title>Cena cinematográfica · scene.js · fx/ · superfícies · F1 Loop · navegador do aluno · sem backend de aprendizagem</title>
+          <rect x="660" y="450" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="660" y="450" width="230" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(666 456) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="375" y="503" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Renderização</text>
-        <text data-detail="context" x="375" y="519" class="t-muted" font-size="9" text-anchor="middle">App • Post • Studio</text>
+          <text data-detail-anchor x="775" y="486" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Cena cinematográfica</text>
+        <text data-detail="context" x="775" y="502" class="t-muted" font-size="9" text-anchor="middle">scene.js · fx/ · superfícies</text>
         </g>
 
-        <g id="node-ui" data-node-id="ui" data-node-label="Interface DOM" tabindex="0" role="button" aria-label="Focus Interface DOM, ui.js • Registro.js, Navegador • aplicação estática" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="ui.js • Registro.js" data-node-context="Navegador • aplicação estática">
-          <title>Interface DOM · ui.js • Registro.js · Navegador • aplicação estática</title>
-          <rect x="530" y="470" width="170" height="70" rx="6" class="c-mask"/>
-          <rect x="530" y="470" width="170" height="70" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(536 476) scale(0.6875)">
+        <g id="node-f1-world" data-node-id="f1-world" data-node-label="Mundo e 97 peças" tabindex="0" role="button" aria-label="Focus Mundo e 97 peças, world/ · mechanics.js, F1 Loop · navegador do aluno · sem backend de aprendizagem" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="world/ · mechanics.js" data-node-context="F1 Loop · navegador do aluno · sem backend de aprendizagem">
+          <title>Mundo e 97 peças · world/ · mechanics.js · F1 Loop · navegador do aluno · sem backend de aprendizagem</title>
+          <rect x="960" y="450" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="960" y="450" width="230" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(966 456) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="615" y="503" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Interface DOM</text>
-        <text data-detail="context" x="615" y="519" class="t-muted" font-size="9" text-anchor="middle">ui.js • Registro.js</text>
+          <text data-detail-anchor x="1075" y="486" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Mundo e 97 peças</text>
+        <text data-detail="context" x="1075" y="502" class="t-muted" font-size="9" text-anchor="middle">world/ · mechanics.js</text>
         </g>
 
-        <g id="node-fx" data-node-id="fx" data-node-label="Efeitos didáticos" tabindex="0" role="button" aria-label="Focus Efeitos didáticos, fx/index.js • módulos FX, Navegador • aplicação estática" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="fx/index.js • módulos FX" data-node-context="Navegador • aplicação estática">
-          <title>Efeitos didáticos · fx/index.js • módulos FX · Navegador • aplicação estática</title>
-          <rect x="770" y="470" width="170" height="70" rx="6" class="c-mask"/>
-          <rect x="770" y="470" width="170" height="70" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(776 476) scale(0.6875)">
+        <g id="node-f1-notes" data-node-id="f1-notes" data-node-label="Caderno local" tabindex="0" role="button" aria-label="Focus Caderno local, localStorage · exportação JSON, F1 Loop · navegador do aluno · sem backend de aprendizagem" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="localStorage · exportação JSON" data-node-context="F1 Loop · navegador do aluno · sem backend de aprendizagem">
+          <title>Caderno local · localStorage · exportação JSON · F1 Loop · navegador do aluno · sem backend de aprendizagem</title>
+          <rect x="360" y="680" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="360" y="680" width="230" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(366 686) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="855" y="503" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Efeitos didáticos</text>
-        <text data-detail="context" x="855" y="519" class="t-muted" font-size="9" text-anchor="middle">fx/index.js • módulos FX</text>
+          <text data-detail-anchor x="475" y="716" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Caderno local</text>
+        <text data-detail="context" x="475" y="732" class="t-muted" font-size="9" text-anchor="middle">localStorage · exportação JSON</text>
         </g>
 
-        <g id="node-title" data-node-id="title" data-node-label="Texto e fundo" tabindex="0" role="button" aria-label="Focus Texto e fundo, Title • Background, Navegador • aplicação estática" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="Title • Background" data-node-context="Navegador • aplicação estática">
-          <title>Texto e fundo · Title • Background · Navegador • aplicação estática</title>
-          <rect x="770" y="70" width="170" height="70" rx="6" class="c-mask"/>
-          <rect x="770" y="70" width="170" height="70" rx="6" class="c-frontend" stroke-width="1.5"/>
-          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(776 76) scale(0.6875)">
+        <g id="node-f1-learning" data-node-id="f1-learning" data-node-label="Conteúdo e atividades" tabindex="0" role="button" aria-label="Focus Conteúdo e atividades, content.js · learning/, F1 Loop · navegador do aluno · sem backend de aprendizagem" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="content.js · learning/" data-node-context="F1 Loop · navegador do aluno · sem backend de aprendizagem">
+          <title>Conteúdo e atividades · content.js · learning/ · F1 Loop · navegador do aluno · sem backend de aprendizagem</title>
+          <rect x="60" y="680" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="60" y="680" width="230" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(66 686) scale(0.6875)">
             <rect x="2" y="3" width="12" height="10" rx="2"/>
             <path d="M2 6.5h12"/>
             <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
             <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
           </g>
-          <text data-detail-anchor x="855" y="103" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Texto e fundo</text>
-        <text data-detail="context" x="855" y="119" class="t-muted" font-size="9" text-anchor="middle">Title • Background</text>
+          <text data-detail-anchor x="175" y="716" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Conteúdo e atividades</text>
+        <text data-detail="context" x="175" y="732" class="t-muted" font-size="9" text-anchor="middle">content.js · learning/</text>
+        </g>
+
+        <g id="node-engine-inspect" data-node-id="engine-inspect" data-node-label="Inspeção do motor" tabindex="0" role="button" aria-label="Focus Inspeção do motor, engine/viewer.js + CSS · lazy, F1 Loop · navegador do aluno · sem backend de aprendizagem" aria-pressed="false" data-node-kind="frontend" data-node-sublabel="engine/viewer.js + CSS · lazy" data-node-context="F1 Loop · navegador do aluno · sem backend de aprendizagem">
+          <title>Inspeção do motor · engine/viewer.js + CSS · lazy · F1 Loop · navegador do aluno · sem backend de aprendizagem</title>
+          <rect x="960" y="680" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="960" y="680" width="230" height="76" rx="6" class="c-frontend" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="frontend" class="semantic-sigil s-frontend" transform="translate(966 686) scale(0.6875)">
+            <rect x="2" y="3" width="12" height="10" rx="2"/>
+            <path d="M2 6.5h12"/>
+            <circle cx="4.1" cy="4.8" r=".7" class="sigil-fill"/>
+            <circle cx="6.3" cy="4.8" r=".7" class="sigil-fill"/>
+          </g>
+          <text data-detail-anchor x="1075" y="716" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Inspeção do motor</text>
+        <text data-detail="context" x="1075" y="732" class="t-muted" font-size="9" text-anchor="middle">engine/viewer.js + CSS · lazy</text>
+        </g>
+
+        <g id="node-engine-asset" data-node-id="engine-asset" data-node-label="Asset do motor" tabindex="0" role="button" aria-label="Focus Asset do motor, Blender → meshopt → GLB, Architecture component" aria-pressed="false" data-node-kind="external" data-node-sublabel="Blender → meshopt → GLB" data-node-context="Architecture component">
+          <title>Asset do motor · Blender → meshopt → GLB · Architecture component</title>
+          <rect x="960" y="920" width="230" height="76" rx="6" class="c-mask"/>
+          <rect x="960" y="920" width="230" height="76" rx="6" class="c-external" stroke-width="1.5"/>
+          <g aria-hidden="true" data-semantic-sigil="external" class="semantic-sigil s-external" transform="translate(966 926) scale(0.6875)">
+            <rect x="2.5" y="5" width="8.5" height="8" rx="1.5"/>
+            <path d="M8 2.5h5.5V8M13.5 2.5 7.5 8.5"/>
+          </g>
+          <text data-detail-anchor x="1075" y="956" class="t-primary" font-size="11" font-weight="600" text-anchor="middle">Asset do motor</text>
+        <text data-detail="context" x="1075" y="972" class="t-muted" font-size="9" text-anchor="middle">Blender → meshopt → GLB</text>
         </g>
 
         <!-- Connection labels -->
@@ -4736,12 +4766,17 @@
 
 
 
+
         <!-- Legend -->
         <g data-legend data-legend-bridge>
-          <text x="40" y="664" class="t-primary" font-size="10" font-weight="600">Legend</text>
-          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Frontend" data-legend-x="40" data-legend-baseline="684" data-legend-width="82">
-            <rect x="40" y="676" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
-            <text x="61" y="684" class="t-muted" font-size="8">Frontend</text>
+          <text x="40" y="1094" class="t-primary" font-size="10" font-weight="600">Legend</text>
+          <g data-legend-semantic-kind="frontend" data-legend-kind="frontend" data-legend-label="Frontend" data-legend-x="40" data-legend-baseline="1114" data-legend-width="82">
+            <rect x="40" y="1106" width="14" height="9" rx="2" class="c-frontend" stroke-width="1"/>
+            <text x="61" y="1114" class="t-muted" font-size="8">Frontend</text>
+          </g>
+          <g data-legend-semantic-kind="external" data-legend-kind="external" data-legend-label="External" data-legend-x="144" data-legend-baseline="1114" data-legend-width="82">
+            <rect x="144" y="1106" width="14" height="9" rx="2" class="c-external" stroke-width="1"/>
+            <text x="165" y="1114" class="t-muted" font-size="8">External</text>
           </g>
         </g>
       </svg>
@@ -4927,39 +4962,7 @@
 
     <!-- Info Cards -->
     <div class="cards">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot cyan"></div>
-          <h3>Caminho principal</h3>
-        </div>
-        <ul>
-          <li>&bull; main.js inicializa módulos e conecta a atualização do Director ao loop do App.</li>
-          <li>&bull; Scroll transforma a rolagem em capítulo e progresso; Director escreve estados do relógio.</li>
-        </ul>
-      </div>
 
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot amber"></div>
-          <h3>Dependências e fronteira</h3>
-        </div>
-        <ul>
-          <li>&bull; Vite empacota; Three.js, GSAP, Lenis, postprocessing e Troika executam no navegador.</li>
-          <li>&bull; Não foi identificado backend de aplicação. Recursos estáticos e fontes são locais.</li>
-          <li>&bull; Registro.js persiste o ciclo no localStorage e permite exportação JSON; não envia dados.</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot slate"></div>
-          <h3>Proveniência</h3>
-        </div>
-        <ul>
-          <li>&bull; Componentes extraídos dos arquivos vivos; diagrama agrupa módulos secundários para leitura.</li>
-          <li>&bull; Grafo estrutural em graphify-out/graph.json; origens locais em local-evidence.json. Snapshot de 11/09/2026.</li>
-        </ul>
-      </div>
     </div>
 
     <!-- Footer -->

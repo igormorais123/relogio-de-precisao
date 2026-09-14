@@ -1,74 +1,11 @@
 {
-  "html": [
-    {
-      "path": "index.html"
-    }
-  ],
-  "boot": [
-    {
-      "path": "src/main.js"
-    }
-  ],
-  "scroll": [
-    {
-      "path": "src/core/Scroll.js"
-    }
-  ],
-  "director": [
-    {
-      "path": "src/core/Director.js"
-    },
-    {
-      "path": "src/core/cameraPath.js",
-      "line": 43
-    }
-  ],
-  "watch": [
-    {
-      "path": "src/watch/Watch.js"
-    },
-    {
-      "path": "src/watch/gear.js"
-    }
-  ],
-  "data": [
-    {
-      "path": "src/data/narrativa.js"
-    },
-    {
-      "path": "src/data/paginas.js"
-    }
-  ],
-  "app": [
-    {
-      "path": "src/core/App.js"
-    },
-    {
-      "path": "src/core/Post.js"
-    },
-    {
-      "path": "src/core/Studio.js"
-    }
-  ],
-  "ui": [
-    {
-      "path": "src/ui/ui.js"
-    },
-    {
-      "path": "src/core/Registro.js"
-    }
-  ],
-  "fx": [
-    {
-      "path": "src/fx/index.js"
-    }
-  ],
-  "title": [
-    {
-      "path": "src/core/Title.js"
-    },
-    {
-      "path": "src/core/Background.js"
-    }
-  ]
+  "snapshot_observed_at_utc": "2026-09-14T06:12:07.465361+00:00",
+  "graph_nodes": 594,
+  "graph_edges": 976,
+  "components": 12,
+  "visual_review": "Rendered HTML inspected at 1440x1100 with Chromium --disable-gpu; UTF-8 labels and paths legible, no overlaps. Screenshot outside repository.",
+  "validation_profile": "standard",
+  "engine": "main.js lazy imports engine/viewer.js; power-unit-v1.glb via Meshopt; body engine-open pauses aula, engine:closed resumes.",
+  "hook_status": "graphify hook install completed; post-commit and post-checkout installed; merge driver registered (verified by graphify hook status).",
+  "future_edits": "Verified committed engine source at snapshot timestamp; subsequent concurrent edits not covered. Track worktree not integrated or mapped."
 }
