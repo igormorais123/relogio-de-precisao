@@ -89,5 +89,5 @@ Integração do Codex em `main.js`, `render-page.mjs` ou `style.css`: anunciar e
 4. Fatos de F1 só com fonte primária. **Texto visível (decisão do Igor, 14/09/2026):** sem slogans, frases de efeito em pares, tríades com pontos, clichês típicos de IA ou metalinguagem (o site comentando a si mesmo: "modelo didático", "não é CFD", "ilustração", "o site não avaliou", "caso fictício", "sem certificação automática"). Honestidade vem de não afirmar o que não é fato, e não de avisos sobre a própria cena.
 5. Nada é publicado em GitHub Pages sem consolidação e aprovação do Igor.
 
-### Outras sessões (14/09/2026, 05:05)
+### Outras sessões (14/09/2026, ~04:37)
 Uma terceira sessão Claude ("observer-sessions") anunciou que ia clonar os repositórios, criar `fx/camera.js`, acrescentar bloom, DoF, motion blur e aberração cromática e publicar em `gh-pages`. Tudo isso já existe em `post.js` e `story.js`. Foi orientada a não duplicar, não publicar, trabalhar em worktree própria e propor uma frente sem dono aqui antes de editar. Frentes sem dono hoje: pôster novo a partir do render final, médios de cinema da rodada 3 fora de câmera, pista, box e interface, e auditoria de acessibilidade somente leitura.
