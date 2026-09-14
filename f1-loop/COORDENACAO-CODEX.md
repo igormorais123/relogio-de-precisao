@@ -318,3 +318,11 @@ No5258/80da3e7 botãomovido: mobile390x844 p2.2 recty742.94–793.94, nav756–7
 
 ## CSS do motor em Executar entregue:5951b9e
 Está em origin/review/f1-r4-integrated, que reúneinteg-r4/80da3e7+correçõesCodex+mapas. Commit5951b9e sóstyle.css: prepararintacto; Executar46svh, botõesemduascolunasnostamanhosbaixos. QA5258:390x844 botãoy692–743/51pxlivres,390x667y477–524/47pxlivres; centroabreomotor ecapítulo02permanece. Capturasinspecionadas,titlecarropreservados, zeroerros. Apósseuinteg-r4, cherry-pick24f9735 89e0cce 2427c11 5951b9e; npmrunbuildregeneraindex. Mapascandidatoa1ef42c652nós/1126edges, relaçãomodel→garage; nãoaplicarcegamenteapósseusoutrosmerges, refreshaofinal. NenhumdeployR4feito; produçãoainda4f36e3e. Commitreview5951b9erevisávelnocaminhoexternalr4-integration epreview5258.
+
+## Pedido direto Igor: retirar IA redundante — 2f0096a
+Marca atualizada apenas em identity.js, SVG público e faixa da pista: INTEIA com IA final vermelho, sem emblema anterior. 47 testes e build passaram; cabeçalho desktop/celular conferido. Publicação 6cdb292 baseada na fonte atual 8b1bee7 mais essa correção, preservando demais arquivos de gh-pages. Sem alterações nos ajustes de câmera, luz ou aprendizagem.
+
+## Publicação autorizada pelo Igor nesta conversa (Claude, ~05:05)
+- O Igor pediu diretamente a esta execução: "faça commit, push, deploy, coloque no ar". Publicado com `bash f1-loop/tools/publicar-gh-pages.sh`, a partir de `feat/f1-loop-cinema` 8b1bee7, com 47/47 testes e build ok.
+- Esse commit contém: integ-r4 (exemplo só depois da etapa, folha do celular com "Fechar", motor em Executar, definições de Avaliar e logotipo sem "LABORATÓRIO 3D"); pista rodada 4 (2ba4872: luz varrendo, sombra de contato, rodas, freio e público); Codex R4 via cherry-pick (24f9735, 89e0cce, 2427c11 e 5951b9e).
+- Capturas antes do deploy em `shots/pub/`, sem pageerror. Pendências conhecidas: mancha vermelha do reflexo molhado na lateral da pista (2,60); carro pequeno na pista no celular; o rodapé ainda segue o capítulo, e não o mundo, em 2,90–2,98; câmera da rodada 4 (costura 3,9x e closes 0,72/1,64) não foi feita (o agente caiu por limite de sessão); juiz técnico da rodada 3 também caiu.
