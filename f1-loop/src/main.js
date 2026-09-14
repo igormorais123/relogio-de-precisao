@@ -1,4 +1,4 @@
-import {ENGINE_LESSONS,engineBeat} from './engine/chapter.js';
+import {ENGINE_INTRO,ENGINE_LESSONS,engineBeat} from './engine/chapter.js';
 import {monitorTimeline} from './monitor-scene.js';
 import {mountLearning} from './learning/index.js';
 import {CHAPTERS,FIELDS} from './content.js';
@@ -87,16 +87,16 @@ function frame(now){
  const engineLocal=Math.max(0,shownP-6);pose.engineChapter=shownP>=6;pose.engineProgress=engineLocal;pose.enginePaused=enginePaused;
  document.body.classList.toggle('in-engine-chapter',pose.engineChapter);
  if(pose.engineChapter){const beat=engineBeat(engineLocal),lesson=ENGINE_LESSONS[beat],inside=engineLocal>.27;
- $('#title-motor-do-loop').textContent=inside?lesson.title:'Escolha e registre o motor';
- $('#engine-chapter-text').textContent=inside?lesson.text:'A unidade de potência da F1 de 2026 mantém o V6 turbo de 1,6 litro, e a recuperação de energia segue mapas preparados com antecedência. Na sua tarefa, o motor é a ferramenta, o modelo e a configuração que produzem a resposta.';
- $('#engine-part-label').textContent=inside?lesson.part:'UNIDADE DE POTÊNCIA';
+ $('#title-motor-do-loop').textContent=inside?lesson.title:ENGINE_INTRO.title;
+ $('#engine-chapter-text').textContent=inside?lesson.text:ENGINE_INTRO.text;
+ $('#engine-part-label').textContent=inside?lesson.part:ENGINE_INTRO.part;$('#engine-source').hidden=inside;
  $('#engine-lesson-count').textContent=inside?`${beat+1} / 3`:'Motor V6';
  $('[data-engine-chapter="next"]').textContent=engineLocal<.27?'Entrar no motor →':beat<2?'Próxima →':'Voltar ao início ↗';
  }
  pose.monitorScene=monitor.active?monitor.weight:0;pose.monitorReading=monitor.active?monitor.reading:null;const place=pose.engineChapter?'MOTOR DO LOOP':monitor.active&&monitor.weight>.5?'ANÁLISE NO BOX':pose.world==='track'?'PISTA':pose.world==='tunnel'?'TÚNEL DE VENTO':pose.index===2?'ESTAÇÃO DE DADOS':SCENE_LABELS[pose.index];if($('#scene-label').textContent!==place)$('#scene-label').textContent=place;scene.setPose(pose);scene.render(dt,now/1000,idle?1000/30:1000/60);placeHotspot();
  schedule();
 }
-function setReading(on){state.reading=on;document.body.classList.remove('in-engine-chapter');document.body.classList.remove('monitor-focused');document.body.classList.toggle('reading',on);$('#reading').setAttribute('aria-pressed',String(on));$('#reading').textContent=on?'Modo cinema':'Modo leitura';$$('.lesson').forEach(d=>d.open=on);$$('.chapter').forEach(s=>{s.style.removeProperty('--in');s.style.removeProperty('--out');s.classList.remove('copy-off','dissolving');});measure();if(on){$('#load-state').textContent='Leitura · movimento pausado';$('#hotspot').classList.add('off');paint();}else{if(scene)$('#load-state').textContent='';else loadScene();snap=true;schedule();}}
+function setReading(on){state.reading=on;if(on){$('#title-motor-do-loop').textContent=ENGINE_INTRO.title;$('#engine-chapter-text').textContent=ENGINE_INTRO.text;$('#engine-part-label').textContent=ENGINE_INTRO.part;$('#engine-source').hidden=false;}document.body.classList.remove('in-engine-chapter');document.body.classList.remove('monitor-focused');document.body.classList.toggle('reading',on);$('#reading').setAttribute('aria-pressed',String(on));$('#reading').textContent=on?'Modo cinema':'Modo leitura';$$('.lesson').forEach(d=>d.open=on);$$('.chapter').forEach(s=>{s.style.removeProperty('--in');s.style.removeProperty('--out');s.classList.remove('copy-off','dissolving');});measure();if(on){$('#load-state').textContent='Leitura · movimento pausado';$('#hotspot').classList.add('off');paint();}else{if(scene)$('#load-state').textContent='';else loadScene();snap=true;schedule();}}
 let enginePaused=false;
 function goEngine(p){const el=$('#motor-do-loop');window.scrollTo({top:el.offsetTop+p*(el.offsetHeight-innerHeight),behavior:reduced.matches?'instant':'smooth'});snap=reduced.matches;schedule();}
 $('[data-engine-chapter="next"]').onclick=()=>{const p=Math.max(0,shownP-6),beat=engineBeat(p);if(p<.27)goEngine(.35);else if(beat<2)goEngine(beat===0?.58:.82);else $('#preparar').scrollIntoView();};

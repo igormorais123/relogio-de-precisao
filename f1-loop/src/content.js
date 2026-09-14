@@ -85,7 +85,7 @@ export const CHAPTERS = [
    action:'Concluir meu registro',field:'next',extra:['decision'],
    prompt:'Que decisão a evidência permite, e o que ela não permite? O que ficou pendente? O que a próxima pessoa precisa saber para continuar?',
    example:'Decisão: comunicar só o resultado observado e seus limites. Não autoriza adoção definitiva nem afirma que o formulário causou a redução. Pendente: quem decide a adoção. Próxima volta: comparar os formulários com a mesma equipe, para isolar o efeito. Outra saída válida: encerrar a causa como inconclusiva até esse teste.',
-   lesson:'Na McLaren, o debrief entre sessões é estruturado: primeiro as mudanças de acerto que a equipe precisa conhecer, depois os relatos dos engenheiros e as impressões dos pilotos. Daí sai onde colocar o carro na sessão seguinte. O seu registro cumpre esse papel na tarefa.',
+   lesson:'Na McLaren, o debrief entre sessões é estruturado: primeiro as mudanças de acerto que a equipe precisa conhecer, depois os relatos dos engenheiros e as impressões dos pilotos. Daí sai onde colocar o carro na sessão seguinte.',
    source:'https://www.mclaren.com/racing/formula-1/2026/what-do-formula-1-drivers-do-between-sessions/',sourceName:'McLaren · Debrief e preparação da próxima sessão',
    question:'O prazo do despacho acaba hoje e duas afirmações continuam sem folha localizada. Como encerrar?',
    choices:['Enviar a nota como concluída, com a ressalva genérica “sujeito a conferência”.','Registrar inconclusivo para as duas afirmações, informar a lacuna à chefia e anotar o próximo passo.','Rodar o mesmo pedido na IA mais algumas vezes até as folhas aparecerem.'],
