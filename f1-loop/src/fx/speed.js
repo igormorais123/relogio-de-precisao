@@ -1,0 +1,258 @@
+import {Effect, EffectAttribute, BlendFunction} from 'postprocessing';
+import {Matrix4, Uniform, Vector2, Vector3, Vector4} from 'three';
+
+// Efeitos de velocidade para a sequência de pista (src/world/track.js).
+//
+// SpeedEffect(camera, {samples, topSpeed, cameraBlur, shutter, carMin, carMax})
+//   Effect com profundidade. Um único laço de amostras soma dois borrões:
+//   (1) obturador do mundo: cada pixel fora da caixa do carro é reprojetado como se o
+//       mundo tivesse andado topSpeed·amount/60 m em +Z (o carro está parado na origem
+//       e a pista corre em −Z), então asfalto, zebras e barreiras riscam e o carro fica
+//       nítido; com cameraBlur a matriz anterior da câmera entra na mesma conta e o
+//       efeito substitui o MotionBlurEffect de post.js (câmera presa ao chão, tomada b);
+//   (2) arrasto radial em espaço de tela a partir do carro (focus projetado): zero
+//       num raio em volta dele, forte nas bordas, com cauda nas luzes HDR.
+//   setAmount(0..1[, radial]) controla os dois; resetMotion() após um salto de câmera.
+//   Deve rodar em HDR, depois do SanitizeEffect e antes de DOF/bloom.
+// speedCamera(t, amount, out?, baseFov?) -> {x, y, z, pitch, yaw, roll, fovKick, fov}
+//   Função pura e determinística: tremor de pista (10–23 Hz, milímetros), balanço lento
+//   (0,2–0,3 Hz) e FOV kick de até 8°. Sem `out`, reutiliza um objeto do módulo.
+// createWheelBlur({THREE, mechanics}) -> {update(amount), dispose()}
+//   Um disco por roda, preso ao suporte de direção (não gira), com a média dos raios da
+//   roda: evita o efeito estroboscópico das rodas a 250 rad/s num quadro de 60 Hz.
+// createSparks({THREE, renderer, mobile}) -> {object, update(time, amount), dispose()}
+//   Faíscas do assoalho em rajadas, 1 draw call, todo o estado no vertex shader.
+// Nada aqui aloca por quadro.
+
+export const SPEED_CAMERA_LIMITS = {x: .012, y: .012, z: .006, pitch: .0025, yaw: .0025, roll: .006, fovKick: 8};
+const SCRATCH = {x: 0, y: 0, z: 0, pitch: 0, yaw: 0, roll: 0, fovKick: 0, fov: 30};
+
+export function speedCamera(t, amount, out = SCRATCH, baseFov = 30) {
+  const a = amount > 0 ? Math.min(amount, 1) : 0;
+  const e = a * a * (3 - 2 * a), trem = e * e, s = Math.sin;
+  const time = Number.isFinite(t) ? t : 0;
+  // Tremor alto e minúsculo (pista) + balanço baixo e lento (carroceria e operador); nada entre 1 e 5 Hz.
+  out.x = .0045 * trem * (s(time * 61.3) * .5 + s(time * 97.1 + 1.7) * .3 + s(time * 143.9 + .4) * .2) + .006 * e * (s(time * 1.9 + .3) * .6 + s(time * 1.13 + 2.1) * .4);
+  out.y = .0035 * trem * (s(time * 71.7 + .9) * .6 + s(time * 123.3) * .4) + .004 * e * s(time * 1.37 + .8);
+  out.z = .003 * e * s(time * .83) + .002 * trem * s(time * 88.1 + .6);
+  out.pitch = .0012 * trem * (s(time * 79.3 + .2) * .6 + s(time * 131.7 + 2) * .4) + .0009 * e * s(time * 1.61 + .4);
+  out.yaw = .001 * trem * (s(time * 67.9 + 1.1) * .5 + s(time * 109.3) * .5) + .0012 * e * s(time * .97 + 1.2);
+  out.roll = .0045 * e * (s(time * .71 + .5) * .7 + s(time * 1.23 + 2.3) * .3) + .0008 * trem * s(time * 57.1);
+  out.fovKick = 8 * e;
+  out.fov = baseFov + out.fovKick;
+  return out;
+}
+
+const speedFragment = /* glsl */`
+uniform mat4 uInvViewProj;
+uniform mat4 uReproject;
+uniform vec3 uShift;
+uniform vec3 uCarMin;
+uniform vec3 uCarMax;
+uniform vec2 uCenter;
+uniform vec3 uParams;   // x = arrasto radial, y = cauda das luzes, z = ativo
+void mainImage(const in vec4 inputColor, const in vec2 uv, const in float depth, out vec4 outputColor){
+  if(uParams.z < .5){ outputColor = inputColor; return; }
+  float uRadial = uParams.x, uTrail = uParams.y;
+  vec2 vel = vec2(0.);
+  {
+    // Céu e luzes aditivas não escrevem profundidade: valem como pontos no plano distante,
+    // então as luzes ao longe também riscam (pouco), em vez de ficarem como bolinhas.
+    vec4 world = uInvViewProj * vec4(uv * 2. - 1., min(depth, .9999) * 2. - 1., 1.);
+    vec3 p = world.xyz / world.w;
+    // O carro é o assunto: como num panorâmico que o acompanha, fica nítido mesmo com a câmera no chão.
+    bool car = all(greaterThan(p, uCarMin)) && all(lessThan(p, uCarMax));
+    vec4 prev = uReproject * vec4(p + uShift, 1.);
+    if(!car && prev.w > 1e-4) vel = uv - (prev.xy / prev.w * .5 + .5);
+    float len = length(vel);
+    if(len > .075) vel *= .075 / len;
+  }
+  vec2 rel = (uv - uCenter) * vec2(aspect, 1.);
+  float mask = smoothstep(.17, .7, length(rel));
+  vec2 radial = (uv - uCenter) * uRadial * mask;
+  float rl = length(radial);
+  if(rl > .05) radial *= .05 / rl;
+  if(dot(vel, vel) + rl * rl < 4e-7){ outputColor = inputColor; return; }
+  float jitter = fract(52.9829189 * fract(dot(gl_FragCoord.xy, vec2(.06711056, .00583715))));
+  vec3 sum = vec3(0.), trail = vec3(0.);
+  for(int i = 0; i < SAMPLES; i++){
+    float t = (float(i) + jitter) / float(SAMPLES);
+    vec3 s = textureLod(inputBuffer, uv + vel * (t - .5) - radial * t, 0.).rgb;
+    sum += s;
+    float l = dot(s, vec3(.2126, .7152, .0722));
+    trail = max(trail, s * smoothstep(1., 5., l) * (1. - t));
+  }
+  outputColor = vec4(sum / float(SAMPLES) + trail * uTrail * mask, inputColor.a);
+}`;
+
+export class SpeedEffect extends Effect {
+  constructor(camera, {samples = 12, topSpeed = 80, cameraBlur = false, shutter = 1, carMin = [-1.05, .012, -2.75], carMax = [1.05, 1.3, 2.75]} = {}) {
+    super('SpeedEffect', speedFragment, {
+      attributes: EffectAttribute.DEPTH,
+      blendFunction: BlendFunction.NORMAL,
+      defines: new Map([['SAMPLES', String(Math.max(3, samples | 0))]]),
+      uniforms: new Map([
+        ['uInvViewProj', new Uniform(new Matrix4())], ['uReproject', new Uniform(new Matrix4())],
+        ['uShift', new Uniform(new Vector3())], ['uCarMin', new Uniform(new Vector3(...carMin))], ['uCarMax', new Uniform(new Vector3(...carMax))],
+        // Escalares num Vector3: Uniform compartilha a forma com os que guardam matrizes, e um double
+        // escrito direto em .value viraria um HeapNumber novo a cada quadro.
+        ['uCenter', new Uniform(new Vector2(.5, .5))], ['uParams', new Uniform(new Vector3(0, .45, 0))],
+      ]),
+    });
+    this.camera = camera;
+    this.topSpeed = topSpeed;
+    this.cameraBlur = cameraBlur;
+    this.shutter = shutter;
+    this.radialGain = .11;
+    this.focus = new Vector3(0, .45, 0);
+    this.amount = 0;
+    this.radial = 0;
+    this.fresh = true;
+    this._viewProj = new Matrix4();
+    this._previous = new Matrix4();
+    this._clip = new Vector4();
+  }
+  set mainCamera(value) { this.camera = value; }
+  get mainCamera() { return this.camera; }
+  setAmount(amount, radial = amount) {
+    this.amount = amount > 0 ? Math.min(amount, 1) : 0;
+    this.radial = radial > 0 ? Math.min(radial, 1) : 0;
+  }
+  resetMotion() { this.fresh = true; }
+  update() {
+    const camera = this.camera, u = this.uniforms;
+    if (!camera) return;
+    const viewProj = this._viewProj.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+    u.get('uInvViewProj').value.copy(viewProj).invert();
+    const reproject = u.get('uReproject').value;
+    if (this.cameraBlur) {
+      if (this.fresh) { this._previous.copy(viewProj); this.fresh = false; }
+      reproject.copy(this._previous);
+      this._previous.copy(viewProj);
+    } else reproject.copy(viewProj);
+    u.get('uShift').value.set(0, 0, this.amount * this.topSpeed / 60 * this.shutter);
+    const params = u.get('uParams').value;
+    params.x = this.radial * this.radial * this.radialGain;
+    params.z = this.amount > 0 || this.radial > 0 || this.cameraBlur ? 1 : 0;
+    const c = this._clip.set(this.focus.x, this.focus.y, this.focus.z, 1).applyMatrix4(viewProj);
+    if (c.w > .01) u.get('uCenter').value.set(c.x / c.w * .5 + .5, c.y / c.w * .5 + .5);
+  }
+}
+
+// ------------------------------------------------------------- rodas
+export function createWheelBlur({THREE, mechanics}) {
+  const size = 256, canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  {
+    const g = canvas.getContext('2d'), img = g.createImageData(size, size);
+    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
+      const r = Math.hypot(x + .5 - size / 2, y + .5 - size / 2) / (size / 2), o = (y * size + x) * 4;
+      let v = 0, a = 0;
+      if (r < .16) { v = 150 + 30 * Math.sin(r * 90); a = 255; }                       // porca central
+      else if (r < .88) { v = 34 + 9 * Math.sin(r * 160) + 14 * Math.exp(-(((r - .3) / .05) ** 2)); a = 150 + 70 * (1 - r); } // raios em média
+      else if (r < .97) { v = 105 + 25 * Math.sin(r * 400); a = 245; }                    // aro usinado
+      else if (r < 1) { v = 40; a = 255 * (1 - (r - .97) / .03); }
+      img.data[o] = v; img.data[o + 1] = v + 2; img.data[o + 2] = v + 5; img.data[o + 3] = a;
+    }
+    g.putImageData(img, 0, 0);
+  }
+  const map = new THREE.CanvasTexture(canvas);
+  map.colorSpace = THREE.SRGBColorSpace;
+  const material = new THREE.MeshStandardMaterial({map, transparent: true, depthWrite: false, metalness: .85, roughness: .34, envMapIntensity: 1.2, opacity: 0});
+  material.name = 'Roda em movimento';
+  const discs = [], box = new THREE.Box3(), inverse = new THREE.Matrix4(), part = new THREE.Box3();
+  for (const w of mechanics?.wheels || []) {
+    w.pivot.updateWorldMatrix(true, true);
+    inverse.copy(w.pivot.matrixWorld).invert();
+    box.makeEmpty();
+    for (const r of w.members) r.root.traverse(o => {
+      if (o.isMesh && [].concat(o.material).some(m => m.name.toLowerCase() === 'rodas')) box.union(part.setFromObject(o).applyMatrix4(inverse));
+    });
+    if (box.isEmpty()) continue;
+    const side = Math.sign(w.pivot.position.x) || 1;
+    const radius = Math.min(box.max.y - box.min.y, box.max.z - box.min.z) / 2 * .985;
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(radius, 48).rotateY(side * Math.PI / 2), material);
+    disc.position.set((side > 0 ? box.max.x : box.min.x) + side * .004, (box.max.y + box.min.y) / 2, (box.max.z + box.min.z) / 2);
+    disc.name = 'Roda em movimento'; disc.renderOrder = 1; disc.visible = false;
+    w.pivot.add(disc);
+    discs.push(disc);
+  }
+  return {
+    discs,
+    update(amount) {
+      const t = Math.min(1, Math.max(0, ((amount || 0) - .2) / .4));
+      material.opacity = t * t * (3 - 2 * t) * .95;
+      for (let i = 0; i < discs.length; i++) discs[i].visible = material.opacity > .01;
+    },
+    dispose() { for (const d of discs) { d.removeFromParent(); d.geometry.dispose(); } material.dispose(); map.dispose(); },
+  };
+}
+
+// ------------------------------------------------------------ faíscas
+export function createSparks({THREE, renderer, mobile = false}) {
+  const count = mobile ? 22 : 48;
+  const geometry = new THREE.InstancedBufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute([0, -1, 0, 1, -1, 0, 1, 1, 0, 0, 1, 0], 3));
+  geometry.setIndex([0, 1, 2, 0, 2, 3]);
+  const seeds = new Float32Array(count * 4);
+  let seed = 7129;
+  for (let i = 0; i < seeds.length; i++) { seed = (1664525 * seed + 1013904223) >>> 0; seeds[i] = seed / 4294967296; }
+  geometry.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seeds, 4));
+  geometry.instanceCount = count;
+  const uniforms = {uTime: {value: 0}, uAmount: {value: 0}, uShutter: {value: 1 / 110}, uRes: {value: new THREE.Vector2(1440, 900)}};
+  const material = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+    uniforms,
+    vertexShader: /* glsl */`
+      uniform float uTime, uAmount, uShutter;
+      uniform vec2 uRes;
+      attribute vec4 aSeed;
+      varying float vHeat, vAcross;
+      vec3 sparkAt(float age, vec3 o, vec3 v){
+        vec3 p = o + v * age + vec3(0., -4.9 * age * age, 0.);
+        p.y = abs(p.y - .015) + .015;
+        return p;
+      }
+      void main(){
+        float P = .55 + aSeed.x * 1.1;
+        float t = uTime + aSeed.y * P;
+        float k = floor(t / P);
+        float age = t - k * P;
+        float life = .1 + .14 * aSeed.w;
+        float gate = step(.45, fract(sin(k * 91.7 + aSeed.z * 311.3) * 43758.5453)) * smoothstep(.55, .85, uAmount);
+        // Leque que sobe e abre atrás do assoalho; rasteiras e compridas pareciam faixa pintada.
+        vec3 o = vec3((aSeed.z - .5) * .56, .02, -1.5 - aSeed.x * .7);
+        vec3 v = vec3((aSeed.w - .5) * 4.2, 1.1 + 3.2 * aSeed.y, -(6. + 12. * aSeed.z) * (.55 + .45 * uAmount));
+        vec4 ca = projectionMatrix * modelViewMatrix * vec4(sparkAt(age, o, v), 1.);
+        vec4 cb = projectionMatrix * modelViewMatrix * vec4(sparkAt(max(age - uShutter, 0.), o, v), 1.);
+        vHeat = clamp(1. - age / life, 0., 1.); vAcross = position.y;
+        if(gate * step(age, life) < .5 || ca.w < .05 || cb.w < .05){ gl_Position = vec4(0., 0., 2., 1.); return; }
+        vec2 sa = ca.xy / ca.w * uRes * .5, sb = cb.xy / cb.w * uRes * .5;
+        vec2 dir = sa - sb; float l = length(dir);
+        dir = l > 1e-3 ? dir / l : vec2(1., 0.);
+        vec4 c = position.x > .5 ? ca : cb;
+        c.xy += vec2(-dir.y, dir.x) * position.y * 2.6 / uRes * c.w;
+        gl_Position = c;
+      }`,
+    fragmentShader: /* glsl */`
+      varying float vHeat, vAcross;
+      void main(){
+        float profile = exp(-vAcross * vAcross * 3.);
+        vec3 col = mix(vec3(1., .3, .05) * 4., vec3(1., .8, .52) * 14., vHeat * vHeat);
+        gl_FragColor = vec4(col * profile * (.3 + .7 * vHeat), 1.);
+      }`,
+  });
+  const object = new THREE.Mesh(geometry, material);
+  object.name = 'Faíscas do assoalho'; object.frustumCulled = false; object.renderOrder = 4;
+  const buffer = new THREE.Vector2();
+  return {
+    object,
+    update(time, amount) {
+      uniforms.uTime.value = time;
+      uniforms.uAmount.value = amount > 0 ? Math.min(amount, 1) : 0;
+      object.visible = uniforms.uAmount.value > .55;
+      if (renderer) uniforms.uRes.value.copy(renderer.getDrawingBufferSize(buffer));
+    },
+    dispose() { object.removeFromParent(); geometry.dispose(); material.dispose(); },
+  };
+}
