@@ -50,6 +50,19 @@
       "outputSha256": "c0061e66e1ae53fe21e4a2f815834f5e003749f02d8c8b7b7729338af71ec334",
       "addedAt": "2026-09-14T14:31:02+00:00",
       "command": "py -m fontTools.subset public/fonts/Barlow-Regular.ttf --unicodes=\"U+0020-007E,U+00A0-00FF,U+0100-017F,U+2000-206F,U+20AC,U+2190-2199,U+21B6\" --layout-features=\"*\" --flavor=woff2 --output-file=public/fonts/Barlow-Regular.woff2"
+    },
+    {
+      "source": "Barlow-SemiBold.ttf (não versionado; baixado da origem)",
+      "output": "public/fonts/Barlow-SemiBold.woff2",
+      "origin": "https://raw.githubusercontent.com/jpt/barlow/main/fonts/ttf/Barlow-SemiBold.ttf",
+      "license": "https://raw.githubusercontent.com/jpt/barlow/main/OFL.txt",
+      "licenseName": "SIL Open Font License 1.1",
+      "bytesBefore": 154124,
+      "bytesAfter": 34804,
+      "sourceSha256": "4921fa2882d1835d2f487b3b1121ba483373726c50f92f5381d078846e36f61d",
+      "outputSha256": "ebf04cf8c01212f0c636375bfd88b324dff40b556b3ce74ecd613f329691ea2b",
+      "addedAt": "2026-09-14T14:41:33+00:00",
+      "command": "py -m fontTools.subset Barlow-SemiBold.ttf --unicodes=\"U+0020-007E,U+00A0-00FF,U+0100-017F,U+2000-206F,U+20AC,U+2190-2199,U+21B6\" --layout-features=\"*\" --flavor=woff2 --output-file=public/fonts/Barlow-SemiBold.woff2"
     }
   ]
 }
