@@ -236,19 +236,27 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     const portrait = mobile ? portraitFrame(pose, width / height) : null;
     camera.position.fromArray(portrait ? portrait.camera : pose.camera);
     target.fromArray(portrait ? portrait.target : pose.target);
+    // Dedicated monitor reading (monitor-scene.js): the lens settles on the lesson screen, held still.
+    const dedicated=pose.monitorScene||0;
+    if(dedicated>0){
+      target.lerp(garage.anchors.monitors,dedicated);
+      offset.copy(garage.anchors.monitors);offset.x+=mobile?4.8:2.2;offset.y+=.035;offset.z+=.025;
+      camera.position.lerp(offset,dedicated);
+    }
     // Handheld breathing and pointer parallax stay small so the take remains legible.
     const follow = 1 - Math.exp(-dt * 3);
     pointer.sx += (pointer.x - pointer.sx) * follow; pointer.sy += (pointer.y - pointer.sy) * follow;
     side.subVectors(target, camera.position).cross(camera.up).normalize();
-    camera.position.addScaledVector(side, pointer.sx * .16 + Math.sin(time * .31) * .025);
-    camera.position.y += -pointer.sy * .08 + Math.sin(time * .23 + 1.3) * .018;
+    camera.position.addScaledVector(side, (pointer.sx * .16 + Math.sin(time * .31) * .025) * (1-dedicated));
+    camera.position.y += (-pointer.sy * .08 + Math.sin(time * .23 + 1.3) * .018) * (1-dedicated);
     // Track run: the frame drops the text-column offset and centres the car; the speed camera adds
     // millimetre shake, a slow sway and the FOV kick on top of the take.
-    const c = pose.center || 0, run = pose.speed || 0, r = pose.track || 0;
-    camera.setViewOffset(width, height, mobile ? 0 : -width * .15 * (1 - c), portrait ? height * portrait.offsetY : -height * .03 * (1 - c), width, height);
+    const c = Math.max(pose.center || 0, dedicated), run = pose.speed || 0, r = pose.track || 0;
+    camera.setViewOffset(width, height, mobile ? 0 : -width * .15 * (1 - c), portrait ? height * portrait.offsetY * (1 - dedicated) : -height * .03 * (1 - c), width, height);
     speedCamera(time, run, shake, pose.fov);
     const s = pose.shake || 0;
     camera.fov = portrait ? portrait.fov + shake.fovKick * s * 1.32 : pose.fov + shake.fovKick * s;
+    camera.fov = mix(camera.fov, mobile ? 34 : 26, dedicated);
     camera.far = r > 0 ? track.cameraFar : 80;
     camera.updateProjectionMatrix();
     camera.lookAt(target);
@@ -292,7 +300,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     const fix = smooth((p - 3.9) / .2) * (1 - smooth((p - 4.6) / .25));
     // The box floor stays near black from Corrigir through Encerrar (4.4–5.0), with no lift between the two moods.
     garage.setMood({debrief: d, evaluate: v, fix: Math.max(fix, smooth((p - 4.3) / .15)), focus: pose.highlight || 0});
-    garage.setLessonProgress(p);
+    garage.setLessonProgress(p, pose.monitorReading);
     garage?.update(dt, camera, time);
     tunnel?.update(dt, camera, time);
 
@@ -322,12 +330,13 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     const g = t > 0 ? [0, 1].map(k => gradeGarage[k].map((v, i) => mix(v, gradeTunnel[k][i], t))) : gradeGarage.map((row, k) => row.map((v, i) => mix(v, gradeDebrief[k][i], d)));
     if (r > 0) for (let k = 0; k < 2; k++) for (let i = 0; i < 3; i++) g[k][i] = mix(g[k][i], gradeTrack[k][i], r);
     post.setGrade(g[0], g[1], 1);
-    post.setBloom(mix(.5 + .35 * t + .3 * d, .62, r));
+    post.setBloom(mix(mix(.5 + .35 * t + .3 * d, .62, r),.12,dedicated));
     post.setSpeed(run, run * .7);
     post.setBand(pose.incoming ? pose.wipe : 0, time);
     focus.fromArray(pose.focus);
     // Focus range and bokeh scale come from the story pose.
-    post.focus(camera.position.distanceTo(focus), pose.focusRange, pose.bokehScale);
+    focus.lerp(garage.anchors.monitors,dedicated);
+    post.focus(camera.position.distanceTo(focus), mix(pose.focusRange,4,dedicated), mix(pose.bokehScale,.1,dedicated));
     // Seams (story haze): the far box floor and the tunnel shell sink into dark haze with no horizon,
     // and the dust thins so the empty background never reads as a starry sky.
     const h = pose.haze || 0;

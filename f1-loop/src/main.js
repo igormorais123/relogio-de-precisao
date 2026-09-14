@@ -1,3 +1,4 @@
+import {monitorTimeline} from './monitor-scene.js';
 import {mountLearning} from './learning/index.js';
 import {CHAPTERS,FIELDS} from './content.js';
 import {sampleStory,assessChoice,exportNotebook} from './story.js';
@@ -27,7 +28,13 @@ for(const h of $$('.chapter h1, .chapter h2')){
 }
 
 function measure(){positions=$$('.chapter').map(s=>s.offsetTop);schedule();}
-function progress(){const y=window.scrollY;let i=0;while(i<positions.length-1&&y>=positions[i+1])i++;return i===5?5:i+Math.max(0,Math.min(1,(y-positions[i])/(positions[i+1]-positions[i])));}
+function monitorState(){const el=$('#analise-no-box');return monitorTimeline(scrollY,el.offsetTop,el.offsetHeight);}
+function progress(){const y=window.scrollY;let i=0;while(i<positions.length-1&&y>=positions[i+1])i++;
+ if(!state.reading&&i===3){const top=$('#analise-no-box').offsetTop;return y<top?3+.64*Math.max(0,(y-positions[3])/(top-positions[3])):monitorState().story;}
+ return i===5?5:i+Math.max(0,Math.min(1,(y-positions[i])/(positions[i+1]-positions[i])));}
+function goMonitor(beat){const el=$('#analise-no-box');if(beat>2){$('#corrigir').scrollIntoView();return;}if(beat<0){$('#avaliar').scrollIntoView();return;}window.scrollTo({top:el.offsetTop+el.offsetHeight*(1/6+(beat+.35)*2/9),behavior:'instant'});snap=true;schedule();}
+$('[data-monitor-prev]').onclick=()=>goMonitor(monitorState().beat-1);
+$('[data-monitor-next]').onclick=()=>goMonitor(monitorState().beat+1);
 // Copy reads during the drift and dissolves before the camera travels (R7).
 function paintCopy(){
  const vh=innerHeight,narrow=innerWidth<761;let shown=0;
@@ -71,10 +78,14 @@ function frame(now){
  if(snap||reduced.matches){shownP=targetP;snap=false;}else{shownP+=(targetP-shownP)*(1-Math.exp(-dt*5));if(Math.abs(targetP-shownP)<1e-4)shownP=targetP;}
  paint();
  if(state.reading||!scene)return;
- pose=sampleStory(shownP);const place=pose.world==='track'?'PISTA':pose.world==='tunnel'?'TÚNEL DE VENTO':pose.index===2?'ESTAÇÃO DE DADOS':SCENE_LABELS[pose.index];if($('#scene-label').textContent!==place)$('#scene-label').textContent=place;scene.setPose(pose);scene.render(dt,now/1000,idle?1000/30:1000/60);placeHotspot();
+ const monitor=monitorState();document.body.classList.toggle('monitor-focused',monitor.active);
+ const label=`${monitor.beat+1} / 3 · ${['Observação','Comparação','Conclusão'][monitor.beat]}`;
+ if($('#monitor-page').textContent!==label)$('#monitor-page').textContent=label;
+ $('[data-monitor-next]').textContent=monitor.beat===2?'Seguir para Corrigir →':'Próxima →';
+ pose=sampleStory(shownP);pose.monitorScene=monitor.active?monitor.weight:0;pose.monitorReading=monitor.active?monitor.reading:null;const place=monitor.active?'ANÁLISE NO BOX':pose.world==='track'?'PISTA':pose.world==='tunnel'?'TÚNEL DE VENTO':pose.index===2?'ESTAÇÃO DE DADOS':SCENE_LABELS[pose.index];if($('#scene-label').textContent!==place)$('#scene-label').textContent=place;scene.setPose(pose);scene.render(dt,now/1000,idle?1000/30:1000/60);placeHotspot();
  schedule();
 }
-function setReading(on){state.reading=on;document.body.classList.toggle('reading',on);$('#reading').setAttribute('aria-pressed',String(on));$('#reading').textContent=on?'Modo cinema':'Modo leitura';$$('.lesson').forEach(d=>d.open=on);$$('.chapter').forEach(s=>{s.style.removeProperty('--in');s.style.removeProperty('--out');s.classList.remove('copy-off','dissolving');});measure();if(on){$('#load-state').textContent='Leitura · movimento pausado';$('#hotspot').classList.add('off');paint();}else{if(scene)$('#load-state').textContent='';else loadScene();snap=true;schedule();}}
+function setReading(on){state.reading=on;document.body.classList.remove('monitor-focused');document.body.classList.toggle('reading',on);$('#reading').setAttribute('aria-pressed',String(on));$('#reading').textContent=on?'Modo cinema':'Modo leitura';$$('.lesson').forEach(d=>d.open=on);$$('.chapter').forEach(s=>{s.style.removeProperty('--in');s.style.removeProperty('--out');s.classList.remove('copy-off','dissolving');});measure();if(on){$('#load-state').textContent='Leitura · movimento pausado';$('#hotspot').classList.add('off');paint();}else{if(scene)$('#load-state').textContent='';else loadScene();snap=true;schedule();}}
 $('#reading').addEventListener('click',()=>{const id=CHAPTERS[state.chapter].id;setReading(!state.reading);document.getElementById(id).scrollIntoView();measure();snap=true;paint();});
 $('#preload-read').addEventListener('click',()=>{if(loading)loadAbort?.abort();setReading(true);document.body.classList.add('scene-ready');const h=$('#title-preparar');h.tabIndex=-1;h.focus({preventScroll:true});});
 reduced.addEventListener('change',e=>setReading(e.matches));
