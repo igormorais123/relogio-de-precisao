@@ -155,4 +155,6 @@ setReading(state.reading);measure();paint();
 
 // "Dentro do motor" leads to chapter 07, which shows the engine in this renderer (the old fullscreen viewer leaked memory per opening).
 const inspectEngineButton=document.getElementById('inspect-engine');
-inspectEngineButton?.addEventListener('click',()=>{document.getElementById('motor-do-loop')?.scrollIntoView({behavior:reduced.matches?'auto':'smooth'});});
+inspectEngineButton?.addEventListener('click',()=>{scene?.prepareEngine?.();document.getElementById('motor-do-loop')?.scrollIntoView({behavior:reduced.matches?'auto':'smooth'});});
+// Routes that jump to chapter 07 start the engine warm-up on the click, before the scroll arrives.
+$$('a[href="#motor-do-loop"]').forEach(a=>a.addEventListener('click',()=>scene?.prepareEngine?.()));
