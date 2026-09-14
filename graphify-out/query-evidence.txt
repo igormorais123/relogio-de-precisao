@@ -1,51 +1,55 @@
-Traversal: BFS depth=2 | Start: ['openEngine()'] | 9 nodes found
+Traversal: BFS depth=2 | Start: ['createTrack()'] | 10 nodes found
 
-NODE openEngine() [src=f1-loop/src/engine/viewer.js loc=L14 community=cinema.test.mjs]
-NODE viewer.js [src=f1-loop/src/engine/viewer.js loc=L1 community=cinema.test.mjs]
-NODE three [src=src/core/App.js loc=L1 community=vite]
-NODE c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_src_engine_viewer_css [src= loc= community=cinema.test.mjs]
-NODE smooth() [src=f1-loop/src/engine/viewer.js loc=L9 community=cinema.test.mjs]
-NODE ref_three_addons_controls_orbitcontrols_js [src= loc= community=cinema.test.mjs]
-NODE ref_three_addons_environments_roomenvironment_js [src= loc= community=cinema.test.mjs]
-NODE ref_three_addons_libs_meshopt_decoder_module_js [src= loc= community=cinema.test.mjs]
-NODE ref_three_addons_loaders_gltfloader_js [src= loc= community=cinema.test.mjs]
-EDGE viewer.js --contains [EXTRACTED]--> openEngine() at=f1-loop/src/engine/viewer.js:L14
-EDGE viewer.js --imports_from [EXTRACTED context=import]--> c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_src_engine_viewer_css at=f1-loop/src/engine/viewer.js:L6
-EDGE viewer.js --contains [EXTRACTED]--> smooth() at=f1-loop/src/engine/viewer.js:L9
-EDGE viewer.js --imports_from [EXTRACTED context=import]--> three at=f1-loop/src/engine/viewer.js:L1
-EDGE viewer.js --imports_from [EXTRACTED context=import]--> ref_three_addons_controls_orbitcontrols_js at=f1-loop/src/engine/viewer.js:L4
-EDGE viewer.js --imports_from [EXTRACTED context=import]--> ref_three_addons_environments_roomenvironment_js at=f1-loop/src/engine/viewer.js:L5
-EDGE viewer.js --imports_from [EXTRACTED context=import]--> ref_three_addons_libs_meshopt_decoder_module_js at=f1-loop/src/engine/viewer.js:L3
-EDGE viewer.js --imports_from [EXTRACTED context=import]--> ref_three_addons_loaders_gltfloader_js at=f1-loop/src/engine/viewer.js:L2
-Traversal: BFS depth=2 | Start: ['build-power-unit.py'] | 25 nodes found
+NODE createTrack() [src=f1-loop/src/world/track.js loc=L371 community=Watch.js]
+NODE createWipeClip() [src=f1-loop/src/fx/wipe-clip.js loc=L40 community=Watch.js]
+NODE rng() [src=f1-loop/src/world/track.js loc=L200 community=Watch.js]
+NODE asphaltTextures() [src=f1-loop/src/world/track.js loc=L215 community=Watch.js]
+NODE createTrackMotion() [src=f1-loop/src/world/track.js loc=L65 community=Watch.js]
+NODE detailTexture() [src=f1-loop/src/world/track.js loc=L267 community=Watch.js]
+NODE drawAtlas() [src=f1-loop/src/world/track.js loc=L320 community=Watch.js]
+NODE FOG_UNIFORMS() [src=f1-loop/src/world/track.js loc=L93 community=Watch.js]
+NODE rect() [src=f1-loop/src/world/track.js loc=L318 community=Watch.js]
+NODE periodicNoise() [src=f1-loop/src/world/track.js loc=L202 community=Watch.js]
+EDGE createTrack() --calls [EXTRACTED context=call]--> createTrackMotion() at=f1-loop/src/world/track.js:L375
+EDGE createTrack() --calls [EXTRACTED context=call]--> asphaltTextures() at=f1-loop/src/world/track.js:L461
+EDGE createTrack() --calls [EXTRACTED context=call]--> detailTexture() at=f1-loop/src/world/track.js:L462
+EDGE createTrack() --calls [EXTRACTED context=call]--> drawAtlas() at=f1-loop/src/world/track.js:L593
+EDGE createTrack() --calls [EXTRACTED context=call]--> rect() at=f1-loop/src/world/track.js:L618
+EDGE createTrack() --calls [EXTRACTED context=call]--> FOG_UNIFORMS() at=f1-loop/src/world/track.js:L649
+EDGE createTrack() --calls [EXTRACTED context=call]--> rng() at=f1-loop/src/world/track.js:L705
+EDGE createTrack() --calls [EXTRACTED context=call]--> createWipeClip() at=f1-loop/src/world/track.js:L374
+EDGE asphaltTextures() --calls [EXTRACTED context=call]--> periodicNoise() at=f1-loop/src/world/track.js:L218
+Traversal: BFS depth=2 | Start: ['SpeedEffect'] | 6 nodes found
 
-[!] TRUNCATED: showing 25 of 25 nodes (~850-token budget). The answer may be among the 0 cut nodes — raise the token budget (CLI: --budget) or narrow the query (e.g. context_filter=['call'], or get_node for a specific symbol).
+NODE SpeedEffect [src=f1-loop/src/fx/speed.js loc=L105 community=src/core/Registro.js]
+NODE .update() [src=f1-loop/src/fx/speed.js loc=L142 community=src/core/Registro.js]
+NODE .constructor() [src=f1-loop/src/fx/speed.js loc=L106 community=src/core/Registro.js]
+NODE .mainCamera() [src=f1-loop/src/fx/speed.js loc=L135 community=src/core/Registro.js]
+NODE .resetMotion() [src=f1-loop/src/fx/speed.js loc=L141 community=src/core/Registro.js]
+NODE .setAmount() [src=f1-loop/src/fx/speed.js loc=L137 community=src/core/Registro.js]
+EDGE SpeedEffect --method [EXTRACTED]--> .constructor() at=f1-loop/src/fx/speed.js:L106
+EDGE SpeedEffect --method [EXTRACTED]--> .mainCamera() at=f1-loop/src/fx/speed.js:L136
+EDGE SpeedEffect --method [EXTRACTED]--> .setAmount() at=f1-loop/src/fx/speed.js:L137
+EDGE SpeedEffect --method [EXTRACTED]--> .resetMotion() at=f1-loop/src/fx/speed.js:L141
+EDGE SpeedEffect --method [EXTRACTED]--> .update() at=f1-loop/src/fx/speed.js:L142
+Traversal: BFS depth=2 | Start: ['build-power-unit.py'] | 24 nodes found
 
-NODE build-power-unit.py [src=f1-loop/tools/build-power-unit.py loc=L1 community=world/garage.js]
-NODE register() [src=f1-loop/tools/build-power-unit.py loc=L52 community=world/garage.js]
-NODE cyl() [src=f1-loop/tools/build-power-unit.py loc=L79 community=world/garage.js]
-NODE smooth() [src=f1-loop/tools/build-power-unit.py loc=L63 community=world/garage.js]
-NODE cube() [src=f1-loop/tools/build-power-unit.py loc=L71 community=world/garage.js]
-NODE tube() [src=f1-loop/tools/build-power-unit.py loc=L87 community=world/garage.js]
-NODE bevel() [src=f1-loop/tools/build-power-unit.py loc=L67 community=world/garage.js]
-NODE torus() [src=f1-loop/tools/build-power-unit.py loc=L83 community=world/garage.js]
-NODE bolt() [src=f1-loop/tools/build-power-unit.py loc=L106 community=world/garage.js]
-NODE curved() [src=f1-loop/tools/build-power-unit.py loc=L99 community=world/garage.js]
-NODE empty() [src=f1-loop/tools/build-power-unit.py loc=L58 community=world/garage.js]
-NODE plate_label() [src=f1-loop/tools/build-power-unit.py loc=L111 community=world/garage.js]
-NODE bpy [src=f1-loop/tools/build-power-unit.py loc=L7 community=world/garage.js]
-NODE light() [src=f1-loop/tools/build-power-unit.py loc=L420 community=world/garage.js]
-NODE material() [src=f1-loop/tools/build-power-unit.py loc=L23 community=world/garage.js]
-NODE Original didactic V6 turbo power unit. Run with Blender 5.2 --background --pytho [src=f1-loop/tools/build-power-unit.py loc=L1 community=world/garage.js]
-NODE hashlib [src=f1-loop/tools/build-power-unit.py loc=L7 community=world/garage.js]
-NODE json [src=f1-loop/tools/build-power-unit.py loc=L7 community=world/garage.js]
-NODE math [src=f1-loop/tools/build-power-unit.py loc=L7 community=world/garage.js]
-NODE mathutils [src=f1-loop/tools/build-power-unit.py loc=L9 community=world/garage.js]
-NODE os [src=f1-loop/tools/build-power-unit.py loc=L7 community=world/garage.js]
-NODE pathlib [src=f1-loop/tools/build-power-unit.py loc=L8 community=world/garage.js]
-NODE subprocess [src=f1-loop/tools/build-power-unit.py loc=L7 community=world/garage.js]
-NODE sys [src=f1-loop/tools/build-power-unit.py loc=L7 community=world/garage.js]
-NODE tempfile [src=f1-loop/tools/build-power-unit.py loc=L7 community=world/garage.js]
-EDGE build-power-unit.py --imports [EXTRACTED context=import]--> bpy at=f1-loop/tools/build-power-unit.py:L7
-EDGE build-power-unit.py --contains [EXTRACTED]--> bevel() at=f1-loop/tools/build-power-unit.py:L67
-... (truncated — 0 more nodes cut by ~850-token budget. Narrow with context_filter=['call'] or use get_node for a specific symbol)
+[!] TRUNCATED: showing 16 of 24 nodes (~400-token budget). The answer may be among the 8 cut nodes — raise the token budget (CLI: --budget) or narrow the query (e.g. context_filter=['call'], or get_node for a specific symbol).
+
+NODE build-power-unit.py [src=f1-loop/tools/build-power-unit.py loc=L1 community=6]
+NODE register() [src=f1-loop/tools/build-power-unit.py loc=L52 community=6]
+NODE cyl() [src=f1-loop/tools/build-power-unit.py loc=L79 community=6]
+NODE smooth() [src=f1-loop/tools/build-power-unit.py loc=L63 community=6]
+NODE cube() [src=f1-loop/tools/build-power-unit.py loc=L71 community=6]
+NODE tube() [src=f1-loop/tools/build-power-unit.py loc=L87 community=6]
+NODE bevel() [src=f1-loop/tools/build-power-unit.py loc=L67 community=6]
+NODE torus() [src=f1-loop/tools/build-power-unit.py loc=L83 community=6]
+NODE bolt() [src=f1-loop/tools/build-power-unit.py loc=L106 community=6]
+NODE curved() [src=f1-loop/tools/build-power-unit.py loc=L99 community=6]
+NODE empty() [src=f1-loop/tools/build-power-unit.py loc=L58 community=6]
+NODE plate_label() [src=f1-loop/tools/build-power-unit.py loc=L111 community=6]
+NODE bpy [src=f1-loop/tools/build-power-unit.py loc= community=6]
+NODE light() [src=f1-loop/tools/build-power-unit.py loc=L420 community=6]
+NODE material() [src=f1-loop/tools/build-power-unit.py loc=L23 community=6]
+NODE hashlib [src=f1-loop/tools/build-power-unit.py loc= community=6]
+... (truncated — 8 more nodes cut by ~400-token budget. Narrow with context_filter=['call'] or use get_node for a specific symbol)

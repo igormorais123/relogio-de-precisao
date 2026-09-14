@@ -3,7 +3,7 @@
   "diagram_type": "architecture",
   "meta": {
     "title": "Relógio de Precisão + F1 Loop",
-    "subtitle": "Snapshot local · aula pausa na inspeção do motor e retoma ao fechar",
+    "subtitle": "Fluxo contínuo: box → túnel → pista · inspeção do motor pausa e retoma a aula",
     "quality_profile": "standard",
     "animation": "none",
     "viewBox": [
@@ -86,7 +86,7 @@
       "id": "f1-story",
       "type": "frontend",
       "label": "Progresso e câmera",
-      "sublabel": "story.js · progressão absoluta",
+      "sublabel": "story.js · câmera · wipes · velocidade",
       "pos": [
         360,
         450
@@ -100,7 +100,7 @@
       "id": "f1-scene",
       "type": "frontend",
       "label": "Cena cinematográfica",
-      "sublabel": "scene.js · fx/ · superfícies",
+      "sublabel": "scene.js · post.js · speed.js",
       "pos": [
         660,
         450
@@ -113,8 +113,8 @@
     {
       "id": "f1-world",
       "type": "frontend",
-      "label": "Mundo e 97 peças",
-      "sublabel": "world/ · mechanics.js",
+      "label": "Box, túnel e pista",
+      "sublabel": "world/ · mechanics.js · 97 peças",
       "pos": [
         960,
         450
