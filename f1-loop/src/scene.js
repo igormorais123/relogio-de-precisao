@@ -248,6 +248,9 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       target.y = mix(target.y, .55, pose.track);
       target.z = mix(target.z, 0, pose.track);
     }
+    // Give the lesson screen the portrait frame while the existing camera passes the desk.
+    const monitorReading = mobile ? smooth((p - 3.52) / .12) * (1 - smooth((p - 3.80) / .12)) : 0;
+    if (monitorReading > 0) target.lerp(garage.anchors.monitors, monitorReading);
     // Handheld breathing and pointer parallax stay small so the take remains legible.
     const follow = 1 - Math.exp(-dt * 3);
     pointer.sx += (pointer.x - pointer.sx) * follow; pointer.sy += (pointer.y - pointer.sy) * follow;
@@ -257,7 +260,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     // Track run: the frame drops the text-column offset and centres the car; the speed camera adds
     // millimetre shake, a slow sway and the FOV kick on top of the take.
     const c = pose.center || 0, run = pose.speed || 0, r = pose.track || 0;
-    camera.setViewOffset(width, height, mobile ? 0 : -width * .15 * (1 - c), (mobile ? height * .2 : -height * .03) * (1 - c) * (1 - mobileBay), width, height);
+    camera.setViewOffset(width, height, mobile ? 0 : -width * .15 * (1 - c), (mobile ? height * .2 : -height * .03) * (1 - c) * (1 - mobileBay) * (1 - monitorReading), width, height);
     speedCamera(time, run, shake, pose.fov);
     const s = pose.shake || 0;
     camera.fov = (pose.fov + shake.fovKick * s) * (mobile ? 1.32 : 1);
@@ -302,6 +305,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     scene.environment = r >= .5 && track.envTexture ? track.envTexture : (inTunnel ? envTunnel : envGarage).texture;
     tunnel?.setFlow(t);
     garage.setMood({debrief: d, evaluate: v});
+    garage.setLessonProgress(p);
     garage?.update(dt, camera, time);
     tunnel?.update(dt, camera, time);
 

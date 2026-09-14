@@ -3,7 +3,6 @@ import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js'
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {drawBrand} from '../../materia-prima/modulos-atualizados/identity.js';
 import {createWipeClip} from '../fx/wipe-clip.js';
-import {CLAIMS} from '../learning/model.js';
 
 // Box INTEIA procedural, derivado do box do laboratório (11 × 15 m).
 // Mundo frio e escuro (grafite, gelo apagado, LED frio no teto) com pontos
@@ -17,7 +16,7 @@ const RED = '#D92135';
 const DECISIONS = {aceitar: 'Aceitar', reverter: 'Reverter', revisar: 'Revisar', inconclusivo: 'Inconclusivo', 'decisao-necessaria': 'Decisão necessária'};
 const FALLBACK_LABELS = {task: 'Tarefa', reference: 'Fonte e versão de referência', criterion: 'Critério', hypothesis: 'Hipótese', test: 'Teste e limite', evidence: 'Evidência observada', correction: 'Correção e regressões', next: 'Pendência e próxima volta', decision: 'Decisão'};
 // Ilha de Avaliar: o caso da aula (comunicado sobre o teste do formulário, src/learning/model.js).
-// Esquerda: a fonte; centro: a conferência frase a frase; direita: o registro do aluno ou,
+// Esquerda: a fonte; centro: dado, limite e conclusão; direita: o registro do aluno ou,
 // sem registro, a consequência do critério. Nenhuma tela mostra campo vazio no plano de clímax.
 const CASE_SOURCE = [
   'Em 14/05/2026, um setor comparou dois formulários de atendimento.',
@@ -25,19 +24,6 @@ const CASE_SOURCE = [
   'Formulário e equipe mudaram juntos. A causa não foi isolada.',
   'Não há data nem autorização para adoção definitiva.',
 ];
-const VERDICT = {ok: '#6fe0a8', no: '#ff4b5c', unk: '#ffb54a'};
-const CLAIM_STYLE = {
-  sustentada: {verdict: ['SUSTENTADA'], tone: 'ok'},
-  'nao-sustentada': {verdict: ['NÃO SUSTENTADA'], tone: 'no'},
-  'nao-verificada': {verdict: ['NÃO VERIFICADA'], tone: 'unk'},
-};
-// The world and the exercise share verdicts; only these shorter screen captions differ.
-const CASE_CLAIMS = [
-  {text: 'Medianas de 12 e 9 min, 50 por versão', where: 'Registro, frase 2'},
-  {text: 'O novo formulário causou a redução', where: 'Registro, frase 3'},
-  {text: 'Adoção definitiva em 20 de maio', where: 'Registro, frase 4'},
-  {text: 'Equipe treinada antes do teste', where: 'Nenhuma frase do registro'},
-].map((caption, index) => ({...caption, ...CLAIM_STYLE[CLAIMS[index].verdict]}));
 const STUDENT_FIELDS = ['evidence', 'criterion', 'decision'];
 
 export function createGarage({renderer, scene, mobile = false} = {}) {
@@ -425,6 +411,13 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
 
   // --------------------------------------------------------------- desenho
   let lastValues = {}, lastFields = [];
+  let lessonBeat = 0;
+  function setLessonProgress(progress) {
+    const beat = progress < 3.70 ? 0 : progress < 3.77 ? 1 : 2;
+    if (beat === lessonBeat) return;
+    lessonBeat = beat;
+    drawCaseScreen(notebookScreens[1]);
+  }
   function setNotebook(values = {}, fields = []) {
     lastValues = values || {};
     lastFields = Array.isArray(fields) ? fields : [];
@@ -526,6 +519,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
       brand: brand.position.clone(),
     },
     setNotebook,
+    setLessonProgress,
     setMood,
     update,
     dispose,
@@ -605,49 +599,34 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     texture.needsUpdate = true;
   }
 
+  // The camera's existing push-in becomes a short lesson. Textures only upload
+  // when a scroll beat changes; reversing the scroll restores the earlier card.
   function drawCaseScreen(screen) {
-    const {ctx, canvas, texture} = screen;
+    const {ctx, canvas, texture, mesh} = screen;
     const W = canvas.width, H = canvas.height, s = W / 1024;
     paintScreenBase(ctx, W, H);
-    const m = screenHeader(ctx, W, s, 'COMUNICADO × REGISTRO', 'FRASE A FRASE');
-    const verdictX = W - m, textW = 560 * s;
-    CASE_CLAIMS.forEach((claim, i) => {
-      const top = (140 + i * 82) * s, mid = top + 41 * s;
-      if (i) { ctx.fillStyle = 'rgba(210,228,240,.08)'; ctx.fillRect(m, top, W - 2 * m, 2 * s); }
-      ctx.fillStyle = VERDICT[claim.tone];
-      ctx.fillRect(m, top + 14 * s, 6 * s, 54 * s);
-      ctx.fillStyle = '#8ea6b4';
-      ctx.font = `${44 * s}px ${DISPLAY}`;
-      ctx.fillText(String(i + 1), m + 22 * s, mid + 15 * s);
-      ctx.fillStyle = '#eef3f6';
-      ctx.font = `${31 * s}px ${BODY}`;
-      ctx.fillText(wrap(ctx, claim.text, textW, 1)[0], m + 62 * s, mid - 2 * s);
-      ctx.fillStyle = '#8ea6b4';
-      ctx.font = `${21 * s}px ${BODY}`;
-      ctx.fillText(claim.where, m + 62 * s, mid + 26 * s);
-      ctx.textAlign = 'right';
-      ctx.fillStyle = VERDICT[claim.tone];
-      const two = claim.verdict.length > 1;
-      ctx.font = `${(two ? 34 : 48) * s}px ${DISPLAY}`;
-      claim.verdict.forEach((line, k) => ctx.fillText(line, verdictX, mid + (two ? (k ? 34 : -2) : 17) * s));
-      ctx.textAlign = 'left';
-    });
-    // Critério: a faixa inferior dá o veredito do conjunto.
-    const band = 474 * s;
-    ctx.fillStyle = 'rgba(217,33,53,.24)';
-    ctx.fillRect(m, band, W - 2 * m, 74 * s);
-    ctx.fillStyle = RED;
-    ctx.fillRect(m, band, 10 * s, 74 * s);
-    ctx.fillStyle = '#eef3f6';
-    ctx.font = `${30 * s}px ${BODY}`;
-    setSpacing(ctx, 3 * s);
-    ctx.fillText('CRITÉRIO', m + 34 * s, band + 48 * s);
-    setSpacing(ctx, 0);
-    ctx.textAlign = 'right';
-    ctx.fillStyle = '#ff5a69';
-    ctx.font = `${64 * s}px ${DISPLAY}`;
-    ctx.fillText('NÃO PASSOU', W - m - 24 * s, band + 60 * s);
-    ctx.textAlign = 'left';
+    const m = 52 * s;
+    const cards = [
+      {title:'O QUE O TESTE MOSTROU', lines:['12 → 9 min'], detail:['Mediana de atendimento', '50 pedidos em cada versão'], source:'REGISTRO · FRASE 2'},
+      {title:'O QUE MUDOU JUNTO', lines:['FORMULÁRIO', '+ EQUIPE'], detail:['Duas mudanças no mesmo teste.'], source:'REGISTRO · FRASE 3'},
+      {title:'O QUE PODEMOS CONCLUIR', lines:['MENOR TEMPO.', 'CAUSA NÃO ISOLADA.'], detail:['Atribuir o ganho ao formulário', 'vai além do que o registro sustenta.'], source:'CONFERIR ANTES DE COMUNICAR'},
+    ];
+    const card = cards[lessonBeat];
+    ctx.textAlign='left';ctx.textBaseline='alphabetic';
+    ctx.fillStyle='#8ea6b4';ctx.font=`${30*s}px ${BODY}`;
+    ctx.fillText(card.title,m,78*s);
+    ctx.fillStyle='#ffd447';ctx.font=`${(lessonBeat===0?174:lessonBeat===1?108:86)*s}px ${DISPLAY}`;
+    card.lines.forEach((line,i)=>ctx.fillText(line,m,(lessonBeat===0?292:244+i*102)*s));
+    ctx.fillStyle='#eef3f6';ctx.font=`${38*s}px ${BODY}`;
+    card.detail.forEach((line,i)=>ctx.fillText(line,m,(410+i*48)*s));
+    ctx.fillStyle='#8ea6b4';ctx.font=`${22*s}px ${BODY}`;
+    ctx.fillText(card.source,m,540*s);
+    for(let i=0;i<3;i++){
+      ctx.fillStyle=i===lessonBeat?'#ffd447':'#34414a';
+      ctx.fillRect(W-m-(3-i)*52*s,526*s,38*s,8*s);
+    }
+    mesh.userData.lessonBeat=lessonBeat;
+    mesh.userData.lessonTitle=card.title;
     texture.needsUpdate = true;
   }
 
