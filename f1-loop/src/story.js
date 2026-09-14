@@ -69,6 +69,11 @@ const CAMERA=[
  // 3.77): the lens only creeps up (≈0.7 m), so it never stops and never pulls the screen around.
  [3.70,[-45,1.7,3],[-4.57,1.45,-1.5]],
  [3.80,[-52,1.4,3.7],[-4.57,1.45,-1.5]],
+ [3.84,[-48.2,1.75,4.08],[-4.57,1.45,-1.5]],
+ // Whip pan: the aim leaves the monitor at 3.84 and lands on the car by 3.87 while the lens is still by the
+ // island (this key sits on the crane's own path, so position speed is unchanged); the car is in shot,
+ // cropped big, before the crane pulls back and settles it.
+ [3.87,[-41.6,2.36,4.42],[.3,.45,.2]],
  // 05 Corrigir · box. The crane rises off the island in the last stretch and has the whole closed car
  // inside the reading zone from 3.96, when the 05 title opens, looking down on the revised floor; then
  // it pulls back while the body lifts (explode 3.95–4.2).
@@ -84,12 +89,12 @@ const CAMERA=[
 const TRACKS={
  // Long-lens zooms at 0.72 and 1.64 make the component close-ups, 30–34 on the track, 20 on the
  // monitor; 38 is back before copy arrives.
- fov:[[0,38],[.5,38],[.6,30],[.72,20],[.84,28],[.94,38],[1.5,38],[1.56,31],[1.64,25],[1.74,28],[1.86,36],[2,38],[2.5,38],[2.62,30],[2.74,34],[2.86,34],[3,38],[3.45,36],[3.68,20],[3.86,20],[3.96,37],[4,38],[4.5,38],[4.66,34],[5,38]],
+ fov:[[0,38],[.5,38],[.6,30],[.72,20],[.84,28],[.94,38],[1.5,38],[1.56,31],[1.64,25],[1.74,28],[1.86,36],[2,38],[2.5,38],[2.62,30],[2.74,34],[2.86,34],[3,38],[3.45,36],[3.68,20],[3.84,20],[3.9,32],[3.96,37],[4,38],[4.5,38],[4.66,34],[5,38]],
  // The car opens on the way to the bench, peaks after the copy leaves and slams shut at the wipe.
  explode:[[0,0],[.62,0],[1,.35],[1.45,.6],[1.62,.8],[1.86,0],[3.95,0],[4.2,.45],[4.55,.45],[4.85,0],[5,0]],
  // Shallow focus lives in the closes and the Avaliar rack; reading pauses keep the whole subject sharp;
  // the track keeps it low so the bokeh does not erase the speed streaks.
- bokeh:[[0,.11],[.5,.11],[.72,.5],[.9,.25],[1,.2],[1.5,.2],[1.64,.5],[1.8,.35],[2,.25],[2.5,.25],[2.58,.12],[2.92,.12],[3,.25],[3.5,.25],[3.68,.7],[3.86,.7],[3.96,.3],[4,.11],[4.5,.11],[4.66,.22],[5,.11]],
+ bokeh:[[0,.11],[.5,.11],[.72,.5],[.9,.25],[1,.2],[1.5,.2],[1.64,.5],[1.8,.35],[2,.25],[2.5,.25],[2.58,.12],[2.92,.12],[3,.25],[3.5,.25],[3.68,.7],[3.82,.7],[3.9,.3],[3.96,.25],[4,.11],[4.5,.11],[4.66,.22],[5,.11]],
  // Avaliar is lit by the evidence: the room drops and the monitors take over.
  evaluate:[[0,0],[2.95,0],[3.15,1],[3.84,1],[3.98,0],[5,0]],
  exposure:[[0,1],[1.8,1],[2.2,.9],[2.8,.9],[3.2,1],[4.8,1],[5,.92]],
@@ -108,7 +113,7 @@ const TRACKS={
 // Focus narrates (R8): it rides the face of the car turned to the lens, so the subject of each
 // pause is sharp from any angle. Avaliar racks it to the island monitors only once the push-in has
 // made them big (3.5 on); each close locks it on its part with a short range (LOCK, CLOSES).
-const RACK=[[0,0],[3.5,0],[3.7,1],[3.82,1],[3.92,0],[5,0]];
+const RACK=[[0,0],[3.5,0],[3.7,1],[3.82,1],[3.88,0],[5,0]];
 // Part centres at the explode amount of each close (tools/car-hull.json): rear wing, floor.
 const CLOSES=[[.72,[.3,.6,-2.25]],[1.64,[0,.29,-.85]]];
 const LOCK=[[0,0],[.58,0],[.66,1],[.8,1],[.9,0],[1.5,0],[1.57,1],[1.7,1],[1.78,0],[5,0]];
@@ -228,7 +233,7 @@ export function portraitFrame(pose,aspect=390/844){
  }
  // The lesson screen (3.52–3.92) owns the portrait frame: aimed at its centre and not lifted, so the big
  // cards on the monitor are not cut on the left (garage.js anchors.monitors).
- const lesson=smooth((p-3.52)/.12)*(1-smooth((p-3.8)/.12));
+ const lesson=smooth((p-3.52)/.12)*(1-smooth((p-3.76)/.09));
  if(lesson>0){target=target.map((v,i)=>v+(MONITORS[i]-v)*lesson);offsetY*=1-lesson;}
  // Reverse shot inside the box (1.68–1.97): a wide lens keeps the lens in front of the rear wall.
  const bay=smooth((p-1.68)/.1)*(1-smooth((p-1.83)/.14));
