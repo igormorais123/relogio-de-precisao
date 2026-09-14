@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createLearningState, applyLearningAction, checkClaims, checkCorrection, checkDecision, CORRECTIONS, SIMULATION_REQUEST, CLAIMS, SOURCE } from '../src/learning/model.js';
 import { renderLearningMarkup } from '../src/learning/index.js';
-const validAnswers = [{verdict:'sustentada',source:'2'},{verdict:'nao-sustentada',source:'3'},{verdict:'nao-verificada',source:'4'},{verdict:'nao-verificada',source:'nenhuma'}];
+const validAnswers = [{verdict:'sustentada',source:'2'},{verdict:'nao-sustentada',source:'3'},{verdict:'nao-sustentada',source:'4'},{verdict:'nao-verificada',source:'nenhuma'}];
 test('navigation, skipped stages and incomplete criteria do not produce progress',()=>{
  const s=createLearningState();
  for(const action of [{stage:5,decision:'comunicar',responsibility:true},{stage:0,criterion:'   ',selfReview:true},{stage:0,criterion:'Manter dados',selfReview:false}]){
@@ -41,10 +41,15 @@ test('Execute archives exact simulation request, source and intact candidate onl
  s=applyLearningAction(s,{stage:2,archive:true,archiveChoice:'intacta'}).state;assert.equal(s.execution.request,SIMULATION_REQUEST);assert.deepEqual(s.execution.source,SOURCE);assert.deepEqual(s.execution.candidate,CLAIMS.map(c=>c.text));
  assert.notStrictEqual(s.execution.source,SOURCE);assert.equal(s.execution.kind,'prewritten-simulation');
 });
-test('missing date source is not confused with contradicted causal inference',()=>{
- const swapped=structuredClone(validAnswers);swapped[2].verdict='nao-sustentada';assert.equal(checkClaims(swapped).passed,true);assert.match(checkClaims(swapped).findings[2].message,/verdade externa/);
- swapped[2].verdict='nao-verificada';swapped[1].verdict='nao-verificada';assert.equal(checkClaims(swapped).passed,false);
+test('each claim requires the one classification and source supported by the case',()=>{
+ const expected=[['sustentada','2'],['nao-sustentada','3'],['nao-sustentada','4'],['nao-verificada','nenhuma']];
+ for(let i=0;i<4;i++) for(const verdict of ['sustentada','nao-sustentada','nao-verificada']) for(const source of ['1','2','3','4','nenhuma']) {
+  const answers=structuredClone(validAnswers);answers[i]={verdict,source};
+  assert.equal(checkClaims(answers).passed, verdict===expected[i][0]&&source===expected[i][1],`claim ${i+1}: ${verdict}/${source}`);
+ }
+ assert.match(checkClaims(validAnswers).findings[2].message,/não prova que a data seja falsa/);
 });
+
 test('three legitimate outcomes require a coherent scope/reason pair, never a general approval',()=>{
  for(const [decision,reason] of [['comunicar','observacao'],['inconclusivo','causa-pendente'],['inconclusivo','data-pendente'],['decisao-necessaria','autorizacao']]){
   assert.equal(checkDecision(decision,reason,true).passed,true);assert.equal(checkDecision(decision,reason,false).passed,false);
@@ -80,4 +85,14 @@ test('training needs missing capacity record; unsupported date and unverified tr
  answers[3].verdict='nao-sustentada';assert.equal(checkClaims(answers).passed,false);
  assert.equal(CLAIMS.length,4);assert.match(CLAIMS[3].text,/recebeu treinamento/);assert.doesNotMatch(CORRECTIONS[0],/recebeu treinamento/);
  const html=renderLearningMarkup();assert.match(html,/quatro frases/);assert.match(html,/Nenhuma frase do registro trata disso/);assert.match(html,/data-lr-documents open/);assert.match(html,/Critério-modelo/);assert.equal((html.match(/name="review-/g)||[]).length,3);
+});
+
+test('static preparation offers the model before save and evaluation keeps four expandable claims',()=>{
+ const html=renderLearningMarkup();
+ assert.ok(html.indexOf('Critério-modelo:')<html.indexOf('Guardar meu critério'));
+ assert.doesNotMatch(html,/dois eixos|ambos os rótulos|aceitamos dois/i);
+ assert.match(html,/a fonte trata do assunto, mas não permite afirmar isso/);
+ assert.match(html,/a fonte não trata do assunto e falta consultar outro documento/);
+ assert.equal((html.match(/data-lr-claim="[0-3]" open/g)||[]).length,4);
+ assert.match(html,/>Registrar minha escolha<\/button>/);
 });
