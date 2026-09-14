@@ -143,7 +143,7 @@ float trPools(float along, float x, float z, float near){
 // percorrida pelo raio e com a rugosidade; a caixa do carro bloqueia o que passa por ele.
 const REFLECT_GLSL = /* glsl */`
 uniform vec3 uLampColor;
-uniform float uReflGain;
+uniform float uReflGain, uSpecGain;
 vec3 trReflect(vec3 P, vec3 nW, float rough){
   vec3 V = normalize(cameraPosition - P);
   vec3 N = normalize(mix(vec3(0., 1., 0.), nW, .5));
@@ -219,6 +219,34 @@ vec3 trReflect(vec3 P, vec3 nW, float rough){
   sum = mix(sum, carSeen, hit);
   wide *= 1. - hit;
   return (sum * gloss + wide / (1. + rough * rough * 4.)) * F * uReflGain;
+}
+// Especular de microfaceta das luminárias da reta e das torres: em visão rasante sobre asfalto
+// rugoso, cada lâmpada vira uma faixa longa na direção da lente, quebrada pela normal e pela
+// rugosidade do agregado. As fontes andam com a pista, então nada acompanha a câmera.
+float trGGX(vec3 P, vec3 N, vec3 V, vec3 Lp, float a2){
+  vec3 L = Lp - P; float d2 = dot(L, L); L *= inversesqrt(d2);
+  vec3 H = normalize(L + V);
+  float NoL = max(dot(N, L), 0.), NoH = max(dot(N, H), 0.), NoV = max(dot(N, V), .02);
+  float q = NoH * NoH * (a2 - 1.) + 1.;
+  float k = sqrt(a2) * .5;
+  float G = NoL / (NoL * (1. - k) + k) / (NoV * (1. - k) + k);
+  float Fr = .04 + .96 * pow(1. - max(dot(V, H), 0.), 5.);
+  return a2 / (3.14159 * q * q) * G * Fr * .25 / d2;
+}
+vec3 trLampSpec(vec3 P, vec3 N, float rough){
+  vec3 V = normalize(cameraPosition - P);
+  float a = max(rough * rough, .03), a2 = a * a;
+  float along = P.z + uTravel;
+  float dz = mod(along - 10., 20.) - 10.;
+  float dzL = mod(along, 80.) - 40., dzR = mod(along + 40., 80.) - 40.;
+  float posts = 0., towers = 0.;
+  for (int k = -2; k <= 2; k++) posts += trGGX(P, N, V, vec3(6.2, 8.6, P.z - dz + 20. * float(k)), a2);
+  for (int k = -1; k <= 1; k++) {
+    towers += trGGX(P, N, V, vec3(-15., 24.4, P.z - dzL + 80. * float(k)), a2);
+    towers += .8 * trGGX(P, N, V, vec3(24., 24.4, P.z - dzR + 80. * float(k)), a2);
+  }
+  // Teto baixo: acima disso a lâmpada sobre a roda virava um lóbulo branco saturado.
+  return min(uLampColor * (posts * 80. + towers * 1100.) * uSpecGain, vec3(2.2));
 }`;
 
 // Luz das luminárias da reta no chão (as duas mais próximas em z) e sombra de contato do carro
@@ -238,11 +266,12 @@ float trSweep(vec3 P){
 float trContact(vec3 P){
   vec2 q = abs(P.xz - vec2(0., -.72)) - vec2(.8, 1.8);
   float d = length(max(q, 0.)) + min(max(q.x, q.y), 0.);
-  float body = 1. - .75 * (1. - smoothstep(-.35, .6, d));
-  vec2 f = vec2(abs(P.x) - .743, P.z - 1.52) / vec2(.3, .45);
-  vec2 r = vec2(abs(P.x) - .72, P.z + 1.84) / vec2(.32, .5);
-  float tyres = 1. - .8 * exp(-dot(f, f) * 1.4) - .8 * exp(-dot(r, r) * 1.4);
-  return body * clamp(tyres, .1, 1.);
+  // Núcleo quase preto sob o assoalho e uma penumbra larga; sob os pneus, contato duro e escuro.
+  float body = 1. - .9 * (1. - smoothstep(-.45, .9, d));
+  vec2 f = vec2(abs(P.x) - .743, P.z - 1.52) / vec2(.26, .4);
+  vec2 r = vec2(abs(P.x) - .72, P.z + 1.84) / vec2(.28, .44);
+  float tyres = 1. - .95 * exp(-dot(f, f) * 1.8) - .95 * exp(-dot(r, r) * 1.8);
+  return body * clamp(tyres, .04, 1.);
 }`;
 
 // ------------------------------------------------------------ texturas
@@ -513,7 +542,7 @@ export function createTrack({THREE, renderer, mobile = false} = {}) {
   const asphalt = asphaltTextures(THREE, texSize);
   const detail = detailTexture(THREE, mobile ? 256 : 512, mobile ? 512 : 1024);
   textures.add(asphalt.data); textures.add(asphalt.normal); textures.add(detail);
-  const reflect = {uLampColor: {value: new THREE.Color('#e4ecff')}, uReflGain: {value: .55}};
+  const reflect = {uLampColor: {value: new THREE.Color('#e4ecff')}, uReflGain: {value: .55}, uSpecGain: {value: 1}};
   {
     const material = new THREE.MeshStandardMaterial({color: '#ffffff', roughness: 1, metalness: 0, envMapIntensity: .15});
     const groundUniforms = {uAsphalt: {value: asphalt.data}, uAsphaltN: {value: asphalt.normal}, uDetail: {value: detail}};
@@ -550,6 +579,13 @@ float trRough, trWet; vec2 trUv, trGx, trGy; float trTrack, trRun, trLine, trGra
   trGrass = clamp(1. - trLine - trTrack - trRun, 0., 1.);
   float lowN = trNoise(vec2(x * .25, along * .125), 80.);
   float midN = trNoise(vec2(x * 1.3, along * .5), 320.);
+  // Estrias do agregado: finas através da pista (0,05–0,15 m) e longas ao longo dela, então
+  // sobrevivem ao arrasto como riscos de tom e rugosidade e não cintilam com o mundo correndo.
+  // Cada oitava some antes de ficar menor que um pixel.
+  float fx = fwidth(x);
+  float st1 = mix(.5, trNoise(vec2(x * 7., along * .15), 96.), 1. - smoothstep(.25, .6, fx * 7.));
+  float st2 = mix(.5, trNoise(vec2(x * 20., along * .4), 256.), 1. - smoothstep(.25, .6, fx * 20.));
+  float streak = .55 * st1 + .45 * st2;
   // Manchas úmidas: rugosidade baixa onde o reflexo das luzes se estica.
   float wetN = .7 * trNoise(vec2(x * .2, along * .1), 64.) + .3 * trNoise(vec2(x * .9, along * .5), 320.);
   trWet = smoothstep(.5, .66, wetN) * (trTrack + .6 * trRun + .5 * trLine);
@@ -557,7 +593,7 @@ float trRough, trWet; vec2 trUv, trGx, trGy; float trTrack, trRun, trLine, trGra
   float grooves = exp(-pow((abs(x) - .76) / .22, 2.));
   float tar = det.r * trTrack, repair = det.g, skid = det.b * trTrack;
   // Asfalto velho à noite: albedo ≈ .02, porque o AgX do pós levanta o preto.
-  vec3 road = vec3(.02, .021, .023) * (.4 + 1.2 * agg.r) * (.8 + .4 * lowN);
+  vec3 road = vec3(.02, .021, .023) * (.4 + 1.2 * agg.r) * (.8 + .4 * lowN) * (.6 + .8 * streak);
   road *= 1. - .35 * racing - .25 * grooves * (.6 + .4 * midN);
   road = mix(road, road * vec3(1.25, 1.22, 1.18), repair * .6);
   road *= (1. - .7 * tar) * (1. - .8 * skid);
@@ -567,11 +603,12 @@ float trRough, trWet; vec2 trUv, trGx, trGy; float trTrack, trRun, trLine, trGra
   vec3 paint = mix(vec3(.4, .41, .4) * (.8 + .3 * agg.r), road * 1.6, wear * .35);
   vec3 grass = vec3(.01, .015, .011) * (.6 + .8 * agg.r);
   diffuseColor.rgb *= road * trTrack + runoff * trRun + paint * trLine + grass * trGrass;
-  trRough = .86 - .18 * racing - .1 * grooves + .22 * (agg.b - .5);
+  // Rugosidade variável: a trajetória polida e as estrias mais lisas seguram a faixa de luz.
+  trRough = .78 - .22 * racing - .1 * grooves + .22 * (agg.b - .5) - .36 * (streak - .5);
   trRough = mix(trRough, .28, tar);
   trRough = mix(trRough, .7, skid * .6);
   trRough = mix(trRough, .6, trLine);
-  trRough = mix(trRough, .08 + .12 * agg.b, trWet);
+  trRough = mix(trRough, .1 + .12 * agg.b - .12 * (streak - .5), trWet);
   trRough = mix(trRough, .97, trGrass);
   trRough = clamp(trRough, .06, 1.);
 }`)
@@ -593,7 +630,10 @@ reflectedLight.directSpecular *= .01 * trAO;
 reflectedLight.indirectDiffuse *= trAO;
 reflectedLight.indirectSpecular *= .3 * trAO;
 reflectedLight.directDiffuse += uPoolColor * (trPools(vTrackW.z + uTravel, vTrackW.x, vTrackW.z, 0.) * 4. + trSweep(vTrackW) * 110.) * material.diffuseColor * trAO;
-reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack + .7 * trRun + .8 * trLine);`);
+// Reflexos também passam pela oclusão: sem ela, a borda do assoalho ganhava uma linha de luz.
+float trMask = (trTrack + .7 * trRun + .8 * trLine) * trAO;
+reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * trMask;
+reflectedLight.directSpecular += trLampSpec(vTrackW, trNW, trRough) * trMask;`);
     };
     material.customProgramCacheKey = () => 'track-ground-v3';
     own(materials, material);

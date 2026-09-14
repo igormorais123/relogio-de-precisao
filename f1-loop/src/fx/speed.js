@@ -257,15 +257,16 @@ export function createSparks({THREE, renderer, mobile = false}) {
         return p;
       }
       void main(){
-        // Rajadas: a prancha toca o asfalto por ~0,2 s e solta um feixe de faíscas juntas; cerca de
-        // duas rajadas em três ciclos de 0,8 s, só com o carro perto do máximo.
-        const float B = .8;
+        // Rajadas curtas e frequentes: a prancha toca o asfalto a cada ~0,45 s e solta um feixe que
+        // dura ~0,35 s; quatro ciclos em cinco acendem, então um quadro parado quase sempre pega
+        // faíscas. Continuam na frenagem (a prancha desce com o bico), apagam com o carro lento.
+        const float B = .45;
         float k = floor(uTime / B);
-        float age = uTime - k * B - aSeed.y * .2;
+        float age = uTime - k * B - aSeed.y * .3;
         float life = .06 + .1 * aSeed.w;
-        float gate = step(.35, fract(sin(k * 91.7 + 3.1) * 43758.5453))
-                   * step(.3, fract(sin(k * 12.9 + aSeed.z * 78.2) * 43758.5453))
-                   * smoothstep(.6, .9, uAmount);
+        float gate = step(.1, fract(sin(k * 91.7 + 3.1) * 43758.5453))
+                   * step(.55, fract(sin(k * 12.9 + aSeed.z * 78.2) * 43758.5453))
+                   * smoothstep(.12, .4, uAmount);
         vec3 o = vec3((aSeed.z - .5) * .6, .02, -1.2 - aSeed.x * .9);
         // O asfalto corre a 80 m/s: solta da prancha, a faísca fica para trás rápido e quica baixo.
         vec3 v = vec3((aSeed.w - .5) * 3., .5 + 2.2 * aSeed.y, -(16. + 26. * aSeed.z));
@@ -297,7 +298,7 @@ export function createSparks({THREE, renderer, mobile = false}) {
       if (mobile) return;
       uniforms.uTime.value = time;
       uniforms.uAmount.value = amount > 0 ? Math.min(amount, 1) : 0;
-      object.visible = uniforms.uAmount.value > .6;
+      object.visible = uniforms.uAmount.value > .12;
       if (renderer) uniforms.uRes.value.copy(renderer.getDrawingBufferSize(buffer));
     },
     dispose() { object.removeFromParent(); geometry.dispose(); material.dispose(); },
