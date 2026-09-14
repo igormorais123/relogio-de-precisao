@@ -339,3 +339,45 @@ Marca atualizada apenas em identity.js, SVG público e faixa da pista: INTEIA co
 4. m7 Corrigir: igualar o tamanho das três versões e escrever o acerto como "retirou três afirmações sem apoio: a causa, a data de adoção e o treinamento".
 5. m6: exemplo/saídas de Encerrar; confirme se a prática já deixa claro que há mais de uma saída sem o texto do item 1.
 Rode `npm test` e anuncie aqui os SHAs; eu integro por cherry-pick.
+
+## Escudo INTEIA fornecido por Igor — 45253af
+Novo pedido direto: reestilizar escudo/cérebro das três referências e aplicar no carro. Imagegen gerou arte amarelo/grafite; PNG 1,87 MB com recorte via alphaMap no material. Branding agora assíncrono (await em scene e track-lab), emblemas lateral e bico, nome preservado. QA desktop/celular: três decals, sem erros. Publicação isolada da fonte 45253af; demais ajustes de cinema não alterados.
+
+## Pedido direto Igor: aula no monitor técnico
+Vou editar somente drawCaseScreen/setLessonProgress em world/garage.js e uma chamada em scene.apply. Três telas grandes na aproximação de Avaliar: dado (12/9 min), limite (formulário e equipe mudaram juntos), conclusão (não atribuir causa). Não altero luzes, geometria, câmera nem main/content; preservo os demais monitores. Integrar esses trechos na rodada 5.
+
+## Aula no monitor validada
+Dois arquivos: garage.js ganha setLessonProgress e três cartões grandes em drawCaseScreen (limiares 3.70/3.77); scene.js chama a atualização e centraliza só o close móvel entre 3.52 e 3.92. QA 3.67/3.75/3.83 e retorno confirmou 0/1/2/0 sem erros; retrato real conferido após centralização. 47 testes e build PASS. Graphify update recusou redução de 642 para 609 nós; mapa anterior preservado, não usei force. No merge R5 preservar as luzes próprias de vocês e integrar somente esses trechos.
+
+Publicação deste pedido: fonte isolada c7447f3 = produção 45253af + monitor, branch fix/f1-monitor-lesson-release; gh-pages 3ce7d4a. Commit integrável canônico 4e674c9. Não publiquei interface R5 1fa3129. Foco móvel do monitor em scene.js é necessário para não cortar o texto à esquerda.
+
+Igor corrigiu: quer uma cena EXTRA inteira no monitor, com tempo de leitura. Trabalho em worktree dedicated-monitor sobre produção c7447f3. Acrescentarei seção própria entre Avaliar e Corrigir, câmera sustentada, navegação por três telas; integração pontual em main/render/style/scene, sem tocar a rodada 5 canônica.
+
+## Integração Claude ~12:45 — tipografia, produção divergente e cena extra do monitor
+- **Tipografia integrada (canônica `feat/f1-loop-cinema`):** o juiz cego (`planejamento/07-avaliacao-cinema/rodada-5/tipografia.md`) escolheu **Barlow** para o corpo (Barlow 7,7; IBM Plex 6,8; Atkinson 6,4; Lato 6,1). Regular e SemiBold reais em `public/fonts/`; `learning.css` e `viewer.css` usam Barlow. Mantenha `font-family:Barlow` se editar essas folhas. A Lato fica só para o canvas de `garage.js`.
+- **Canônica agora tem:** interface R5 (1fa3129), pista R5 (bc7bd67), luz/box/túnel R5 (bdf8375, preserva seus monitores de 4e674c9 e o `setLessonProgress`), tipografia. Não publicado ainda.
+- **Produção divergente:** `gh-pages` 3ce7d4a saiu de `fix/f1-monitor-lesson-release` (c7447f3), fora da canônica. Próximo deploy precisa sair da canônica, senão perde a rodada 5 inteira. Se o Igor pedir publicação a você, publique a partir da `feat/f1-loop-cinema` atualizada.
+- **Cena extra do monitor (pedido do Igor):** combina com a rodada 5, mas há colisão direta: o agente Claude de câmera está refazendo exatamente a costura Avaliar → Corrigir (3,74–4,00) em `story.js` e o bloco de câmera do `scene.js`, e o `main.js` depende de 6 capítulos (`progress()`, `SCENE_LABELS`, `paintCopy`, nav). Proposta para não quebrar: (1) não criar 7º capítulo; faça a cena como trecho sustentado dentro de Avaliar, alongando a seção `#avaliar` (altura) e usando a faixa de progresso ~3,55–3,92 que já é o push-in do monitor; (2) mande para mim, aqui, o trecho exato de `render-page.mjs`/`style.css`/`main.js` que precisa, e eu aplico; (3) a pose de câmera sustentada vai para `story.js` via agente de câmera: descreva posição/alvo/fov desejados e as janelas das três telas. Não edite `story.js` nem o bloco de câmera do `scene.js` na canônica enquanto ele não entregar.
+- **Pedido:** o rótulo "CASO PARA PRATICAR" voltou ao topo da prática (visto em Avaliar, desktop). Tinha saído por ser metalinguagem; retire de novo em `src/learning/*`.
+
+## Cena adicional dedicada — 8da5642 em feat/f1-dedicated-monitor
+Implementada conforme correção explícita de Igor: seção #analise-no-box de 600svh ENTRE Avaliar e Corrigir, SEM sétimo .chapter (continuam seis). monitor-scene.js remapeia a entrada 3.64→3.74, sustenta 3.74 por 4 viewports e sai até4; três cartões e botões voltar/próxima/corrigir, versão textual no modo leitura. main usa monitorTimeline e passa monitorScene/monitorReading. Câmera dedicada interpola alvo para garage.anchors.monitors, posição relativa +X2.2 desktop/+X4.8 mobile, Y+.035/Z+.025, FOV26/34; sem parallax, foco amplo/bloom. Controle dos cartões independente do storyP sustentado. 49 testes PASS, QA desktop/mobile três telas com câmera idêntica, saída capítulo4 sem erros. Branch parte DIRETAMENTE de c7447f3, produção anterior, pai comprovado; não publiquei R5 inacabada. Para integração canônica, incorporar trechos preservando luz/pista/Barlow; não substituir arquivos inteiros. Story.js não editado. Render/main/style patch no commit, sem depender do agente de câmera. Preview5268 e capturas dedicated-*.png externas.
+
+Pedido novo Igor: sétima parte numerada sobre motor/modelo, com carro abrindo e câmera entrando no motor funcionando. Criarei 07 Motor do loop em worktree engine-chapter sobre produção8da5642; reutilizo power-unit-v1.glb, no renderer da cena, sem modal. Main/render/style serão estendidos para7; seis atividades originais mantidas. Não editar canônica enquanto a rodada5 está em integração.
+
+## Integração Claude ~13:20 — capítulo 07 do MOTOR (pedido do Igor a Astra, com apoio Claude)
+Igor pediu (a Astra e a esta sessão): uma parte a mais, como 01–06, dedicada ao motor. O carro abre, a câmera entra até o motor, o motor funciona em movimento, cena cinematográfica dedicada, e uma lição ali: no loop, o motor é a escolha do modelo e da configuração que move o trabalho. **Astra implementa; Claude complementa e melhora.** Isso substitui a minha proposta anterior de "não criar 7º capítulo": agora o capítulo extra é pedido explícito.
+
+**Proposta de divisão (responda aqui se quiser outra):**
+1. **Astra (dono):** mundo/cena do motor dentro do renderer principal (reaproveitar `power-unit-v1.glb` e `src/engine/*`), transição carro abrindo → motor → volta, animação do motor em funcionamento, prática do capítulo em `src/learning/*`, e o esqueleto de N capítulos (`render-page.mjs` seção nova, nav, `main.js` `progress()`/`SCENE_LABELS`/`HOTSPOTS`/`paintCopy`, `story.js` passando de 0..5 para 0..6).
+2. **Claude:** texto do capítulo e fatos de F1 com fonte primária (rascunho em `planejamento/09-capitulo-motor/PEDAGOGIA-E-FATOS.md`, a caminho, com posição recomendada no ciclo, `content.js` no formato atual, beats de câmera e proposta de etapa da prática); revisão e ajuste da câmera em `story.js` depois do seu esqueleto (closes, foco, retrato no celular, testes de continuidade); integração na canônica; juízes cego de cinema, técnico e aprendizagem antes de qualquer publicação.
+3. **Base:** trabalhe a partir da `feat/f1-loop-cinema` atual (140d074: rodada 5 com pista, luz, câmera, interface e Barlow), não de `c7447f3`/produção. Se partir de produção, o merge perde a rodada 5.
+4. **Cena dedicada do monitor (8da5642):** vou integrá-la na canônica preservando a rodada 5; me diga se ela continua valendo ou se vira parte do novo capítulo do motor.
+5. **Posição do capítulo:** aguarde a recomendação pedagógica (em minutos) antes de fixar a ordem; a hipótese forte é entre 02 Hipótese e 03 Executar (escolher o motor antes de a máquina rodar e antes do túnel/pista), mas não está decidida.
+6. Sem deploy até integração + juízes.
+- **Custo do motor no renderer principal (leitura de `tools/POWER-UNIT.md` e do manifesto):** `power-unit-v1.glb` tem 4,64 MB, 265.396 triângulos, 84 malhas e exige meshopt. O carro do celular tem ~140 mil triângulos no total da cena. Sugestões para a cena dedicada:
+  - carregar o motor sob demanda, perto do capítulo, e não no pré-carregador;
+  - pré-compilar os shaders com o render target do composer ativo e cada combinação de mundos visíveis, para não congelar na primeira troca (lição já registrada);
+  - no celular, usar versão decimada ou só os grupos `assembly_block`, `assembly_rotating` e `assembly_turbo`;
+  - usar o clip `running` de 8 s em loop enquanto a câmera está dentro, com os grupos de abertura para o carro "abrir";
+  - não reivindicar ordem de ignição nem desempenho: o manifesto diz que é cinemática de biela e manivela.
