@@ -18,26 +18,29 @@ const CAMERA=[
  // height that sits the car low in frame); the comment gives the car's share of frame height.
  // 01 Preparar · box. Near-frontal hero at engineer's eye height, orbiting toward the decal
  // while a crane lifts the lens over the car (massa 55% → 27%).
- [0.00,[8,6.1,1.8],aim(8,.6,.3)],
+ // The lens sits a little higher and tilts ≈4° down, so the INTEIA sign on the rear wall stays out of
+ // the top of the frame instead of being cut by it (0.00 and 5.00 are the same frame).
+ [0.00,[8,6.1,2.15],aim(8,.6,.2)],
  [0.25,[24,7.5,3.2],aim(24,.6,.4)],
- [0.50,[58,10.5,3.6],aim(58,.3,.9)],
+ [0.50,[58,10,3.6],aim(58,.3,.9)],
  // Travel: text-free travels carry a component close-up (corn-02/09): one part at 55% of the width
  // with focus locked on it (CLOSES) and the rest of the car soft, never past the chapter dots.
  // 0.72: the crane climbs over the right rear quarter on a 20° lens until the rear wing is a third
  // of the frame; only the back half of the car is in shot, cut on the empty text side.
- [0.72,[62,5.5,5.2],[.38,.45,-2.45]],
+ [0.72,[62,4.8,4.6],[.38,.45,-2.45]],
  // 02 Hipótese · orbit in explosion: high rear orbit around the parts, floor isolated (32% → 43%).
  // The body opens a little later (explode .35 at 1.0), so the orbit can start close to the wing.
  [1.00,[105,10,6.5],aim(105,.2,.35)],
  [1.25,[145,11,6],aim(145,0,.35)],
- [1.50,[170,11,5],aim(170,0,.35)],
- // Explosion peak: the isolated floor, the hypothesis part, from 3 m high on a 20° lens behind the
- // car: no model-kit view from above, the floor fills half the width and the flying wheels sit at
- // the frame edges.
- [1.64,[170,10,3],[-.72,.36,-.97]],
+ [1.50,[158,11,4.9],aim(158,0,.35)],
+ // Explosion peak: the isolated floor, the hypothesis part, on a 25° lens from the rear-right quarter,
+ // 21° down: no model-kit view from above. With the wheels flown out, nothing closer keeps the whole
+ // car off the chapter dots (tests: car ≤88% of the width), so the lens does the isolating: focus
+ // locked on the floor, the flown parts soft around it.
+ [1.64,[147,10.7,3.9],[-.84,.11,-2]],
  // Travel: the crane holds high while the diagonal wipe crosses (1.76–2.00), so the box floor
  // fills the frame until the tunnel covers it; the descent happens inside the tunnel.
- [1.80,[180,9.4,3.5],[.1,.6,-.2]],
+ [1.80,[160,10,3.4],[.1,.6,-.2]],
  // 03 Executar · tunnel. Rear three-quarter that sinks to a low contra-plongée at 0.75 m once
  // the tunnel owns the frame, then swings out toward the flank (52% → 23%).
  [2.00,[178,6.05,1.5],aim(178,0,.4)],
@@ -58,26 +61,30 @@ const CAMERA=[
  [3.25,[34,9.6,2.2],[-2.2,.9,-2.2]],
  // The lens rides above the car and looks down, so the rear wall panel stays above the frame.
  [3.50,[-5,6,2.7],aim(-5,-.2,.35)],
- // Travel: push-in past the front-left wheel until the central monitor is 35–40% of the width,
- // and only then the rack (RACK from 3.5) hands the focus to the evidence. The crane keeps
- // rising through the hold (tangent ×1.3), so the lens never stops.
- [3.74,[-45,1.7,3.2],[-4.57,1.45,-1.5],1.3],
+ // Travel: the push-in keeps the car as the subject past its left front wheel (never the empty floor or
+ // the rear panel), then turns onto the island until the central monitor is 35–40% of the width, and
+ // only then the rack (RACK from 3.5) hands the focus to the evidence. The crane keeps rising through
+ // the hold (tangent ×1.3), so the lens never stops.
+ [3.62,[-28,3.9,3.05],[-.9,.6,.2]],
+ [3.755,[-45,1.7,3.2],[-4.57,1.45,-1.5],1.3],
  // 05 Corrigir · box. The crane rises off the island and has the whole closed car inside the reading
- // zone from 3.96, when the 05 title opens; then it pulls back while the body lifts
+ // zone from 3.96, when the 05 title opens; the aim holds the car left of centre while it comes in, so
+ // it is never cut by the right edge under the chapter dots. Then it pulls back while the body lifts
  // (explode 3.95–4.2), looking down on the revised floor.
- [3.93,[-8,5.8,4.4],aim(-8,-.2,.35)],
+ [3.93,[-8,5.8,4.4],aim(-8,-.6,.35)],
  [4.00,[-4,6.2,4.1],aim(-4,-.1,.35)],
- [4.25,[0,8.5,4.2],aim(0,.2,.4)],
+ // Tilted ≈4° further down than the pull-back suggests: the rear-wall sign leaves the top edge.
+ [4.25,[0,8.5,5.2],aim(0,.2,.3)],
  [4.50,[10,9,3.8],aim(10,.2,.4)],
  // Travel: descending crane onto the nose while the car closes, landing on the first frame.
  [4.74,[12,7.4,2.9],aim(12,.5,.35)],
  // 06 Encerrar · the closing frame answers the opening one.
- [5.00,[8,6.1,1.8],aim(8,.6,.3)]
+ [5.00,[8,6.1,2.15],aim(8,.6,.2)]
 ];
 const TRACKS={
  // Long-lens zooms at 0.72 and 1.64 make the component close-ups, 30–34 on the track, 20 on the
  // monitor; 38 is back before copy arrives.
- fov:[[0,38],[.5,38],[.6,30],[.72,20],[.84,28],[.94,38],[1.5,38],[1.56,30],[1.64,20],[1.74,26],[1.86,36],[2,38],[2.5,38],[2.62,30],[2.74,34],[2.86,34],[3,38],[3.45,36],[3.7,20],[3.8,20],[3.9,37],[4,38],[4.5,38],[4.66,34],[5,38]],
+ fov:[[0,38],[.5,38],[.6,30],[.72,20],[.84,28],[.94,38],[1.5,38],[1.56,31],[1.64,25],[1.74,28],[1.86,36],[2,38],[2.5,38],[2.62,30],[2.74,34],[2.86,34],[3,38],[3.45,36],[3.7,20],[3.8,20],[3.9,37],[4,38],[4.5,38],[4.66,34],[5,38]],
  // The car opens on the way to the bench, peaks after the copy leaves and slams shut at the wipe.
  explode:[[0,0],[.62,0],[1,.35],[1.45,.6],[1.62,.8],[1.86,0],[3.95,0],[4.2,.45],[4.55,.45],[4.85,0],[5,0]],
  // Shallow focus lives in the closes and the Avaliar rack; reading pauses keep the whole subject sharp;
@@ -101,14 +108,17 @@ const TRACKS={
 // Focus narrates (R8): it rides the face of the car turned to the lens, so the subject of each
 // pause is sharp from any angle. Avaliar racks it to the island monitors only once the push-in has
 // made them big (3.5 on); each close locks it on its part with a short range (LOCK, CLOSES).
-const RACK=[[0,0],[3.5,0],[3.7,1],[3.8,1],[3.92,0],[5,0]];
+const RACK=[[0,0],[3.5,0],[3.72,1],[3.81,1],[3.92,0],[5,0]];
 // Part centres at the explode amount of each close (tools/car-hull.json): rear wing, floor.
 const CLOSES=[[.72,[.3,.6,-2.25]],[1.64,[0,.29,-.85]]];
 const LOCK=[[0,0],[.58,0],[.66,1],[.8,1],[.9,0],[1.5,0],[1.57,1],[1.7,1],[1.78,0],[5,0]];
 const CLOSE_RANGE=1.5;
+// Corrigir's descending crane lands on the nose: focus rides to it and leaves before the closing frame.
+const NOSE_POINT=[0,.3,2.2],NOSE=[[0,0],[4.52,0],[4.62,1],[4.76,1],[4.9,0],[5,0]];
 function focusAt(p,camera,target){
- const [x,,z]=camera,h=Math.hypot(x,z)||1,reach=Math.min(1.35,.25*h),k=scalar(RACK,p),lock=scalar(LOCK,p);
+ const [x,,z]=camera,h=Math.hypot(x,z)||1,reach=Math.min(1.35,.25*h),k=scalar(RACK,p),lock=scalar(LOCK,p),nose=scalar(NOSE,p);
  let point=[x/h*reach,Math.max(.5,Math.min(1,target[1])),z/h*reach];
+ if(nose>0)point=point.map((v,i)=>v+(NOSE_POINT[i]-v)*nose);
  if(k>0)point=point.map((v,i)=>v+(MONITORS[i]-v)*k);
  if(lock>0){const part=CLOSES.reduce((a,b)=>Math.abs(b[0]-p)<Math.abs(a[0]-p)?b:a)[1];point=point.map((v,i)=>v+(part[i]-v)*lock);}
  return {point,lock};
@@ -179,24 +189,43 @@ export function sampleStory(progress){
 // Portrait framing (phones, ≈390×844), pure so scene.js and the tests share it.
 // Copy on phones reads from about i−0.02 to i+0.52 in the lower half, so the 3D is lifted into the
 // upper band (offsetY). Outside the copy (PORTRAIT_FREE) the car is the subject: the lens aims at its
-// centre, the frame is not lifted, and the distance is fitted so the car fills ≈58% of the width.
+// centre, the frame is not lifted, and the car fills ≈62% of the width.
+// A narrow frame is filled with the lens before the distance: the camera stays near the desktop take
+// (inside the box, this side of the circuit walls, short of the fog) and never goes past 1.5× it.
 // The Avaliar push-in stays on the monitor (its subject), and Corrigir's copy opens at 3.96.
 const PORTRAIT_FREE=[[0,0],[.52,0],[.58,1],[.94,1],[.99,0],[1.52,0],[1.58,1],[1.97,1],[2,0],[2.46,0],[2.5,1],[2.97,1],[3,0],[4.52,0],[4.58,1],[4.94,1],[4.99,0],[5,0]];
-const PORTRAIT_FILL=.58;
+const PORTRAIT_FILL=.62,PORTRAIT_WIDE=72,PORTRAIT_SWING=[[0,0],[.96,0],[1.1,1],[1.7,1],[1.82,0],[5,0]],PORTRAIT_TILT=[[0,0],[3.9,0],[4.05,1],[4.5,1],[4.58,0],[5,0]];
+const lens=(half,d,aspect)=>2*Math.atan(half/(PORTRAIT_FILL*aspect*d))/RAD;
 export function portraitFrame(pose,aspect=390/844){
  const p=pose.index+pose.local,free=scalar(PORTRAIT_FREE,p),explode=pose.explode||0;
- let target=[...pose.target],camera=[...pose.camera],fov=pose.fov*1.32,offsetY=.2*(1-free);
- let k=1.4+explode*.45+(pose.pull||0);
+ // Reading: the phone pulls back (more when the car is open or on a lateral track take), mostly with
+ // the lens, so the camera does not back into the set pieces around the bay.
+ const k=1.4+explode*.45+(pose.pull||0),kd=1+(k-1)*.35;
+ let target=[...pose.target],camera=target.map((v,i)=>v+(pose.camera[i]-v)*kd);
+ // The tyre rack behind the bay (garage.js, az≈138°) lies on the Hipótese orbit line; the portrait
+ // orbit runs ≈24° ahead of it (reading and the floor close), so the narrow frame leaves the rack out.
+ const swing=scalar(PORTRAIT_SWING,p)*24*RAD,turn=(x,z,cx,cz)=>[cx+(x-cx)*Math.cos(swing)+(z-cz)*Math.sin(swing),cz-(x-cx)*Math.sin(swing)+(z-cz)*Math.cos(swing)];
+ if(swing)[camera[0],camera[2]]=turn(camera[0],camera[2],target[0],target[2]);
+ // The lifted portrait frame shows more of the rear wall: in Corrigir the lens rises ≈4° more so
+ // the INTEIA sign leaves the top instead of sitting cut under the header logo.
+ const tilt=scalar(PORTRAIT_TILT,p);
+ if(tilt)camera[1]+=Math.hypot(camera[0]-target[0],camera[2]-target[2])*Math.tan(4*RAD)*tilt;
+ let fov=2*Math.atan(Math.tan(pose.fov*1.32/2*RAD)*k/kd)/RAD,offsetY=.2*(1-free);
  if(free>0){
-  target=target.map((v,i)=>v+([0,.5,0][i]-v)*free);
-  const dx=camera[0]-target[0],dy=camera[1]-target[1],dz=camera[2]-target[2],len=Math.hypot(dx,dy,dz)||1,h=Math.hypot(dx,dz)||1;
+  const centre=[0,.5,0],v=pose.camera.map((x,i)=>x-centre[i]);
+  if(swing)[v[0],v[2]]=turn(v[0],v[2],0,0);
+  const len=Math.hypot(...v)||1,h=Math.hypot(v[0],v[2])||1;
   // Half-width of the car across the lens: the side view shows its length, the end view its width
   // plus the wheels that fly out with the explode.
-  const half=Math.abs(dz)/h*(.95+1.5*explode)+Math.abs(dx)/h*2.6;
-  const fit=Math.max(3.2,half/(PORTRAIT_FILL*Math.tan(fov/2*RAD)*aspect))/len;
-  k+=(fit-k)*free;
+  const half=Math.abs(v[2])/h*(.95+1.5*explode)+Math.abs(v[0])/h*2.6;
+  let d=len,f=lens(half,d,aspect);
+  if(f>PORTRAIT_WIDE){f=PORTRAIT_WIDE;d=Math.min(len*1.5,half/(PORTRAIT_FILL*aspect*Math.tan(f/2*RAD)));}
+  else if(f<30){f=30;d=Math.max(3.2,half/(PORTRAIT_FILL*aspect*Math.tan(f/2*RAD)));}
+  const eye=centre.map((c,i)=>c+v[i]/len*d);
+  camera=camera.map((x,i)=>x+(eye[i]-x)*free);
+  target=target.map((x,i)=>x+(centre[i]-x)*free);
+  fov+=(f-fov)*free;
  }
- camera=target.map((v,i)=>v+(camera[i]-v)*k);
  // Reverse shot inside the box (1.68–1.97): a wide lens keeps the lens in front of the rear wall.
  const bay=smooth((p-1.68)/.1)*(1-smooth((p-1.83)/.14));
  if(bay>0){
