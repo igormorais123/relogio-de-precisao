@@ -253,14 +253,21 @@ export function enhanceCar({model, mechanics, mobile}) {
     // o carro andando e fica acesa e mais forte na frenagem; os discos ganham brasa. Sem alocação.
     race(speed, brake, time) {
       const s = speed > 0 ? Math.min(speed, 1) : 0, b = brake > 0 ? Math.min(brake, 1) : 0;
-      const flash = s > .05 ? (Math.sin(time * 25.13) > -.3 ? 1 : .06) * s : 0;
+      // Rear light stays lit while running (a bright deep red, not AgX pink), with the 4 Hz flash on top.
+      const flash = s > .05 ? s * (.45 + .55 * (Math.sin(time * 25.13) > -.3 ? 1 : 0)) : 0;
       const glow = Math.max(flash, b);
       for (let i = 0; i < leds.length; i++) {
         const led = leds[i];
-        if (glow > 0) { led.material.emissive.setRGB(1, .025, .04); led.material.emissiveIntensity = led.intensity + glow * (5 + 7 * b); led.lit = true; }
+        if (glow > 0) { led.material.emissive.setRGB(1, .008, .015); led.material.emissiveIntensity = led.intensity + glow * (2.6 + 3 * b); led.lit = true; }
         else if (led.lit) { led.material.emissive.copy(led.color); led.material.emissiveIntensity = led.intensity; led.lit = false; }
       }
-      discMaterial.emissiveIntensity = b * b * 2.6;
+      // Discs heat up as soon as braking starts, not only at the end.
+      discMaterial.emissiveIntensity = b * (1.1 + 1.9 * b);
+      // Nose dive under braking: pitch about the rear axle (z ≈ −1.84), so the rear stays planted.
+      const rest = model.userData.raceRestY ??= model.position.y;
+      const dive = .0045 * b * b * (3 - 2 * b);
+      model.rotation.x = dive;
+      model.position.y = rest - 1.84 * dive;
     },
     dispose() {
       for (const h of holders) h.holder.removeFromParent();

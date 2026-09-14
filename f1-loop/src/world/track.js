@@ -194,14 +194,26 @@ vec3 trReflect(vec3 P, vec3 nW, float rough){
                * smoothstep(.1 - w3, .1 + w3, H3.y) * (1. - smoothstep(4.6 - w3, 4.6 + w3, H3.y));
     sum += vec3(1., .88, .7) * 1.3 * open * inPit * smoothstep(1.1, 1.35, H.y) / (1. + w3 * .5);
   }
+  // Arquibancada iluminada (face em x ≈ −30, degraus de 2 a 13 m): brilho quente e manchado que
+  // os trechos úmidos esticam; é ela que o carro recorta no reflexo da tomada lateral.
+  if (R.x < -.002 && R.y > .002) {
+    float t5 = (-30. - P.x) / R.x; vec3 H5 = P + R * t5; float w5 = spread * t5 + .5;
+    float a5 = mod(H5.z + uTravel, 320.) - 160.;
+    float inZ5 = 1. - smoothstep(44. - w5, 48. + w5, abs(a5));
+    float inY5 = smoothstep(2. - w5, 3. + w5, H5.y) * (1. - smoothstep(11. - w5, 13. + w5, H5.y));
+    float mottle = .55 + .45 * trNoise(vec2(H5.y * .6, a5 * .3), 64.);
+    float wash = .6 + .4 * cos((a5 + 40.) * .0785398);
+    sum += vec3(.62, .46, .32) * .55 * inZ5 * inY5 * mottle * wash / (1. + w5 * .25);
+  }
   vec3 safe = R + vec3(1e-5) * step(abs(R), vec3(1e-5));
   vec3 t0 = (vec3(-.95, 0., -2.6) - P) / safe, t1 = (vec3(.95, 1.05, 2.6) - P) / safe;
   vec3 tmin = min(t0, t1), tmax = max(t0, t1);
   float enter = max(max(tmin.x, tmin.y), tmin.z), leave = min(min(tmax.x, tmax.y), tmax.z);
-  // O raio que bate no carro reflete o carro: pintura escura em cima, assoalho e pneus pretos embaixo.
-  float hit = step(max(enter, 0.), leave);
+  // O raio que bate no carro só apaga as luzes atrás dele: silhueta escura, borda macia pela corda
+  // percorrida dentro da caixa (sem retângulo) e quebrada pela normal do agregado.
+  float hit = smoothstep(0., .5, leave - max(enter, 0.));
   float yHit = P.y + R.y * max(enter, 0.);
-  vec3 carSeen = mix(vec3(.004, .004, .005), vec3(.2, .014, .02), smoothstep(.22, .42, yHit)) * 9.;
+  vec3 carSeen = mix(vec3(.002, .002, .0025), vec3(.022, .003, .004), smoothstep(.25, .5, yHit));
   sum = mix(sum, carSeen, hit);
   return sum * F * gloss * uReflGain;
 }`;
@@ -573,7 +585,8 @@ float trRough, trWet; vec2 trUv, trGx, trGy; float trTrack, trRun, trLine, trGra
         .replace('#include <lights_fragment_end>', /* glsl */`#include <lights_fragment_end>
 float trAO = trContact(vTrackW);
 reflectedLight.directDiffuse *= .12 * trAO;
-reflectedLight.directSpecular *= .12 * trAO;
+// Sem lóbulo especular das direcionais: no asfalto molhado ele virava um foco que segue a câmera.
+reflectedLight.directSpecular *= .01 * trAO;
 reflectedLight.indirectDiffuse *= trAO;
 reflectedLight.indirectSpecular *= .3 * trAO;
 reflectedLight.directDiffuse += uPoolColor * (trPools(vTrackW.z + uTravel, vTrackW.x, vTrackW.z, 0.) * 4. + trSweep(vTrackW) * 110.) * material.diffuseColor * trAO;
@@ -990,7 +1003,7 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
           wipeDiscard();
           vec3 col = vec3(.009, .011, .013);
           float rows = smoothstep(.5, .9, fract(vL.y / .72)) * step(1.7, vL.y) * step(vL.y, 12.5) * step(vL.x, -22.7);
-          col += vec3(.035, .03, .026) * rows * smoothstep(1., 12., vL.y);
+          col += vec3(.06, .048, .038) * rows * smoothstep(1., 12., vL.y);
           float aisle = step(.93, fract(vL.z / 8.));
           col *= 1. - .6 * aisle;
           // Sob a cobertura: pontos de luz por vão, não uma faixa contínua (lida como placa chapada).
@@ -1011,12 +1024,15 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
       vertexShader: /* glsl */`
         uniform float uTravel, uLoop;
         varying vec2 vUv;
-        varying float vRow;
+        varying float vRow, vWash;
         #include <fog_pars_vertex>
         void main(){
           vec3 transformed = position;
           ${ROLL_VERTEX}
           vUv = uv; vRow = instanceMatrix[3].x * 7.13 + instanceMatrix[3].z * .011;
+          // Holofotes da torre esquerda (along 40 + 80k) lavam o público por trechos.
+          float along = instanceMatrix[3].z - (uv.x - .5) * 96.;
+          vWash = .55 + .65 * (.5 + .5 * cos((along - 40.) * .0785398));
           vec4 mv = modelViewMatrix * instanceMatrix * vec4(transformed, 1.);
           gl_Position = projectionMatrix * mv;
         #ifdef USE_FOG
@@ -1026,7 +1042,7 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
       fragmentShader: /* glsl */`
         uniform float uTime;
         varying vec2 vUv;
-        varying float vRow;
+        varying float vRow, vWash;
         ${FOG_FRAGMENT}
         ${WIPE_SHADER_CHUNK}
         float cHash(float n){return fract(sin(n * 91.345 + 17.1) * 43758.5453);}
@@ -1047,10 +1063,13 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
           if (max(body, skull) < .5) discard;
           float pick = cHash(ci * 7.9 + vRow * 3.1);
           vec3 cloth = pick < .3 ? vec3(.09, .1, .12) : pick < .48 ? vec3(.16, .03, .035) : pick < .62 ? vec3(.17, .16, .15) : pick < .74 ? vec3(.15, .11, .03) : vec3(.04, .06, .1);
-          vec3 col = cloth * (.12 + .5 * smoothstep(head - .45, head, y)) * (.6 + .5 * cHash(ci * 3.7 + vRow));
-          col += vec3(.06, .045, .035) * smoothstep(head - .04, head + .08, y);
+          // Massa iluminada, não breu: sob o risco lateral vira faixas quentes de cor.
+          vec3 col = cloth * (.25 + 1.1 * smoothstep(head - .45, head, y)) * (.6 + .5 * cHash(ci * 3.7 + vRow));
+          col += vec3(.11, .08, .06) * smoothstep(head - .04, head + .08, y);
+          col *= vWash;
+          // Telas abaixo de luminância 1: acima disso a cauda de luz as riscava em palitos.
           float screen = step(.978, cHash(ci * 5.3 + vRow * 1.9)) * step(length(vec2(f - .05, y - (head - .26))), .025);
-          col += vec3(.75, .85, 1.) * 3. * screen * (.7 + .3 * sin(uTime * 2. + seed * 30.));
+          col += vec3(.75, .85, 1.) * .9 * screen * (.7 + .3 * sin(uTime * 2. + seed * 30.));
           gl_FragColor = vec4(mix(col, fogTint(), fogAmount() * .92), 1.);
         }`,
     }));
@@ -1071,7 +1090,8 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
       pos[i * 3] = left ? -55 - r() * 45 : 42 + r() * 60;
       pos[i * 3 + 1] = 1 + r() * r() * 22;
       pos[i * 3 + 2] = r() * TRACK_LOOP;
-      const warm = r() < .6, k = .8 + r() * 2.2;
+      // Abaixo de luminância 1: acima disso a cauda de luz do SpeedEffect riscava cada ponto num palito.
+      const warm = r() < .6, k = .3 + r() * .55;
       color.set(warm ? [1 * k, .56 * k, .24 * k] : [.7 * k, .82 * k, 1 * k], i * 3);
       size[i] = .5 + r() * 1.1;
     }
@@ -1128,7 +1148,7 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
       pos[i * 3] = left ? -38 - r() * 52 : 40 + r() * 55;
       pos[i * 3 + 1] = 6 + r() * 24;
       pos[i * 3 + 2] = r() * TRACK_LOOP;
-      const warm = r() < .55, k = (mobile ? .3 : .22) + r() * .3;
+      const warm = r() < .75, k = (mobile ? .3 : .22) + r() * .3;
       color.set(warm ? [k, .68 * k, .4 * k] : [.7 * k, .82 * k, k], i * 3);
       size[i] = 2.5 + r() * 3.5;
     }
@@ -1150,7 +1170,7 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
           p.z = mod(p.z - uTravel + .5 * uLoop, uLoop) - .5 * uLoop;
           vec4 mv = modelViewMatrix * vec4(p, 1.);
           gl_Position = projectionMatrix * mv;
-          gl_PointSize = clamp(aSize * projectionMatrix[1][1] * uResY * .5 / max(-mv.z, 1.), 3., ${mobile ? '70.' : '96.'});
+          gl_PointSize = clamp(aSize * projectionMatrix[1][1] * uResY * .5 / max(-mv.z, 1.), 3., ${mobile ? '56.' : '72.'});
           vColor = aColor;
         #ifdef USE_FOG
           vFogDepth = -mv.z;
@@ -1164,8 +1184,9 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
           wipeDiscard();
           float d = length(gl_PointCoord - .5) * 2.;
           if (d > 1.) discard;
-          float disc = 1. - smoothstep(.72, 1., d);
-          float ring = .62 + .38 * smoothstep(.4, .9, d);
+          // Disco macio com aro leve: lâmpada fora de foco, não uma moeda cinza chapada.
+          float disc = 1. - smoothstep(.45, 1., d);
+          float ring = .75 + .25 * smoothstep(.3, .8, d);
           gl_FragColor = vec4(vColor * disc * ring * (1. - fogAmount() * .45), 1.);
         }`,
     }));

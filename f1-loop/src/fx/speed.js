@@ -182,9 +182,10 @@ export function createWheelBlur({THREE, mechanics}) {
     base.addColorStop(.84, 'rgba(36,37,40,.94)'); base.addColorStop(.9, 'rgba(92,94,98,.97)'); base.addColorStop(.965, 'rgba(66,68,71,1)'); base.addColorStop(1, 'rgba(20,20,22,0)');
     g.fillStyle = base; g.beginPath(); g.arc(c, c, c, 0, Math.PI * 2); g.fill();
     g.lineCap = 'round';
-    for (let k = 0; k < 70; k++) {
+    // Arcs carry the read of spin at night: brighter and denser than a daylight rim would need.
+    for (let k = 0; k < 90; k++) {
       const r = (.2 + random() * .72) * c, a0 = random() * Math.PI * 2, span = .5 + random() * 1.8;
-      const v = 130 + random() * 90 | 0, width = .6 + random() * 1.8, alpha = .08 + random() * .22;
+      const v = 170 + random() * 80 | 0, width = .6 + random() * 1.8, alpha = .14 + random() * .3;
       g.lineWidth = width;
       for (let s = 0; s < 10; s++) {
         g.strokeStyle = `rgba(${v},${v},${v + 4},${(alpha * (1 - s / 10)).toFixed(3)})`;
@@ -196,7 +197,8 @@ export function createWheelBlur({THREE, mechanics}) {
   const map = new THREE.CanvasTexture(canvas);
   map.colorSpace = THREE.SRGBColorSpace;
   map.center.set(.5, .5);
-  const material = new THREE.MeshStandardMaterial({map, transparent: true, depthWrite: false, metalness: .85, roughness: .34, envMapIntensity: 1.2, opacity: 0});
+  // Less metal and a faint emissive copy of the arcs: in a dark environment a metal disc read as a black cover.
+  const material = new THREE.MeshStandardMaterial({map, emissiveMap: map, emissive: '#ffffff', emissiveIntensity: .05, transparent: true, depthWrite: false, metalness: .6, roughness: .4, envMapIntensity: 1.2, opacity: 0});
   material.name = 'Roda em movimento';
   const discs = [], box = new THREE.Box3(), inverse = new THREE.Matrix4(), part = new THREE.Box3();
   for (const w of mechanics?.wheels || []) {
@@ -231,7 +233,7 @@ export function createWheelBlur({THREE, mechanics}) {
 
 // ------------------------------------------------------------ faíscas
 export function createSparks({THREE, renderer, mobile = false}) {
-  const count = mobile ? 1 : 40;
+  const count = mobile ? 1 : 56;
   const geometry = new THREE.InstancedBufferGeometry();
   geometry.setAttribute('position', new THREE.Float32BufferAttribute([0, -1, 0, 1, -1, 0, 1, 1, 0, 0, 1, 0], 3));
   geometry.setIndex([0, 1, 2, 0, 2, 3]);
@@ -240,7 +242,7 @@ export function createSparks({THREE, renderer, mobile = false}) {
   for (let i = 0; i < seeds.length; i++) { seed = (1664525 * seed + 1013904223) >>> 0; seeds[i] = seed / 4294967296; }
   geometry.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seeds, 4));
   geometry.instanceCount = count;
-  const uniforms = {uTime: {value: 0}, uAmount: {value: 0}, uShutter: {value: 1 / 200}, uRes: {value: new THREE.Vector2(1440, 900)}};
+  const uniforms = {uTime: {value: 0}, uAmount: {value: 0}, uShutter: {value: 1 / 120}, uRes: {value: new THREE.Vector2(1440, 900)}};
   const material = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
     uniforms,
@@ -255,24 +257,27 @@ export function createSparks({THREE, renderer, mobile = false}) {
         return p;
       }
       void main(){
-        float P = .8 + aSeed.x * 1.6;
-        float t = uTime + aSeed.y * P;
-        float k = floor(t / P);
-        float age = t - k * P;
-        float life = .05 + .08 * aSeed.w;
-        // Rajadas raras: um ciclo em cada quatro, só com o carro perto do máximo.
-        float gate = step(.74, fract(sin(k * 91.7 + aSeed.z * 311.3) * 43758.5453)) * smoothstep(.6, .9, uAmount);
-        vec3 o = vec3((aSeed.z - .5) * .5, .02, -1.5 - aSeed.x * .6);
-        vec3 v = vec3((aSeed.w - .5) * 3.2, .8 + 2.4 * aSeed.y, -(5. + 9. * aSeed.z));
+        // Rajadas: a prancha toca o asfalto por ~0,2 s e solta um feixe de faíscas juntas; cerca de
+        // duas rajadas em três ciclos de 0,8 s, só com o carro perto do máximo.
+        const float B = .8;
+        float k = floor(uTime / B);
+        float age = uTime - k * B - aSeed.y * .2;
+        float life = .06 + .1 * aSeed.w;
+        float gate = step(.35, fract(sin(k * 91.7 + 3.1) * 43758.5453))
+                   * step(.3, fract(sin(k * 12.9 + aSeed.z * 78.2) * 43758.5453))
+                   * smoothstep(.6, .9, uAmount);
+        vec3 o = vec3((aSeed.z - .5) * .6, .02, -1.2 - aSeed.x * .9);
+        // O asfalto corre a 80 m/s: solta da prancha, a faísca fica para trás rápido e quica baixo.
+        vec3 v = vec3((aSeed.w - .5) * 3., .5 + 2.2 * aSeed.y, -(16. + 26. * aSeed.z));
         vec4 ca = projectionMatrix * modelViewMatrix * vec4(sparkAt(age, o, v), 1.);
         vec4 cb = projectionMatrix * modelViewMatrix * vec4(sparkAt(max(age - uShutter, 0.), o, v), 1.);
         vHeat = clamp(1. - age / life, 0., 1.); vAcross = position.y;
-        if(gate * step(age, life) < .5 || ca.w < .05 || cb.w < .05){ gl_Position = vec4(0., 0., 2., 1.); return; }
+        if(gate * step(0., age) * step(age, life) < .5 || ca.w < .05 || cb.w < .05){ gl_Position = vec4(0., 0., 2., 1.); return; }
         vec2 sa = ca.xy / ca.w * uRes * .5, sb = cb.xy / cb.w * uRes * .5;
         vec2 dir = sa - sb; float l = length(dir);
         dir = l > 1e-3 ? dir / l : vec2(1., 0.);
         vec4 c = position.x > .5 ? ca : cb;
-        c.xy += vec2(-dir.y, dir.x) * position.y * 2.2 / uRes * c.w;
+        c.xy += vec2(-dir.y, dir.x) * position.y * 1.6 / uRes * c.w;
         gl_Position = c;
       }`,
     fragmentShader: /* glsl */`

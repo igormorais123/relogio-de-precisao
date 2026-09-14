@@ -329,7 +329,8 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       kicker.intensity = mix(kicker.intensity, .55 * e, r);
       scene.environmentIntensity = mix(scene.environmentIntensity, .95 * e, r);
     }
-    for (let i = 0; i < tunnelLights.length; i++) tunnelLights[i].intensity = tunnelLightBase[i] * (1 - r);
+    // Out early in the wipe: at half weight the cyan point light still lit the floor edge on the track.
+    for (let i = 0; i < tunnelLights.length; i++) tunnelLights[i].intensity = tunnelLightBase[i] * (1 - smooth(r / .3));
     const g = t > 0 ? [0, 1].map(k => gradeGarage[k].map((v, i) => mix(v, gradeTunnel[k][i], t))) : gradeGarage.map((row, k) => row.map((v, i) => mix(v, gradeDebrief[k][i], d)));
     if (r > 0) for (let k = 0; k < 2; k++) for (let i = 0; i < 3; i++) g[k][i] = mix(g[k][i], gradeTrack[k][i], r);
     post.setGrade(g[0], g[1], 1);
