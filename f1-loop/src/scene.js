@@ -340,6 +340,9 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     const h = pose.haze || 0;
     // The track has its own sky and a 150 m horizon: as it sweeps in, fog moves out to its range.
     scene.fog.near = mix(mix(15, 12, h), track.fog.near, r); scene.fog.far = mix(mix(40, 21, h), track.fog.far, r);
+    // The portrait camera pulls back 1.4×: keep the box walls in sight as the track clears.
+    const returnFog = mobile ? 1 + .4 * smooth((p - 2.94) / .06) * (1 - smooth((p - 3.10) / .14)) : 1;
+    scene.fog.near *= returnFog; scene.fog.far *= returnFog;
     scene.fog.color.lerpColors(fogBase, fogHaze, h * (1 - r)); scene.background.copy(scene.fog.color);
     dustColor.lerpColors(dustWarm, dustCold, t);
     dust.update(time, pixelRatio * height / 900, (1 - .5 * t) * (1 - .8 * h) * (1 - r), dustColor);
