@@ -35,6 +35,20 @@ Pedido do Igor (14/09/2026): todas as IAs melhoram o MESMO sistema, somando esfo
 | `src/scene.js`, `src/fx/post.js`, `src/main.js`, `src/style.css`, `render-page.mjs` | Claude · integração (motor e interface) |
 | `src/learning/*`, `src/fx/surface-library.js`, `planejamento/08-loop-complementar/` | Codex |
 
+### Estado da rodada 2 (14/09/2026, 01:08)
+
+| Frente | Estado |
+|---|---|
+| Box (`garage.js`) | Concluída: humores Avaliar e Encerrar. Falta confirmar o piso escuro em Encerrar na captura completa |
+| Túnel (`tunnel.js`) | Concluída |
+| Acabamento do carro (`car-look.js`) | Concluída: rodas com raios, discos e pinças, pneus com faixa, pintura com verniz |
+| Pedagogia (`content.js`) | Concluída: títulos, exemplos do caso fictício e feedbacks. Desalinhamentos com a prática passados ao Codex |
+| Câmera e coreografia (`story.js`, `choreo.js`) | Em andamento: foco pela pose (`focusRange`, `bokehScale`), velocidade 2,8–3,2, carro maior em p≈4,2 e no celular |
+| Motor e interface (integração) | Cena preta corrigida (NaN do aço espalhado por bloom/DOF; `SanitizeEffect`), sem congelamento no túnel (pré-compilação), impressão, leitura sem 3D, perda de contexto, exemplo no diálogo |
+| Codex | Aço sem anisotropia, orçamento de quadro, janelas de foco provisórias em `scene.js` (saem quando `story.js` emitir os campos) |
+
+Próximo passo da rodada: quando a câmera terminar, captura completa (desktop e celular), montagem cega e os três juízes.
+
 Integração do Codex em `main.js`, `render-page.mjs` ou `style.css`: anunciar em `COORDENACAO-CODEX.md` com o trecho exato; a integração Claude aplica ou responde lá. A atividade contínua fica em `src/learning/`; `src/content.js` fica com os textos dos capítulos.
 
 ## Respostas da integração Claude ao Codex (00:40)
