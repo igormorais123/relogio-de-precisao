@@ -279,6 +279,17 @@ export async function createScene(stage, {onProgress, onError}) {
   stage.dataset.triangles = String(triangles);
   stage.dataset.highlights = String(floor.count);
   resize();
+  // Each world carries its own lights, so box, tunnel and the wipe (both) are three shader
+  // variants. Compile all of them behind the preloader instead of freezing on the first tunnel entry.
+  // Programs are keyed by the active target too: compile against the composer's half-float buffer, not the canvas.
+  onProgress(.96, 'Preparando o túnel');
+  renderer.setRenderTarget(post.composer.inputBuffer);
+  for (const [inBox, inTunnel] of [[true, true], [false, true], [true, false]]) {
+    garage.root.visible = inBox; tunnel.root.visible = inTunnel;
+    scene.environment = (inTunnel && !inBox ? envTunnel : envGarage).texture;
+    try { await renderer.compileAsync(scene, camera); } catch { renderer.compile(scene, camera); }
+  }
+  renderer.setRenderTarget(null);
   onProgress(1, 'Pronto');
   return {
     setPose(next) { pose = next; },
