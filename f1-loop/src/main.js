@@ -60,6 +60,7 @@ function placeHotspot(){
 function schedule(){if(frameId===null&&!document.hidden)frameId=requestAnimationFrame(frame);}
 function frame(now){
  frameId=null;
+ if(document.body.classList.contains('engine-open'))return;
  targetP=progress();
  // At rest (camera settled, no pointer for 1.5 s) the ambient motion runs at ~30 fps to spare the GPU.
  const idle=scene&&!state.reading&&shownP===targetP&&!snap&&now-lastInput>1500;
@@ -111,3 +112,8 @@ window.__aula={goto(p){measure();const i=Math.min(5,Math.floor(p)),l=p-i,y=i>=5?
 document.fonts.ready.then(()=>{measure();if(location.hash){const target=document.getElementById(location.hash.slice(1));target?.scrollIntoView();}snap=true;schedule();});
 if(state.reading)document.body.classList.add('scene-ready');
 setReading(state.reading);measure();paint();
+
+// Fullscreen inspections suspend this renderer and resume the lesson on return.
+window.addEventListener('engine:closed',()=>{lastTime=performance.now();snap=true;schedule();});
+const inspectEngineButton=document.getElementById('inspect-engine');
+inspectEngineButton?.addEventListener('click',async()=>{inspectEngineButton.disabled=true;try{const {openEngine}=await import('./engine/viewer.js');inspectEngineButton.disabled=false;await openEngine({opener:inspectEngineButton});}catch(error){console.error('Inspeção do motor:',error);}finally{inspectEngineButton.disabled=false;}});
