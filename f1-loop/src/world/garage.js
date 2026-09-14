@@ -13,7 +13,6 @@ import {createWipeClip} from '../fx/wipe-clip.js';
 const DISPLAY = 'Bebas, "Bebas Neue", "Arial Narrow", Impact, sans-serif';
 const BODY = 'Lato, Arial, sans-serif';
 const RED = '#D92135';
-const STAGES = ['Preparar', 'Hipótese', 'Executar', 'Avaliar', 'Corrigir', 'Encerrar'];
 const DECISIONS = {aceitar: 'Aceitar', reverter: 'Reverter', revisar: 'Revisar', inconclusivo: 'Inconclusivo', 'decisao-necessaria': 'Decisão necessária'};
 const FALLBACK_LABELS = {task: 'Tarefa', reference: 'Fonte e versão de referência', criterion: 'Critério', hypothesis: 'Hipótese', test: 'Teste e limite', evidence: 'Evidência observada', correction: 'Correção e regressões', next: 'Pendência e próxima volta', decision: 'Decisão'};
 // Ilha de Avaliar: o caso da aula (comunicado sobre o teste do formulário, src/learning/model.js).
@@ -429,7 +428,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     drawDecisionScreen(notebookScreens[2], lastValues, labels);
   }
   function drawRear() {
-    rearScreens.forEach((screen, i) => drawStageScreen(screen, i));
+    rearScreens.forEach((screen, i) => drawSessionScreen(screen, i));
     drawBrand(brandCanvas.getContext('2d'), brandCanvas.width, brandCanvas.height, {light: true});
     brandTexture.needsUpdate = true;
   }
@@ -692,7 +691,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     texture.needsUpdate = true;
   }
 
-  function drawStageScreen(screen, index) {
+  function drawSessionScreen(screen, index) {
     const {ctx, canvas, texture} = screen;
     const W = canvas.width, H = canvas.height, s = W / 1024;
     paintScreenBase(ctx, W, H);
@@ -700,22 +699,45 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     ctx.fillStyle = '#7f98a8';
     ctx.font = `${24 * s}px ${BODY}`;
     setSpacing(ctx, 4 * s);
-    ctx.fillText('LOOP DE ENGENHARIA', m, 70 * s);
+    ctx.fillText(['TEMPOS POR SETOR', 'TEMPERATURA DOS PNEUS', 'PROGRAMA DE PISTA'][index], m, 70 * s);
     ctx.textAlign = 'right';
-    ctx.fillText(`${index + 1}/3`, W - m, 70 * s);
+    ctx.fillText('BOX 07', W - m, 70 * s);
     ctx.textAlign = 'left';
     setSpacing(ctx, 0);
-    for (let k = 0; k < 2; k++) {
-      const n = index * 2 + k, y = (238 + k * 206) * s;
-      ctx.fillStyle = 'rgba(210,228,240,.14)';
-      ctx.fillRect(m, y - 150 * s, W - 2 * m, 2 * s);
-      ctx.fillStyle = RED;
-      ctx.font = `${150 * s}px ${DISPLAY}`;
-      ctx.fillText(String(n + 1).padStart(2, '0'), m, y + 8 * s);
-      ctx.fillStyle = '#f0f4f6';
-      ctx.font = `${124 * s}px ${DISPLAY}`;
-      ctx.fillText(STAGES[n].toUpperCase(), m + 190 * s, y);
+    ctx.fillStyle = 'rgba(210,228,240,.14)';
+    ctx.fillRect(m, 96 * s, W - 2 * m, 2 * s);
+    if (index === 0) {
+      ctx.fillStyle = '#edf2f4';
+      ctx.font = `${144 * s}px ${DISPLAY}`;
+      ctx.fillText('1:24.618', m, 250 * s);
+      const sectors = [['S1', '27.452', .86], ['S2', '29.781', .94], ['S3', '27.385', .85]];
+      sectors.forEach(([label, value, fraction], i) => {
+        const y = (322 + i * 66) * s;
+        ctx.fillStyle = '#8ea6b4'; ctx.font = `${30 * s}px ${BODY}`;
+        ctx.fillText(label, m, y);
+        ctx.fillStyle = '#cbdae1'; ctx.font = `${42 * s}px ${DISPLAY}`;
+        ctx.fillText(value, m + 96 * s, y + 3 * s);
+        ctx.fillStyle = '#21343e'; ctx.fillRect(m + 290 * s, y - 24 * s, 520 * s, 16 * s);
+        ctx.fillStyle = i === 1 ? '#b8cbd4' : '#b4464f';
+        ctx.fillRect(m + 290 * s, y - 24 * s, 520 * s * fraction, 16 * s);
+      });
+    } else if (index === 1) {
+      [['DE', '92°'], ['DD', '91°'], ['TE', '96°'], ['TD', '95°']].forEach(([label, value], i) => {
+        const x = (i % 2 ? 572 : 100) * s, y = (i < 2 ? 165 : 340) * s;
+        ctx.fillStyle = '#8ea6b4'; ctx.font = `${28 * s}px ${BODY}`; ctx.fillText(label, x, y);
+        ctx.fillStyle = '#edf2f4'; ctx.font = `${108 * s}px ${DISPLAY}`; ctx.fillText(value, x, y + 108 * s);
+        ctx.fillStyle = '#b4464f'; ctx.fillRect(x + 210 * s, y + 20 * s, 16 * s, 90 * s);
+      });
+    } else {
+      [['SAÍDA DOS BOXES', 'CONCLUÍDA'], ['SEQUÊNCIA LONGA', '04 / 12'], ['PRÓXIMA PARADA', 'VOLTA 12']].forEach(([label, value], i) => {
+        const y = (164 + i * 126) * s;
+        ctx.fillStyle = '#8ea6b4'; ctx.font = `${27 * s}px ${BODY}`; ctx.fillText(label, m, y);
+        ctx.fillStyle = i === 1 ? '#d5646d' : '#d9e3e8'; ctx.font = `${70 * s}px ${DISPLAY}`;
+        ctx.fillText(value, m, y + 68 * s);
+      });
     }
+    ctx.fillStyle = '#78909d'; ctx.font = `${21 * s}px ${BODY}`;
+    ctx.fillText('SESSÃO FICTÍCIA · DADOS ILUSTRATIVOS', m, 548 * s);
     texture.needsUpdate = true;
   }
 }
