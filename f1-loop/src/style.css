@@ -62,3 +62,4 @@ body.reading #hotspot{display:none}
 @media (max-width:760px){.enhanced #inspect-engine{min-height:44px;padding:10px 0;font-size:13px}}
 /* Barlow is narrow: prose in the dialogs gets a little air between words and lines (typography judge, round 5). */
 dialog{word-spacing:.03em}.lr-lab{line-height:1.6}.small{font-size:12px}
+.lr-lab p{max-width:80ch}
