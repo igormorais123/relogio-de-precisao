@@ -109,7 +109,7 @@ export function createChoreo({model, mechanics, mobile = false, scene} = {}) {
     }
 
     if (lines) {
-      const fade = smoothstep(amount, .3, .62) * (.3 + .04 * Math.sin(time * 1.3));
+      const fade = (pose?.engineChapter ? 0 : 1) * smoothstep(amount, .3, .62) * (.3 + .04 * Math.sin(time * 1.3));
       lines.visible = nodes.visible = fade > .005;
       if (lines.visible) {
         lineMaterial.opacity = fade; nodeMaterial.opacity = Math.min(1, fade * 2.2);

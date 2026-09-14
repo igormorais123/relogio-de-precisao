@@ -76,3 +76,13 @@ dialog{word-spacing:.03em}.lr-lab{line-height:1.6}.small{font-size:12px}
 @media print{.monitor-scene{height:auto!important;padding:20px!important}.monitor-scene-pin{position:static!important;height:auto!important}.monitor-reading-text{position:static!important;width:auto!important;height:auto!important;clip-path:none!important}.monitor-scene-controls{display:none!important}}
 
 .enhanced:not(.reading) .monitor-scene-heading h2{font-size:clamp(18px,2vw,27px);line-height:1.25}
+
+/* 07 is a cinematic lesson, sharing the renderer and the car's world. */
+.engine-chapter{padding:70px 8%}.engine-chapter-copy{max-width:560px}.engine-chapter-copy h2{font-size:44px;line-height:1.1}.engine-chapter-copy p{line-height:1.65}.engine-chapter-controls{display:none}.engine-reading-only{max-width:700px;line-height:1.8}
+.enhanced:not(.reading) #encerrar{min-height:260svh}.enhanced:not(.reading) #motor-do-loop{min-height:720svh;padding:0}
+.enhanced:not(.reading) .engine-chapter-pin{position:sticky;top:0;height:100svh;padding:140px 6% 100px;display:flex;flex-direction:column;justify-content:space-between;pointer-events:none}
+.enhanced:not(.reading) .engine-chapter-copy{width:29%;max-width:470px}.enhanced:not(.reading) .engine-chapter-copy h2{font-size:clamp(36px,3.8vw,60px);line-height:1.03}.engine-chapter-copy .eyebrow,#engine-part-label{font-size:11px;letter-spacing:1.5px;color:#ffd447}
+.enhanced:not(.reading) .engine-reading-only{display:none}.enhanced:not(.reading) .engine-chapter-controls{display:flex;gap:15px;align-items:center;pointer-events:auto}.engine-chapter-controls button{border:1px solid #ffffff45;background:#0c131adb;min-height:46px;padding:10px 16px}.engine-chapter-controls span{font-size:12px;color:#ffd447}
+.in-engine-chapter #hotspot{visibility:hidden!important}.in-engine-chapter .shade{opacity:.55}
+@media(max-width:760px){.enhanced:not(.reading) .engine-chapter-pin{padding:95px 22px 96px}.enhanced:not(.reading) .engine-chapter-copy{width:100%;margin-top:40svh}.enhanced:not(.reading) .engine-chapter-copy h2{font-size:29px}.engine-chapter-copy p{font-size:13px;line-height:1.45;margin:8px 0}.engine-chapter-copy .eyebrow,#engine-part-label{font-size:9px}.engine-chapter-controls{gap:5px!important;flex-wrap:wrap}.engine-chapter-controls button{font-size:11px;padding:7px 9px}.engine-chapter-controls span{font-size:10px}.in-engine-chapter .chapters-nav{visibility:hidden}.in-engine-chapter .shade{opacity:.2}}
+@media print{#motor-do-loop,.engine-chapter-pin{min-height:0!important;height:auto!important;position:static!important;padding:20px!important}.engine-reading-only{display:block!important}.engine-chapter-controls{display:none!important}}

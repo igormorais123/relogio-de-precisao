@@ -1,3 +1,4 @@
+import {ENGINE_LESSONS,engineBeat} from './engine/chapter.js';
 import {monitorTimeline} from './monitor-scene.js';
 import {mountLearning} from './learning/index.js';
 import {CHAPTERS,FIELDS} from './content.js';
@@ -11,7 +12,7 @@ $('#quiz').hidden = true;
 const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),storageKey='inteia-f1-loop-notebook-v1';
 const state={values:{},answers:{},chapter:-1,reading:reduced.matches};
-const SCENE_LABELS=['BOX','BANCADA','TÚNEL DE VENTO','ESTAÇÃO DE DADOS','BOX','DEBRIEF'];
+const SCENE_LABELS=['BOX','BANCADA','TÚNEL DE VENTO','ESTAÇÃO DE DADOS','BOX','DEBRIEF','MOTOR DO LOOP'];
 const HOTSPOTS=['DEFINIR O CRITÉRIO','TESTAR UMA MUDANÇA','GUARDAR O PEDIDO','CONFERIR NA FONTE','CORRIGIR O QUE FALHOU','REGISTRAR A DECISÃO'];
 let frameId=null,loading=null,loadAbort=null,scene=null,positions=[],activeDialog=null,opener=null,currentLesson=0;
 let targetP=0,shownP=0,lastTime=performance.now(),lastInput=0,snap=true,pose=sampleStory(0);
@@ -31,7 +32,7 @@ function measure(){positions=$$('.chapter').map(s=>s.offsetTop);schedule();}
 function monitorState(){const el=$('#analise-no-box');return monitorTimeline(scrollY,el.offsetTop,el.offsetHeight);}
 function progress(){const y=window.scrollY;let i=0;while(i<positions.length-1&&y>=positions[i+1])i++;
  if(!state.reading&&i===3){const top=$('#analise-no-box').offsetTop;return y<top?3+.64*Math.max(0,(y-positions[3])/(top-positions[3])):monitorState().story;}
- return i===5?5:i+Math.max(0,Math.min(1,(y-positions[i])/(positions[i+1]-positions[i])));}
+ return i===6?6+Math.min(1,Math.max(0,(y-positions[6])/Math.max(1,$('#motor-do-loop').offsetHeight-innerHeight))):i+Math.max(0,Math.min(1,(y-positions[i])/(positions[i+1]-positions[i])));}
 function goMonitor(beat){const el=$('#analise-no-box');if(beat>2){$('#corrigir').scrollIntoView();return;}if(beat<0){$('#avaliar').scrollIntoView();return;}window.scrollTo({top:el.offsetTop+el.offsetHeight*(1/6+(beat+.35)*2/9),behavior:'instant'});snap=true;schedule();}
 $('[data-monitor-prev]').onclick=()=>goMonitor(monitorState().beat-1);
 $('[data-monitor-next]').onclick=()=>goMonitor(monitorState().beat+1);
@@ -48,14 +49,14 @@ function paintCopy(){
  document.body.classList.toggle('travel',shown<.15);
 }
 function paint(){
- const p=targetP,index=Math.min(5,Math.floor(p)),local=p-index;
+ const p=targetP,index=Math.min(6,Math.floor(p)),local=p-index;
  if(index!==state.chapter){state.chapter=index;if(!state.reading)$$('.lesson[open]').forEach(d=>d.open=false);document.body.dataset.chapter=String(index);$$('.chapters-nav a').forEach((a,i)=>{if(i===index)a.setAttribute('aria-current','step');else a.removeAttribute('aria-current');});$('#scene-label').textContent=SCENE_LABELS[index];}
  document.body.classList.toggle('arriving',index>0&&index<5&&local<.16);
- $('#progress-bar').style.transform=`scaleX(${Math.min(1,p/5)})`;
+ $('#progress-bar').style.transform=`scaleX(${Math.min(1,p/7)})`;
  if(!state.reading)paintCopy();
 }
 function placeHotspot(){
- const hs=$('#hotspot');if(!scene||state.reading||innerWidth<761){hs.classList.add('off');return;}
+ const hs=$('#hotspot');if(!scene||state.reading||shownP>=6||innerWidth<761){hs.classList.add('off');return;}
  const i=pose.index,a=scene.anchor(i),inWindow=i===5?(shownP>4.995?1:0):smooth((pose.local-.07)/.08)*(1-smooth((pose.local-.36)/.08));
  const vis=a.ok&&!activeDialog?inWindow:0;
  if(hs.dataset.index!==String(i)){hs.dataset.index=String(i);$('#hotspot-label').textContent=HOTSPOTS[i];}
@@ -82,11 +83,26 @@ function frame(now){
  const label=`${monitor.beat+1} / 3 · ${['Observação','Comparação','Conclusão'][monitor.beat]}`;
  if($('#monitor-page').textContent!==label)$('#monitor-page').textContent=label;
  $('[data-monitor-next]').textContent=monitor.beat===2?'Seguir para Corrigir →':'Próxima →';
- pose=sampleStory(shownP);pose.monitorScene=monitor.active?monitor.weight:0;pose.monitorReading=monitor.active?monitor.reading:null;const place=monitor.active?'ANÁLISE NO BOX':pose.world==='track'?'PISTA':pose.world==='tunnel'?'TÚNEL DE VENTO':pose.index===2?'ESTAÇÃO DE DADOS':SCENE_LABELS[pose.index];if($('#scene-label').textContent!==place)$('#scene-label').textContent=place;scene.setPose(pose);scene.render(dt,now/1000,idle?1000/30:1000/60);placeHotspot();
+ pose=sampleStory(Math.min(shownP,5));
+ const engineLocal=Math.max(0,shownP-6);pose.engineChapter=shownP>=6;pose.engineProgress=engineLocal;pose.enginePaused=enginePaused;
+ document.body.classList.toggle('in-engine-chapter',pose.engineChapter);
+ if(pose.engineChapter){const beat=engineBeat(engineLocal),lesson=ENGINE_LESSONS[beat],inside=engineLocal>.27;
+ $('#title-motor-do-loop').textContent=inside?lesson.title:'Entre no que move o carro';
+ $('#engine-chapter-text').textContent=inside?lesson.text:'A carroceria se abre para revelar o conjunto. No loop, examinamos a escolha do modelo e o que torna sua saída útil.';
+ $('#engine-part-label').textContent=inside?lesson.part:'DO CARRO AO MECANISMO';
+ $('#engine-lesson-count').textContent=inside?`${beat+1} / 3`:'Motor V6';
+ $('[data-engine-chapter="next"]').textContent=engineLocal<.27?'Entrar no motor →':beat<2?'Próxima →':'Voltar ao início ↗';
+ }
+ pose.monitorScene=monitor.active?monitor.weight:0;pose.monitorReading=monitor.active?monitor.reading:null;const place=pose.engineChapter?'MOTOR DO LOOP':monitor.active?'ANÁLISE NO BOX':pose.world==='track'?'PISTA':pose.world==='tunnel'?'TÚNEL DE VENTO':pose.index===2?'ESTAÇÃO DE DADOS':SCENE_LABELS[pose.index];if($('#scene-label').textContent!==place)$('#scene-label').textContent=place;scene.setPose(pose);scene.render(dt,now/1000,idle?1000/30:1000/60);placeHotspot();
  schedule();
 }
-function setReading(on){state.reading=on;document.body.classList.remove('monitor-focused');document.body.classList.toggle('reading',on);$('#reading').setAttribute('aria-pressed',String(on));$('#reading').textContent=on?'Modo cinema':'Modo leitura';$$('.lesson').forEach(d=>d.open=on);$$('.chapter').forEach(s=>{s.style.removeProperty('--in');s.style.removeProperty('--out');s.classList.remove('copy-off','dissolving');});measure();if(on){$('#load-state').textContent='Leitura · movimento pausado';$('#hotspot').classList.add('off');paint();}else{if(scene)$('#load-state').textContent='';else loadScene();snap=true;schedule();}}
-$('#reading').addEventListener('click',()=>{const id=CHAPTERS[state.chapter].id;setReading(!state.reading);document.getElementById(id).scrollIntoView();measure();snap=true;paint();});
+function setReading(on){state.reading=on;document.body.classList.remove('in-engine-chapter');document.body.classList.remove('monitor-focused');document.body.classList.toggle('reading',on);$('#reading').setAttribute('aria-pressed',String(on));$('#reading').textContent=on?'Modo cinema':'Modo leitura';$$('.lesson').forEach(d=>d.open=on);$$('.chapter').forEach(s=>{s.style.removeProperty('--in');s.style.removeProperty('--out');s.classList.remove('copy-off','dissolving');});measure();if(on){$('#load-state').textContent='Leitura · movimento pausado';$('#hotspot').classList.add('off');paint();}else{if(scene)$('#load-state').textContent='';else loadScene();snap=true;schedule();}}
+let enginePaused=false;
+function goEngine(p){const el=$('#motor-do-loop');window.scrollTo({top:el.offsetTop+p*(el.offsetHeight-innerHeight),behavior:reduced.matches?'instant':'smooth'});snap=reduced.matches;schedule();}
+$('[data-engine-chapter="next"]').onclick=()=>{const p=Math.max(0,shownP-6),beat=engineBeat(p);if(p<.27)goEngine(.35);else if(beat<2)goEngine(beat===0?.58:.82);else $('#preparar').scrollIntoView();};
+$('[data-engine-chapter="back"]').onclick=()=>{const p=Math.max(0,shownP-6),beat=engineBeat(p);if(p<.27)$('#encerrar').scrollIntoView();else goEngine(beat===2?.58:beat===1?.35:0);};
+$('#engine-motion').onclick=()=>{enginePaused=!enginePaused;$('#engine-motion').setAttribute('aria-pressed',String(enginePaused));$('#engine-motion').textContent=enginePaused?'Mover motor':'Pausar motor';};
+$('#reading').addEventListener('click',()=>{const id=(CHAPTERS[state.chapter]?.id||'motor-do-loop');setReading(!state.reading);document.getElementById(id).scrollIntoView();measure();snap=true;paint();});
 $('#preload-read').addEventListener('click',()=>{if(loading)loadAbort?.abort();setReading(true);document.body.classList.add('scene-ready');const h=$('#title-preparar');h.tabIndex=-1;h.focus({preventScroll:true});});
 reduced.addEventListener('change',e=>setReading(e.matches));
 function openDialog(dialog){if(dialog.open)return;opener=document.activeElement;activeDialog=dialog;document.body.classList.add('modal-open');dialog.showModal();}
@@ -124,9 +140,9 @@ window.addEventListener('pageshow',()=>{measure();schedule();});
 window.addEventListener('pointermove',e=>{lastInput=performance.now();scene?.setPointer(e.clientX/innerWidth*2-1,e.clientY/innerHeight*2-1);},{passive:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){lastTime=performance.now();schedule();}});
 function preload(fraction,text){$('#preloader').style.setProperty('--f',fraction.toFixed(3));$('#preload-pct').textContent=String(Math.round(fraction*100)).padStart(2,'0');if(text)$('#preload-text').textContent=text;}
-async function loadScene(){if(scene||state.reading||loading)return;loading=true;loadAbort=new AbortController();const signal=loadAbort.signal;$('#load-state').textContent='Carregando o carro 3D…';try{const {createScene}=await import('./scene.js');scene=await createScene($('#stage'),{signal,onProgress:(f,text)=>{preload(f,text);if(!state.reading)$('#load-state').textContent=text+'…';},onError:()=>{const id=CHAPTERS[Math.max(0,state.chapter)].id;$('#stage canvas')?.remove();scene=null;setReading(true);document.getElementById(id).scrollIntoView();$('#load-state').textContent='3D indisponível · aula em modo leitura';}});scene.setNotebook(state.values,FIELDS);snap=true;schedule();$('#load-state').textContent=state.reading?'Leitura · movimento pausado':'';requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('scene-ready')));}catch(e){scene=null;if(signal.aborted){$('#load-state').textContent='Leitura · movimento pausado';}else{console.error('F1 Loop: falha na cena',e);setReading(true);document.body.classList.add('scene-ready');$('#load-state').textContent='3D indisponível · aula em modo leitura';}}finally{loading=false;if(signal.aborted&&!scene&&!state.reading)loadScene();}}
+async function loadScene(){if(scene||state.reading||loading)return;loading=true;loadAbort=new AbortController();const signal=loadAbort.signal;$('#load-state').textContent='Carregando o carro 3D…';try{const {createScene}=await import('./scene.js');scene=await createScene($('#stage'),{signal,onProgress:(f,text)=>{preload(f,text);if(!state.reading)$('#load-state').textContent=text+'…';},onError:()=>{const id=(CHAPTERS[Math.max(0,state.chapter)]?.id||'motor-do-loop');$('#stage canvas')?.remove();scene=null;setReading(true);document.getElementById(id).scrollIntoView();$('#load-state').textContent='3D indisponível · aula em modo leitura';}});scene.setNotebook(state.values,FIELDS);snap=true;schedule();$('#load-state').textContent=state.reading?'Leitura · movimento pausado':'';requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('scene-ready')));}catch(e){scene=null;if(signal.aborted){$('#load-state').textContent='Leitura · movimento pausado';}else{console.error('F1 Loop: falha na cena',e);setReading(true);document.body.classList.add('scene-ready');$('#load-state').textContent='3D indisponível · aula em modo leitura';}}finally{loading=false;if(signal.aborted&&!scene&&!state.reading)loadScene();}}
 // Capture hook for visual QA: jump to an absolute story position without damping.
-window.__aula={goto(p){measure();const i=Math.min(5,Math.floor(p)),l=p-i,y=i>=5?positions[5]:positions[i]+l*(positions[i+1]-positions[i]);window.scrollTo(0,y);snap=true;schedule();},get ready(){return !!scene&&document.body.classList.contains('scene-ready');}};
+window.__aula={goto(p){measure();const i=Math.min(6,Math.floor(p)),l=p-i,y=i>=6?positions[6]+l*($('#motor-do-loop').offsetHeight-innerHeight):positions[i]+l*(positions[i+1]-positions[i]);window.scrollTo(0,y);snap=true;schedule();},get ready(){return !!scene&&document.body.classList.contains('scene-ready');}};
 document.fonts.ready.then(()=>{measure();if(location.hash){const target=document.getElementById(location.hash.slice(1));target?.scrollIntoView();}snap=true;schedule();});
 if(state.reading)document.body.classList.add('scene-ready');
 setReading(state.reading);measure();paint();

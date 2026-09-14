@@ -1,3 +1,4 @@
+import {createInCarEngine} from './engine/in-car.js';
 import {createFrameQuality} from './fx/frame-quality.js';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
@@ -125,6 +126,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   const carMaterials = applyCarMaterials(THREE, model);
   for (const m of carMaterials.materials) if (m.name.toLowerCase().startsWith('pintura')) m.envMapIntensity = 1.25;
   const mechanics = createMechanics(model);
+  const inCarEngine = await createInCarEngine(scene);
   await applyInteiaBranding(model, mechanics);
   // Complementary finish maps; keep the canonical car rig and solid pigment.
   const surfaceLibrary = createSurfaceLibrary(THREE, {renderer, mobile});
@@ -230,6 +232,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   function apply(dt, time) {
     const t = pose.tunnel, d = pose.debrief, e = pose.exposure, v = pose.evaluate;
     const p = pose.index + pose.local;
+    const engineP=pose.engineProgress||0,engineOpen=pose.engineChapter?smooth(engineP/.22):0,engineZoom=pose.engineChapter?smooth((engineP-.12)/.18):0;
     // Portrait framing is a pure function of the pose (story.js portraitFrame, shared with the tests):
     // lifted above the copy while it reads, car centred and ≈58% of the width when there is none,
     // the wide reverse shot inside the box at 1.68–1.97 and the lesson screen centred at 3.52–3.92.
@@ -242,6 +245,11 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       target.lerp(garage.anchors.monitors,dedicated);
       offset.copy(garage.anchors.monitors);offset.x+=mobile?4.8:2.2;offset.y+=.035;offset.z+=.025;
       camera.position.lerp(offset,dedicated);
+    }
+    if(engineZoom>0){
+      target.lerp(inCarEngine.center,engineZoom);
+      offset.copy(inCarEngine.center);offset.x+=mobile?2.3:1.15;offset.y+=mobile?1.4:.68;offset.z+=mobile?2.4:1.3;
+      camera.position.lerp(offset,engineZoom);
     }
     // Handheld breathing and pointer parallax stay small so the take remains legible.
     const follow = 1 - Math.exp(-dt * 3);
@@ -257,6 +265,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     const s = pose.shake || 0;
     camera.fov = portrait ? portrait.fov + shake.fovKick * s * 1.32 : pose.fov + shake.fovKick * s;
     camera.fov = mix(camera.fov, mobile ? 34 : 26, dedicated);
+    camera.fov = mix(camera.fov,mobile?39:33,engineZoom);
     camera.far = r > 0 ? track.cameraFar : 80;
     camera.updateProjectionMatrix();
     camera.lookAt(target);
@@ -265,9 +274,11 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       camera.rotateX(shake.pitch * s); camera.rotateY(shake.yaw * s); camera.rotateZ(shake.roll * s);
     }
 
-    mechanics.setAmount(pose.explode);
+    mechanics.setAmount(Math.max(pose.explode,engineOpen*.65));
     mechanics.setSpin(t > .01);
     mechanics.update(dt * (1 + 20 * t), time * 1000, true);
+    if(engineOpen>0){for(const record of mechanics.records){if(record.category==='body'||record.category==='cockpit')record.root.position.y+=engineOpen*1.5;}}
+    inCarEngine.update(dt,engineOpen,smooth((engineP-.40)/.25)*.65,pose.enginePaused);
     // The circuit integrates its own roll; the wheels follow it (after mechanics rewrote the spin).
     if (r > 0 || run > 0) {
       const motion = track.update(time, dt, run);
@@ -336,7 +347,8 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     focus.fromArray(pose.focus);
     // Focus range and bokeh scale come from the story pose.
     focus.lerp(garage.anchors.monitors,dedicated);
-    post.focus(camera.position.distanceTo(focus), mix(pose.focusRange,4,dedicated), mix(pose.bokehScale,.1,dedicated));
+    focus.lerp(inCarEngine.center,engineZoom);
+    post.focus(camera.position.distanceTo(focus), mix(pose.focusRange,4,Math.max(dedicated,engineZoom)), mix(pose.bokehScale,.1,Math.max(dedicated,engineZoom)));
     // Seams (story haze): the far box floor and the tunnel shell sink into dark haze with no horizon,
     // and the dust thins so the empty background never reads as a starry sky.
     const h = pose.haze || 0;
@@ -351,7 +363,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     debug?.after?.();
   }
   // ?debug=1 exposes the rig to tools/probe.mjs for isolating a look problem.
-  const debug = params.has('debug') ? (window.__scene = {scene, camera, key, rim, front, hemi, garage, tunnel, track, sparks, wheelBlur, post, mechanics, model, renderer}) : null;
+  const debug = params.has('debug') ? (window.__scene = {inCarEngine,scene, camera, key, rim, front, hemi, garage, tunnel, track, sparks, wheelBlur, post, mechanics, model, renderer}) : null;
 
   // Adapt only after warmup and sustained slow real frames, never simulation dt.
   const adaptive = params.get('quality') !== 'high';
@@ -410,6 +422,6 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       if (!stage.dataset.loaded) { stage.dataset.loaded = 'true'; stage.classList.add('loaded'); }
       adapt(time * 1000, budgetMs);
     },
-    dispose() { post.dispose(); dust.dispose(); floor.dispose(); carLook.dispose(); surfaceLibrary.dispose(); carMaterials.dispose(); garage?.dispose(); tunnel?.dispose(); track.dispose(); wheelBlur.dispose(); sparks.dispose(); envGarage.dispose(); envTunnel.dispose(); renderer.dispose(); },
+    dispose() { inCarEngine.dispose();post.dispose(); dust.dispose(); floor.dispose(); carLook.dispose(); surfaceLibrary.dispose(); carMaterials.dispose(); garage?.dispose(); tunnel?.dispose(); track.dispose(); wheelBlur.dispose(); sparks.dispose(); envGarage.dispose(); envTunnel.dispose(); renderer.dispose(); },
   };
 }
