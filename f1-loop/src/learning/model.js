@@ -12,13 +12,27 @@ export const CLAIMS = [
   { text: 'A equipe da versão candidata recebeu treinamento no novo formulário antes do teste.', verdict: 'nao-verificada', source: 'nenhuma', explanation: 'O registro não fala de treinamento. Decidir exige a ficha de capacitação da equipe, que não foi aberta. Não verificada não quer dizer falsa: retire a frase ou busque o documento.' }
 ];
 export const SIMULATION_REQUEST = 'Redija um comunicado interno com base somente no registro de 14 de maio de 2026. Preserve a data, os grupos de 50 pedidos e as medianas de 12 e 9 minutos. Separe observação de causa. Não acrescente data ou autorização de adoção definitiva.';
+// Comprimentos próximos entre as alternativas: o tamanho do texto não indica a resposta (teste de regressão).
 export const CORRECTIONS = [
-  'Em 14 de maio de 2026, observaram-se medianas de 12 minutos e 9 minutos, com 50 pedidos em cada versão. Formulário e equipe mudaram juntos; a causa não foi isolada. Não há data nem autorização de adoção definitiva no registro.',
-  'Em 14 de maio de 2026, o formulário reduziu a mediana de 12 minutos para 9 minutos. A adoção definitiva ainda depende de autorização.',
-  'Em 14 de maio de 2026, o atendimento ficou 3 minutos mais rápido, com 50 pedidos por versão. Como a diferença foi observada, recomenda-se a adoção definitiva; a data será definida depois.'
+  'Em 14 de maio de 2026, as medianas foram de 12 e 9 minutos, com 50 pedidos por versão. Formulário e equipe mudaram juntos; a causa não foi isolada. Não há data nem autorização de adoção definitiva.',
+  'Em 14 de maio de 2026, o novo formulário reduziu a mediana de atendimento de 12 minutos para 9 minutos. A adoção definitiva do novo formulário ainda depende de autorização de quem tem competência.',
+  'Em 14 de maio de 2026, o atendimento ficou 3 minutos mais rápido, com 50 pedidos por versão. Como a diferença foi observada, recomenda-se a adoção definitiva do formulário; a data será definida depois.'
 ];
+export const OPTIONS = {
+  hypothesis: [['fidelidade','Se eu exigir apoio na fonte em cada afirmação, espero preservar os dados e tirar os excessos. Desisto se restar afirmação sem apoio ou se um dado mudar ou sumir.'],['efeito','Se eu mantiver só os números e atribuir a diferença ao formulário, espero explicar o resultado. Desisto se as medianas ou os grupos de pedidos divergirem da fonte.'],['opiniao','Se eu retirar do comunicado a data de adoção, espero resolver todas as afirmações sem apoio. Desisto se ainda restar uma data de adoção na versão já revisada.']],
+  archiveChoice: [['corrigida','Pedido e fonte, com a candidata já corrigida nos pontos que parecem óbvios.'],['substituir','Pedido e fonte, com a nova versão no lugar da candidata que foi recebida.'],['intacta','Pedido exato, fonte e candidata intacta, separados da futura correção.']],
+  verdict: [['sustentada','Sustentada'],['nao-sustentada','Não sustentada'],['nao-verificada','Não verificada']],
+  reason: [['limites','Mantém os dados e deixa explícitos os limites de causa e de adoção.'],['diferenca','Permite destacar a diferença de 3 minutos entre as duas medianas.'],['data','Organiza os resultados e as ressalvas em uma sequência fácil de ler.']],
+  decision: [['comunicar','Comunicar somente os resultados observados e seus limites.'],['inconclusivo','Encerrar como inconclusiva a questão indicada no motivo.'],['decisao-necessaria','Encaminhar a adoção para decisão de quem tem competência.']],
+  decisionReason: [['observacao','Os dados permitem descrever a comparação, sem atribuir causa ou autorizar adoção.'],['causa-pendente','Para decidir se o formulário causou o ganho, falta um teste que isole a mudança.'],['data-pendente','Para informar uma data, falta o documento que a confirme.'],['autorizacao','Para adotar o formulário, falta decisão da autoridade responsável.']]
+};
 export const STAGES = ['Preparar', 'Hipótese', 'Executar', 'Avaliar', 'Corrigir', 'Encerrar'];
-export function createLearningState() { return { completed: [], criterion: '', criterionReview: 'not-assessed', claimAttempts: 0, hypothesis: '', execution: null, correctedText: '', decision: '', decisionReason: '', decisionNote: '', history: [] }; }
+export function createLearningState() { return { completed: [], criterion: '', criterionReview: 'not-assessed', claimAttempts: 0, hypothesis: '', archiveChoice: '', execution: null, answers: [], correctionReason: '', correctedText: '', decision: '', decisionReason: '', decisionNote: '', history: [] }; }
+/** Recusa só o critério sem nada que outra pessoa confira no registro (número, data, grupo, mediana, fonte, causa, adoção…). Não avalia qualidade. */
+export function isVerifiableCriterion(text = '') {
+  const plain = String(text).normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+  return /\d/.test(plain) || /\b(fonte|registro|apoi|sustent|mediana|grupo|data|dado|maio|minuto|causa|causal|frase|trecho|document|autoriz|adocao|adotad|treinamento|capacitacao|numero|valor|evidencia)/.test(plain);
+}
 export function checkClaims(answers = [], attempt = 1) {
   const guides = ['Confira separadamente os dois valores e o tamanho de cada grupo.', 'Quantas condições mudaram juntas? O teste separou seus efeitos?', 'Alguma frase do registro trata da adoção? O que ela diz sobre data e autorização?', 'Alguma frase do registro menciona capacitação? Que documento permitiria conferir essa informação?'];
   const findings = CLAIMS.map((claim, i) => {
@@ -46,7 +60,7 @@ export function applyLearningAction(state, action) {
   const index = state.completed.length;
   if (action.stage !== index) return { state, passed: false, message: index === 6 ? 'O percurso desta sessão já foi registrado. Revise o histórico abaixo.' : `Antes desta ação, conclua ${STAGES[index]}. Abrir um capítulo não conclui a atividade.` };
   let message = '', valid = false;
-  if (index === 0) { valid = typeof action.criterion === 'string' && action.criterion.trim().length > 0 && action.criterion.length <= 2000 && action.selfReview === true; message = valid ? 'Critério guardado como você escreveu.' : 'Escreva seu critério e confirme sua própria revisão.'; }
+  if (index === 0) { const text = typeof action.criterion === 'string' ? action.criterion : ''; const filled = text.trim().length > 0 && text.length <= 2000, verifiable = filled && isVerifiableCriterion(text); valid = verifiable && action.selfReview === true; message = valid ? 'Critério guardado como você escreveu.' : !filled ? 'Escreva seu critério e confirme sua própria revisão.' : !verifiable ? 'Falta algo que outra pessoa confira no registro: a data, os grupos, as medianas ou o apoio de cada frase na fonte.' : 'Confirme sua própria revisão antes de guardar.'; }
   if (index === 1) { valid = action.hypothesis === 'fidelidade'; message = valid ? 'Hipótese registrada: aplicar uma regra de revisão — exigir apoio na fonte para cada afirmação — deve preservar dados e retirar excessos. Será refutada se restar afirmação sem apoio ou se um dado for alterado ou omitido.' : !action.hypothesis ? 'Escolha uma hipótese antes de registrar.' : action.hypothesis === 'efeito' ? 'Conferir só os números não testa a atribuição causal. O texto pode manter as medianas e ainda atribuir o ganho ao formulário sem apoio.' : 'Conferir a ausência da data não basta: outras afirmações podem continuar sem apoio. A previsão precisa poder falhar também nesses pontos.'; }
   if (index === 2) { valid = action.archive === true && action.archiveChoice === 'intacta'; message = valid ? 'Pedido, fonte e resposta candidata guardados sem edição.' : !action.archiveChoice ? 'Escolha o que guardar antes da avaliação.' : action.archiveChoice === 'corrigida' ? 'Corrigir antes de guardar apaga a evidência do que a candidata realmente respondeu. Preserve o original para comparar depois.' : 'Substituir a versão de partida elimina a comparação. Guarde pedido, fonte e candidata intactos em um registro separado.'; }
   if (index === 3) { const result = checkClaims(action.answers, (state.claimAttempts || 0) + 1); valid = result.passed; message = valid ? 'Quatro achados conferidos: os dados têm apoio; causa e data de adoção não são sustentadas pelo registro; treinamento não foi verificado por falta da ficha de capacitação. Nenhum desses limites prova, por si, falsidade.' : 'Há uma classificação ou referência a rever. Confira o retorno das frases em aberto.'; }
@@ -56,9 +70,24 @@ export function applyLearningAction(state, action) {
   const next = { ...state, completed: [...state.completed, index], history: [...state.history, { stage: STAGES[index], action: message }] };
   if (index === 0) next.criterion = action.criterion;
   if (index === 1) next.hypothesis = action.hypothesis;
-  if (index === 2) next.execution = { request: SIMULATION_REQUEST, source: [...SOURCE], candidate: CLAIMS.map(c=>c.text), kind: 'prewritten-simulation' };
-  if (index === 3) next.claimAttempts = (state.claimAttempts || 0) + 1;
-  if (index === 4) next.correctedText = CORRECTIONS[0];
+  if (index === 2) { next.archiveChoice = action.archiveChoice; next.execution = { request: SIMULATION_REQUEST, source: [...SOURCE], candidate: CLAIMS.map(c=>c.text), kind: 'prewritten-simulation' }; }
+  if (index === 3) { next.claimAttempts = (state.claimAttempts || 0) + 1; next.answers = action.answers.map(a => ({ verdict: a.verdict, source: a.source })); }
+  if (index === 4) { next.correctedText = CORRECTIONS[0]; next.correctionReason = action.reason; }
   if (index === 5) { next.decision = action.decision; next.decisionReason = action.decisionReason; next.decisionNote = typeof action.decisionNote === 'string' ? action.decisionNote.slice(0,2000) : ''; }
   return { state: next, passed: true, message };
+}
+const labelOf = (list, value) => list.find(([v]) => v === value)?.[1] || '';
+/** Texto simples para o aluno guardar: o que registrou em cada etapa, as anotações da tarefa real e a data. */
+export function buildRecordText(state, { now = new Date(), notes = [] } = {}) {
+  const done = i => state.completed.includes(i), pending = ['Ainda não registrado.'];
+  const lines = ['Registro da prática: comunicado sobre o teste do formulário', `Gerado em: ${now.toLocaleString('pt-BR', { dateStyle: 'long', timeStyle: 'short' })}`, ''];
+  const section = (i, body) => lines.push(`${i + 1}. ${STAGES[i]}`, ...(done(i) ? body() : pending), '');
+  section(0, () => [`Critério: ${state.criterion}`]);
+  section(1, () => [`Hipótese: ${labelOf(OPTIONS.hypothesis, state.hypothesis)}`]);
+  section(2, () => [`Registro guardado: ${labelOf(OPTIONS.archiveChoice, state.archiveChoice)}`, `Pedido: ${state.execution?.request || SIMULATION_REQUEST}`]);
+  section(3, () => [`Tentativas até conferir: ${state.claimAttempts}`, ...CLAIMS.flatMap((c, i) => { const a = state.answers?.[i] || {}; return [`Frase ${i + 1}: ${c.text}`, `   Classificação: ${labelOf(OPTIONS.verdict, a.verdict)}. Trecho da fonte: ${a.source === 'nenhuma' ? 'nenhuma frase do registro trata disso' : `frase ${a.source}`}.`]; })]);
+  section(4, () => [`Versão escolhida: ${state.correctedText}`, `Motivo: ${labelOf(OPTIONS.reason, state.correctionReason)}`]);
+  section(5, () => [`Decisão: ${labelOf(OPTIONS.decision, state.decision)}`, `Motivo: ${labelOf(OPTIONS.decisionReason, state.decisionReason)}`, `Próxima ação ou ressalva: ${state.decisionNote || 'não registrada.'}`]);
+  lines.push('Anotações na minha tarefa real', ...(notes.length ? notes.map(([label, value]) => `${label}: ${value}`) : ['Nenhuma anotação salva neste navegador.']));
+  return lines.join('\n') + '\n';
 }

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createLearningState, applyLearningAction, checkClaims, checkCorrection, checkDecision, CORRECTIONS, SIMULATION_REQUEST, CLAIMS, SOURCE } from '../src/learning/model.js';
+import { createLearningState, applyLearningAction, checkClaims, checkCorrection, checkDecision, isVerifiableCriterion, buildRecordText, CORRECTIONS, OPTIONS, SIMULATION_REQUEST, CLAIMS, SOURCE } from '../src/learning/model.js';
 import { renderLearningMarkup } from '../src/learning/index.js';
 const validAnswers = [{verdict:'sustentada',source:'2'},{verdict:'nao-sustentada',source:'3'},{verdict:'nao-sustentada',source:'4'},{verdict:'nao-verificada',source:'nenhuma'}];
 test('navigation, skipped stages and incomplete criteria do not produce progress',()=>{
@@ -30,13 +30,13 @@ test('complete human action sequence records correction and bounded decision wit
  assert.equal(result.state.history.length,6);assert.match(result.message,/Não autoriza adoção definitiva/);
  assert.equal(applyLearningAction(result.state,{stage:5,decision:'comunicar',responsibility:true}).passed,false);
 });
-test('free criterion is preserved literally without keyword grading or claim of semantic approval',()=>{
- const criterion='  Meu critério próprio <não avaliado>\nsegunda linha  ';
+test('free criterion is preserved literally without claim of semantic approval',()=>{
+ const criterion='  Cada frase com apoio na fonte <não avaliado>\nsegunda linha  ';
  const result=applyLearningAction(createLearningState(),{stage:0,criterion,selfReview:true});
  assert.equal(result.passed,true);assert.equal(result.state.criterion,criterion);assert.equal(result.state.criterionReview,'not-assessed');assert.match(result.message,/Critério guardado/);
 });
 test('Execute archives exact simulation request, source and intact candidate only on explicit save action',()=>{
- let s=createLearningState();s=applyLearningAction(s,{stage:0,criterion:'Conferir',selfReview:true}).state;s=applyLearningAction(s,{stage:1,hypothesis:'fidelidade'}).state;
+ let s=createLearningState();s=applyLearningAction(s,{stage:0,criterion:'Conferir cada frase na fonte',selfReview:true}).state;s=applyLearningAction(s,{stage:1,hypothesis:'fidelidade'}).state;
  assert.equal(s.execution,null);assert.equal(applyLearningAction(s,{stage:2,inspect:true}).passed,false);
  s=applyLearningAction(s,{stage:2,archive:true,archiveChoice:'intacta'}).state;assert.equal(s.execution.request,SIMULATION_REQUEST);assert.deepEqual(s.execution.source,SOURCE);assert.deepEqual(s.execution.candidate,CLAIMS.map(c=>c.text));
  assert.notStrictEqual(s.execution.source,SOURCE);assert.equal(s.execution.kind,'prewritten-simulation');
@@ -63,7 +63,7 @@ test('static markup contains fictional source, candidate and all six stages with
 
 
 test('empty hypothesis differs from faulty refutation and archive requires an intact version choice',()=>{
- let s=applyLearningAction(createLearningState(),{stage:0,criterion:'Conferir',selfReview:true}).state;
+ let s=applyLearningAction(createLearningState(),{stage:0,criterion:'Conferir cada frase na fonte',selfReview:true}).state;
  assert.match(applyLearningAction(s,{stage:1}).message,/Escolha uma hipótese/);
  for(const hypothesis of ['efeito','opiniao']) assert.equal(applyLearningAction(s,{stage:1,hypothesis}).passed,false);
  s=applyLearningAction(s,{stage:1,hypothesis:'fidelidade'}).state;
@@ -95,4 +95,34 @@ test('static preparation offers the model before save and evaluation keeps four 
  assert.match(html,/a fonte não trata do assunto e falta consultar outro documento/);
  assert.equal((html.match(/data-lr-claim="[0-3]" open/g)||[]).length,4);
  assert.match(html,/>Registrar minha escolha<\/button>/);
+});
+
+test('Preparar refuses a vague criterion with a short note on what is missing and keeps the model collapsed',()=>{
+ for(const criterion of ['Ficar bom.','Melhorar o texto','Está bom quando o comunicado ficar claro e profissional.']){
+  const r=applyLearningAction(createLearningState(),{stage:0,criterion,selfReview:true});
+  assert.equal(r.passed,false,criterion);assert.deepEqual(r.state.completed,[]);assert.match(r.message,/Falta algo que outra pessoa confira no registro/);assert.ok(r.message.length<=140);
+ }
+ for(const criterion of ['Cada frase com apoio na fonte.','Preservar as medianas de 12 e 9 minutos.','Não atribuir causa ao formulário.']) assert.equal(isVerifiableCriterion(criterion),true,criterion);
+ assert.match(applyLearningAction(createLearningState(),{stage:0,criterion:'Cada frase com apoio na fonte.',selfReview:false}).message,/Confirme/);
+ const html=renderLearningMarkup();assert.match(html,/<details class="lr-self-review" data-lr-self-review><summary>Comparar com um critério-modelo<\/summary>/);
+});
+
+test('option length does not reveal the expected answer in Hipótese, Executar and Corrigir',()=>{
+ const groups=[['Hipótese',OPTIONS.hypothesis,'fidelidade'],['Executar',OPTIONS.archiveChoice,'intacta'],['Corrigir · versão',CORRECTIONS.map((t,i)=>[String(i),t]),'0'],['Corrigir · motivo',OPTIONS.reason,'limites']];
+ for(const [name,options,correct] of groups){
+  const len=Object.fromEntries(options.map(([v,t])=>[v,[...t].length])),values=Object.values(len),max=Math.max(...values),min=Math.min(...values);
+  assert.ok(len[correct]<max,`${name}: a opção certa (${len[correct]}) é a mais longa (${max})`);
+  assert.ok((max-min)/max<=.12,`${name}: diferença de ${max-min} caracteres entre ${max} e ${min}`);
+ }
+});
+
+test('record text lists criterion, choices, answers, notes and date in plain language',()=>{
+ let s=createLearningState();
+ const actions=[{stage:0,criterion:'Cada frase com apoio na fonte.',selfReview:true},{stage:1,hypothesis:'fidelidade'},{stage:2,archive:true,archiveChoice:'intacta'},{stage:3,answers:validAnswers},{stage:4,choice:'0',reason:'limites'},{stage:5,decision:'inconclusivo',decisionReason:'causa-pendente',decisionNote:'Pedir teste com a mesma equipe.',responsibility:true}];
+ assert.match(buildRecordText(s,{now:new Date(2026,8,14,10,32)}),/1\. Preparar\nAinda não registrado\./);
+ for(const a of actions)s=applyLearningAction(s,a).state;
+ const text=buildRecordText(s,{now:new Date(2026,8,14,10,32),notes:[['Minha tarefa real','Revisar o ofício 12.']]});
+ for(const expected of ['Gerado em: 14 de setembro de 2026','Critério: Cada frase com apoio na fonte.',OPTIONS.hypothesis[0][1],OPTIONS.archiveChoice[2][1],'Classificação: Não verificada. Trecho da fonte: nenhuma frase do registro trata disso.',CORRECTIONS[0],OPTIONS.reason[0][1],'Decisão: Encerrar como inconclusiva','Próxima ação ou ressalva: Pedir teste com a mesma equipe.','Minha tarefa real: Revisar o ofício 12.']) assert.ok(text.includes(expected),expected);
+ assert.doesNotMatch(text,/[{}"]|undefined|Ainda não registrado/);
+ assert.match(renderLearningMarkup(),/data-lr-download>Baixar meu registro \(\.txt\)<\/button>/);
 });
