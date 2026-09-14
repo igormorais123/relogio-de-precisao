@@ -1,3 +1,4 @@
+import {FIELDS} from './content.js';
 export const clamp = (v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const smooth=t=>{t=clamp(t);return t*t*(3-2*t);};
 
@@ -10,20 +11,20 @@ const CAMERA=[
  [0.50,[6.5,1.7,5.0],[0,.5,0]],
  [0.80,[6.6,3.4,2.0],[0,.7,-.3]],
  // 02 Hipótese · bench: exploded car seen from above, one part isolated.
- [1.00,[5.6,4.7,4.4],[0,.8,-.2]],
- [1.50,[4.4,5.1,5.6],[0,.75,-.5]],
- [1.80,[6.2,1.6,5.2],[0,.5,.3]],
+ [1.00,[6.6,5.5,5.2],[0,.8,-.2]],
+ [1.50,[5.3,6.0,6.5],[0,.75,-.5]],
+ [1.80,[7.0,1.8,5.8],[0,.5,.3]],
  // 03 Executar · tunnel: low front, then lateral travelling against the airflow.
- [2.00,[4.6,.78,3.8],[0,.45,.6]],
- [2.50,[4.4,.86,-.4],[0,.5,-.6]],
+ [2.00,[5.6,.9,4.6],[0,.45,.6]],
+ [2.50,[5.4,.95,-.6],[0,.5,-.6]],
  [2.80,[3.3,1.25,-4.5],[0,.55,-.8]],
  // 04 Avaliar · engineering station: rack focus from the car to the evidence.
  [3.00,[4.6,1.55,3.6],[-4.6,1.45,-1.35]],
  [3.50,[3.8,1.5,2.7],[-4.6,1.45,-1.2]],
  [3.80,[5.6,2.8,1.4],[0,.6,-.2]],
  // 05 Corrigir · back in the box: body lifted, revised floor exposed.
- [4.00,[6.3,.78,2.3],[0,.48,-.3]],
- [4.50,[5.9,.86,-1.3],[0,.44,-.45]],
+ [4.00,[7.6,.95,2.6],[0,.5,-.3]],
+ [4.50,[7.2,1.0,-1.6],[0,.46,-.45]],
  [4.80,[6.3,1.2,4.2],[0,.45,.1]],
  // 06 Encerrar · the closing frame answers the opening one.
  [5.00,[5.6,1.35,6.4],[0,.45,.2]]
@@ -31,13 +32,15 @@ const CAMERA=[
 const TRACKS={
  fov:[[0,30],[1,33],[1.8,30],[2,28],[2.8,30],[3,26],[3.5,25],[3.8,30],[5,30]],
  explode:[[0,0],[.55,0],[1,.78],[1.55,.78],[1.85,0],[3.8,0],[4,.45],[4.55,.45],[4.85,0],[5,0]],
- bokeh:[[0,.5],[1,.35],[2,.55],[2.8,.45],[3,.25],[3.3,.95],[3.6,.95],[4,.6],[5,.5]],
+ bokeh:[[0,.5],[1,.35],[2,.55],[2.8,.45],[3,.25],[3.18,.72],[3.6,.72],[3.8,.3],[4,.6],[5,.5]],
+ // Avaliar is lit by the evidence: the room drops and the monitors take over.
+ evaluate:[[0,0],[2.95,0],[3.15,1],[3.6,1],[3.85,0],[5,0]],
  exposure:[[0,1],[1.8,1],[2.2,.9],[2.8,.9],[3.2,1],[4.8,1],[5,.92]],
  // The same part carries the loop: the floor is the hypothesis (02) and the revision (05).
  highlight:[[0,0],[1.05,0],[1.2,1],[1.6,1],[1.8,0],[4.05,0],[4.2,1],[4.6,1],[4.8,0],[5,0]],
  debrief:[[0,0],[4.7,0],[5,1]]
 };
-const FOCUS=[[0,[0,.5,.9]],[1,[0,.75,-.9]],[1.8,[0,.5,.6]],[2,[0,.5,.9]],[2.5,[0,.5,-.4]],[2.8,[0,.55,-1.2]],[3.05,[0,.55,.3]],[3.3,[-4.7,1.5,-1.35]],[3.6,[-4.7,1.5,-1.35]],[3.9,[0,.45,0]],[4,[0,.4,-.4]],[4.5,[0,.4,-.6]],[5,[0,.5,.9]]];
+const FOCUS=[[0,[0,.5,.9]],[1,[0,.75,-.9]],[1.8,[0,.5,.6]],[2,[0,.5,.9]],[2.5,[0,.5,-.4]],[2.8,[0,.55,-1.2]],[3.02,[0,.55,.3]],[3.18,[-4.7,1.5,-1.35]],[3.6,[-4.7,1.5,-1.35]],[3.75,[0,.95,-.3]],[4,[0,.4,-.4]],[4.5,[0,.4,-.6]],[5,[0,.5,.9]]];
 // Environment wipes straddle the seams into and out of the tunnel (R6).
 const WIPES=[{from:1.88,to:2.12,incoming:'tunnel'},{from:2.88,to:3.12,incoming:'garage'}];
 
@@ -69,5 +72,7 @@ export function sampleStory(progress){
 export function assessChoice(chapter,choice){return {correct:choice===chapter.correct,message:chapter.feedback};}
 export function exportNotebook(values,now=new Date().toISOString()){
  const safe={};for(const [k,v] of Object.entries(values)){if(typeof v==='string')safe[k]=v;}
- return {...safe,schemaVersion:1,exportedAt:now,origin:'Anotações do aluno; não verificadas automaticamente'};
+ // Empty fields are listed, never filled: a gap stays visible to the next reader.
+ const camposSemRegistro=[...FIELDS.map(([key])=>key),'decision'].filter(key=>!(typeof values[key]==='string'&&values[key].trim()));
+ return {...safe,camposSemRegistro,schemaVersion:1,exportedAt:now,origin:'Anotações do aluno; não verificadas automaticamente'};
 }

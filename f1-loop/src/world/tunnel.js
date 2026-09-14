@@ -263,35 +263,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
   belt.position.y = .007; belt.name = 'Esteira rolante'; belt.receiveShadow = true;
   floorGroup.add(belt);
 
-  // Estêncil honesto no piso, fora da silhueta, legível do plano lateral.
-  const LABEL = 'VISUALIZAÇÃO DIDÁTICA · NÃO É CFD';
-  // Arte anamórfica (esticada ao longo da visada, como sinalização de pista):
-  // o escorço do piso devolve proporções normais e o "·" não vira traço.
-  const labelMap = canvasTexture(2048 * tex, 160 * tex, (ctx, w, h) => {
-    let size = h * .8;
-    ctx.font = fontStack(size);
-    ctx.letterSpacing = `${Math.round(size * .12)}px`;
-    const width = ctx.measureText(LABEL).width;
-    size *= Math.min(1, w * .96 / width);
-    ctx.font = fontStack(size); ctx.letterSpacing = `${Math.round(size * .12)}px`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillStyle = 'rgba(214,232,238,.92)';
-    ctx.fillText(LABEL, w / 2, h * .54);
-    // Desgaste da tinta.
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = '#000';
-    const r = rng(777);
-    for (let i = 0; i < 1100 * tex; i++) { ctx.globalAlpha = .2 + r() * .6; ctx.fillRect(r() * w, r() * h, 1 + r() * 3 * tex, 1 + r() * 2 * tex); }
-    ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';
-  }, {repeat: [1, 1]});
-  labelMap.wrapS = labelMap.wrapT = THREE.ClampToEdgeWrapping;
-  const label = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 2.5 * 160 / 2048 * 1.7),
-    new THREE.MeshStandardMaterial({map: labelMap, emissiveMap: labelMap, emissive: new THREE.Color(.16, .21, .23), transparent: true, depthWrite: false, roughness: .7, metalness: 0, polygonOffset: true, polygonOffsetFactor: -2}));
-  label.rotation.order = 'YXZ';
-  label.rotation.set(-Math.PI / 2, Math.PI / 2, 0);   // lê ao longo de −Z visto de +X
-  label.position.set(1.34, .011, -.6);
-  label.name = 'Estêncil VISUALIZAÇÃO DIDÁTICA'; label.receiveShadow = true;
-  floorGroup.add(label);
+  // O aviso "visualização didática, não é CFD" fica no rodapé da página, não no piso.
 
   const floorLeds = [];
   for (const s of [-1, 1]) {
@@ -442,15 +414,20 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
   // ---------- rake de fumaça ----------
   const RAKE_Z = 3.55;
   const smokeLanes = [];
-  const laneXs = mobile ? [-.98, -.42, .14, .7] : [-.98, -.7, -.42, -.14, .14, .42, .7, .98];
-  for (const y of [.34, .62]) for (const x of laneXs) smokeLanes.push([x, y]);
+  // Poucas faixas largas e macias: cada faixa é um feixe espalhado de partículas
+  // aditivas, lido como luz/fumaça iluminada e não como tubos.
+  // A faixa do lado das câmeras da aula (+X) corre baixa, abaixo do logotipo do sidepod.
+  const smokeSpecs = mobile ? [[-.5, .42], [.1, .5], [.8, .18]] : [[-.78, .36], [-.36, .52], [0, .42], [.36, .56], [.8, .18], [0, .78]];
+  smokeLanes.push(...smokeSpecs);
+  const laneXs = smokeSpecs.map(([x]) => x);
   {
     const parts = [];
     // Barras só sobre os bocais, alimentadas por um tubo rente ao piso que vai
     // até as colunas em |x| = 3: nenhum poste alto entre a câmera e o carro.
     const half = Math.max(...laneXs) + .07;
-    for (const y of [.34, .62]) parts.push(boxGeo(half * 2, .03, .03, 0, y, RAKE_Z + .12));
-    for (const x of [-half, half]) parts.push(boxGeo(.022, .62, .022, x, .31, RAKE_Z + .12));
+    const ys = [...new Set(smokeLanes.map(l => l[1]))], top = Math.max(...ys);
+    for (const y of ys) parts.push(boxGeo(half * 2, .025, .025, 0, y, RAKE_Z + .12));
+    for (const x of [-half, half]) parts.push(boxGeo(.022, top, .022, x, top / 2, RAKE_Z + .12));
     parts.push(boxGeo(6, .03, .05, 0, .018, RAKE_Z + .12));
     for (const x of [-3, 3]) parts.push(boxGeo(.08, .16, .12, x, .08, RAKE_Z + .12));
     for (const [x, y] of smokeLanes) {
@@ -492,7 +469,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
     ...FOG_UNIFORMS(),
     uPath: {value: pathTexture}, uRes: {value: new THREE.Vector2(1440, 900)},
     uTime: {value: 0}, uRate: {value: .12}, uFlow: {value: 0}, uSamples: {value: SAMPLES},
-    uThin: {value: .009}, uPuff: {value: .2}, uStreak: {value: .11}, uGain: {value: .2 * Math.sqrt(400 / perLane)},
+    uThin: {value: .028}, uPuff: {value: .22}, uStreak: {value: .16}, uGain: {value: .05 * Math.sqrt(1200 / perLane)},
   };
   const smokeMaterial = new THREE.ShaderMaterial({
     fog: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
@@ -519,7 +496,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
         float lam=.006*smoothstep(1.2,-1.,P.z);
         vec3 eddy=vec3(sin(P.z*1.9-uTime*2.2+ph)+.55*sin(P.z*4.3-uTime*3.3+ph*2.1),
                        .8*sin(P.z*2.6-uTime*1.8+ph*1.37)+.55, 0.)*(vec3(.15,.12,0.)*wake+lam);
-        float spread=.0025+.006*smoothstep(.02,.4,t)+wake*.19;
+        float spread=.006+.045*smoothstep(0.,.25,t)+wake*.2;
         float ang=position.z*6.2831+uTime*wake*1.6;
         vec3 J=vec3(cos(ang), sin(ang), 0.)*spread*sqrt(aR);
         vec3 W=P+eddy+J;
@@ -531,15 +508,16 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
         float len=length(d);
         float pxPerM=projectionMatrix[1][1]*uRes.y*.5/max(-mv.z,.05);
         float thick=max((uThin+wake*uPuff*(.4+aR))*pxPerM, 1.5);
-        float size=2.*len+2.2*thick+2.;   // folga para o halo suave em volta do núcleo
+        float size=2.*len+2.8*thick+2.;   // folga para o halo suave em volta do núcleo
         gl_PointSize=min(size, 220.);
         vDir=len>.001?d/len:vec2(1.,0.);
         vLen=len/size; vRad=.5*thick/size;
-        float fade=smoothstep(0.,.025,t)*(1.-smoothstep(.7,.97,t));
-        // Baforadas: a densidade viaja com as partículas e abre falhas no filete.
+        // Cauda que some suavemente; nada a menos de ~1,5 m da lente.
+        float fade=smoothstep(0.,.06,t)*(1.-smoothstep(.45,.95,t));
+        // Baforadas: a densidade viaja com as partículas e abre falhas na faixa.
         float puff=.5+.5*sin(t*53.+lane*2.3+sin(t*17.+lane)*1.7);
-        float pulse=.18+.82*puff*puff;
-        vAlpha=uFlow*uGain*fade*pulse*mix(1.,.16,wake)*clamp(4./thick,.2,1.);
+        float pulse=.35+.65*puff;
+        vAlpha=uFlow*uGain*fade*pulse*mix(1.,.22,wake)*clamp(10./thick,.2,1.)*smoothstep(1.2,1.9,-mv.z);
         vLight=smoothstep(.1,1.2,W.y);
         vWake=wake; vSeed=position.z;
       #ifdef USE_FOG
@@ -559,12 +537,12 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
         float along=dot(p,vDir), across=dot(p,vec2(-vDir.y,vDir.x));
         float ax=max(abs(along)-vLen,0.);
         float r=length(vec2(ax,across))/vRad;
-        float a=exp(-r*r*1.9)*.8+exp(-r*r*.45)*.3;
+        float a=exp(-r*r*1.2)*.7+exp(-r*r*.4)*.3;
         if(vWake>.02){
           float cloud=tNoise(p*5.+vSeed*31.+vec2(uTime*.15,0.))*.65+tNoise(p*12.+vSeed*57.)*.35;
           a*=mix(1.,.2+cloud*1.3,vWake);
         }
-        vec3 col=mix(vec3(.46,.70,.86), vec3(1.), .25+.75*vLight);
+        vec3 col=mix(vec3(.22,.62,.82), vec3(.72,.9,1.), .15+.55*vLight);
         col=mix(col, vec3(.7,.9,1.)*1.35, vWake*.6);   // esteira fria e luminosa, não cinza
         gl_FragColor=vec4(col*a*vAlpha*(1.-fogAmount()), 1.);
       }`,
@@ -578,11 +556,11 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
   const addPath = (pts, n, amber, width) => ribbonPaths.push({pts, n, amber, width});
   const decimate = mobile ? 3 : 1;
   const laneSpecs = mobile
-    ? [[0, .46], [-.36, .8], [.36, .8], [-.66, .48], [.66, .48], [-1.02, .3], [1.02, .3]]
-    : [[-.14, .46], [.14, .46], [-.36, .8], [.36, .8], [0, 1.02], [-.66, .48], [.66, .48], [-1.02, .36], [1.02, .36]];
+    ? [[-.36, .8], [.36, .8], [0, 1.02], [.66, .48]]
+    : [[-.36, .8], [.36, .8], [0, 1.02], [-.66, .48], [.66, .48], [1.02, .36]];
   for (const [x, y] of laneSpecs) { const s = streamline(x, y); addPath(s.pts, s.n, 0, 1); }
   for (const x of mobile ? [] : [-.45, .45]) { const s = streamline(x, .035, {under: true}); addPath(s.pts, s.n, 0, .85); }
-  const rearStrands = mobile ? 2 : 3, frontStrands = mobile ? 1 : 2;
+  const rearStrands = mobile ? 1 : 2, frontStrands = 1;
   for (const sign of [-1, 1]) {
     for (let k = 0; k < rearStrands; k++) { const s = spiral(sign, k, rearStrands, {z0: -2.2, z1: -6.4, cx0: .8, cx1: 1.08, cy0: .33, cy1: .58, r0: .04, r1: .24, turns: 17}); addPath(s.pts, s.n, 1, .9); }
     for (let k = 0; k < frontStrands; k++) { const s = spiral(sign, k, frontStrands, {z0: 1.15, z1: -1.3, cx0: 1.0, cx1: 1.06, cy0: .3, cy1: .36, r0: .03, r1: .075, turns: 12}); addPath(s.pts, s.n, 1, .75); }
@@ -623,7 +601,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
   const ribbonUniforms = {
     ...FOG_UNIFORMS(),
     uRes: smokeUniforms.uRes, uTime: {value: 0}, uFlow: {value: 0}, uReveal: {value: 0},
-    uWidth: {value: .011}, uMinPx: {value: mobile ? 1.1 : 1.35}, uPulses: {value: 3}, uPulseSpeed: {value: .75},
+    uWidth: {value: .0055}, uMinPx: {value: mobile ? .8 : .9}, uPulses: {value: 3}, uPulseSpeed: {value: .75},
     uCyan: {value: CYAN.clone()}, uAmber: {value: AMBER.clone()},
   };
   const ribbonMaterial = new THREE.ShaderMaterial({
@@ -634,12 +612,12 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
       uniform float uWidth, uMinPx;
       attribute vec3 aStart, aEnd, aInfo;
       attribute vec2 aU;
-      varying float vU, vAcross, vSeed, vAmber, vThin;
+      varying float vU, vAcross, vSeed, vAmber, vThin, vNear;
       #include <fog_pars_vertex>
       void main(){
         vec4 mA=modelViewMatrix*vec4(aStart,1.), mB=modelViewMatrix*vec4(aEnd,1.);
         vec4 cA=projectionMatrix*mA, cB=projectionMatrix*mB;
-        vU=0.; vAcross=0.; vSeed=aInfo.x; vAmber=aInfo.y; vThin=0.;
+        vU=0.; vAcross=0.; vSeed=aInfo.x; vAmber=aInfo.y; vThin=0.; vNear=0.;
       #ifdef USE_FOG
         vFogDepth=0.;
       #endif
@@ -655,6 +633,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
         c.xy+=nrm*position.y*halfPx*2./uRes*c.w;
         gl_Position=c;
         vU=tail?aU.y:aU.x; vAcross=position.y; vThin=clamp(worldPx/uMinPx,0.,1.);
+        vNear=smoothstep(1.2,1.9,-m.z);
       #ifdef USE_FOG
         vFogDepth=-m.z;
       #endif
@@ -662,19 +641,19 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
     fragmentShader: /* glsl */`
       uniform float uTime, uFlow, uReveal, uPulses, uPulseSpeed;
       uniform vec3 uCyan, uAmber;
-      varying float vU, vAcross, vSeed, vAmber, vThin;
+      varying float vU, vAcross, vSeed, vAmber, vThin, vNear;
       ${FOG_FRAGMENT}
       ${WIPE_SHADER_CHUNK}
       void main(){
         wipeDiscard();
         float x=abs(vAcross);
         float profile=exp(-x*x*7.)+exp(-x*x*1.8)*.28;
-        float ends=smoothstep(0.,.09,vU)*(1.-smoothstep(.78,1.,vU));
+        float ends=smoothstep(0.,.18,vU)*(1.-smoothstep(.55,1.,vU));
         float reveal=1.-smoothstep(uReveal*1.12-.1,uReveal*1.12,vU);
         float p=fract(vU*uPulses-uTime*uPulseSpeed+vSeed);
-        float pulse=pow(p,16.)+pow(p,4.)*.16;
+        float pulse=pow(p,8.)*.8+pow(p,3.)*.2;
         vec3 col=mix(uCyan,uAmber,vAmber);
-        float I=(.11+2.8*pulse)*profile*ends*reveal*uFlow*mix(.55,1.,vThin);
+        float I=(.09+1.5*pulse)*profile*ends*reveal*uFlow*mix(.6,1.,vThin)*vNear;
         gl_FragColor=vec4(col*I*(1.-fogAmount()),1.);
       }`,
   });
@@ -725,7 +704,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
       const base = import.meta.env?.BASE_URL ?? '/';
       const face = new FontFace(FONT, `url(${base}fonts/BebasNeue-Regular.woff2)`);
       document.fonts.add(face);
-      ready = face.load().then(() => { labelMap.userData.redraw(); diskMap.userData.redraw(); diskEmissive.userData.redraw(); }).catch(() => {});
+      ready = face.load().then(() => { diskMap.userData.redraw(); diskEmissive.userData.redraw(); }).catch(() => {});
     }
   } catch { /* fonte opcional: o estêncil já foi desenhado com a pilha de reserva */ }
 

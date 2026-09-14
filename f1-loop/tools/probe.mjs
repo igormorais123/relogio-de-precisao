@@ -13,6 +13,6 @@ await page.waitForFunction(() => window.__aula?.ready, null, {timeout: 90000});
 await page.evaluate(v => window.__aula.goto(v), Number(p));
 await page.waitForTimeout(900);
 if (code) console.log('result:', await page.evaluate(code));
-await page.waitForTimeout(900);
+await page.waitForTimeout(Number(process.argv[5] ?? 900));
 await page.screenshot({path: `shots/probe/${tag}.jpg`, type: 'jpeg', quality: 86});
 await browser.close();

@@ -61,7 +61,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   // a distância e a rugosidade, e a silhueta do carro bloqueia o reflexo.
   const floorUniforms = {
     uFloorCam: {value: new THREE.Vector3(5, 1.5, 5)},
-    uLedGain: {value: 1}, uScreenGain: {value: 1},
+    uLedGain: {value: 1}, uScreenGain: {value: 1}, uMonitorGain: {value: 1}, uBand: {value: 0},
     uRoofOn: {value: 1}, uRearOn: {value: 1},
   };
   for (const m of [epoxy, bay]) patchFloorReflection(m, floorUniforms, mobile);
@@ -80,6 +80,10 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   const ledCool = glow('#e6efff', 3.2);
   const ledAmber = glow('#ffab5e', 6);
   const ledRed = glow('#ff3347', 2.2);
+  // Vermelho INTEIA que acende só no debrief (contraluz para a silhueta do carro).
+  const stripeRed = std(RED, .42, .05, .5, {emissive: new THREE.Color('#ff2340'), emissiveIntensity: 0});
+  const bandRed = std('#1b0b0e', .5, 0, .3, {emissive: new THREE.Color('#ff2340'), emissiveIntensity: 0});
+  const ledSlat = glow('#e6efff', 2.4);
 
   // ------------------------------------------------------ geometria fundida
   const bucketSet = () => ({map: new Map(), add(geo, mat) { if (!this.map.has(mat)) this.map.set(mat, []); this.map.get(mat).push(geo); }});
@@ -120,8 +124,9 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   box(REAR, 11.2, 3.8, .14, 0, 1.9, RZ - .07, graphite);
   for (let x = -4.55; x < 5.5; x += 1.3) box(REAR, .014, 3.6, .02, x, 1.9, RZ + .01, black);
   box(REAR, 11.2, .16, .03, 0, .08, RZ + .015, black);
-  box(REAR, 11.2, .045, .02, 0, 2.6, RZ + .012, redPaint);
+  box(REAR, 11.2, .045, .02, 0, 2.6, RZ + .012, stripeRed);
   box(REAR, 7.3, 1.36, .05, -.7, 1.76, RZ + .025, charcoal, {r: .012});
+  box(REAR, 7.2, .16, .02, -.7, 1.17, RZ + .06, bandRed);
   box(REAR, 7.45, .06, .22, -.7, 2.47, RZ + .11, benchTop, {r: .01});
   box(REAR, 7.2, .014, .05, -.7, 2.433, RZ + .17, ledCool);
   for (const x of [-4.35, 2.95]) box(REAR, .05, .05, .2, x, 2.41, RZ + .1, steel);
@@ -139,7 +144,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   const slatStep = mobile ? .22 : .11;
   for (let z = -3.9; z <= 1.2; z += slatStep) box(SIDE, .04, 2.3, .06, SX + .03, 1.35, z, slat);
   box(SIDE, .05, .05, 5.25, SX + .03, 2.53, -1.35, charcoal);
-  box(SIDE, .012, .012, 5.1, SX + .045, 2.5, -1.35, ledCool);
+  box(SIDE, .012, .012, 5.1, SX + .045, 2.5, -1.35, ledSlat);
   // Eletrocalha da ilha, do piso à laje, presa à parede lateral.
   box(SIDE, .09, 3.75, .09, SX + .25, 1.875, -3.72, charcoal);
   for (const z of [2.15, 3.65, 5.15]) {
@@ -358,6 +363,12 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     deskLamp.position.set(DESK_LAMP.x + .37, 1.17, DESK_LAMP.z + .14);
     lights.add(deskLamp);
   }
+  // Luzes de humor: começam apagadas e só sobem com evaluate/debrief (contagem fixa, sem recompilar shaders).
+  const monitorWash = new THREE.SpotLight('#6fa4ff', 0, 6, 1.15, 1, 2);
+  monitorWash.position.set(-4.55, 1.5, -1.35); monitorWash.target.position.set(-2.8, 0, -1.35);
+  const redWash = new THREE.PointLight('#ff2a40', 0, 6.5, 2);
+  redWash.position.set(0, .75, -5.0);
+  lights.add(monitorWash, monitorWash.target, redWash);
   const lightBase = new Map([overhead, benchLamp, monitorGlow, deskLamp].filter(Boolean).map(l => [l, l.intensity]));
 
   // --------------------------------------------------------- cena de ambiente
@@ -397,17 +408,37 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
 
   // ----------------------------------------------------------------- humor
   const moodTargets = [...materials].filter(m => m.isMeshStandardMaterial);
-  function setMood({debrief = 0} = {}) {
-    const d = THREE.MathUtils.clamp(debrief, 0, 1);
-    ledCool.color.copy(ledCool.userData.base).multiplyScalar(1 - .88 * d);
-    overhead.intensity = lightBase.get(overhead) * (1 - .9 * d);
-    benchLamp.intensity = lightBase.get(benchLamp) * (1 - .55 * d);
-    if (deskLamp) deskLamp.intensity = lightBase.get(deskLamp) * (1 - .3 * d);
-    monitorGlow.intensity = lightBase.get(monitorGlow) * (1 + 1.8 * d);
-    for (const s of [...notebookScreens, ...rearScreens]) s.material.color.copy(s.material.userData.base).multiplyScalar(1 + .35 * d);
-    for (const m of moodTargets) m.envMapIntensity = m.userData.env * (1 - .65 * d);
-    floorUniforms.uLedGain.value = 1 - .88 * d;
-    floorUniforms.uScreenGain.value = 1 + .35 * d;
+  const dimmable = [graphite, charcoal, ice, slat, ceiling, drawer, benchTop, epoxy, bay, black, redPaint, stripeRed];
+  for (const m of dimmable) m.userData.albedo = m.color.clone();
+  brandMaterial.userData.base = brandMaterial.color.clone();
+  const mood = {debrief: 0, evaluate: 0};
+  // debrief: teto apagado, contraluz vermelha baixa e telas traseiras; evaluate:
+  // sala de análise à noite, com os monitores da ilha como luz dominante.
+  function setMood({debrief = 0, evaluate = 0} = {}) {
+    const d = THREE.MathUtils.clamp(debrief, 0, 1), e = THREE.MathUtils.clamp(evaluate, 0, 1);
+    mood.debrief = d; mood.evaluate = e;
+    const ceilingGain = (1 - .85 * e) * (1 - .96 * d);
+    ledCool.color.copy(ledCool.userData.base).multiplyScalar(ceilingGain);
+    ledSlat.color.copy(ledSlat.userData.base).multiplyScalar((1 - .94 * e) * (1 - .9 * d));
+    overhead.intensity = lightBase.get(overhead) * (1 - .85 * e) * (1 - .95 * d);
+    benchLamp.intensity = lightBase.get(benchLamp) * (1 - .85 * e) * (1 - .75 * d);
+    if (deskLamp) deskLamp.intensity = lightBase.get(deskLamp) * (1 - .8 * e) * (1 - .5 * d);
+    monitorGlow.intensity = lightBase.get(monitorGlow) * (1 + 1.4 * e + .4 * d);
+    monitorWash.intensity = 34 * e + 2 * d;
+    redWash.intensity = 14 * d * (1 - e);
+    const notebookGain = 1 + .9 * e + .2 * d, rearGain = (1 + .7 * d) * (1 - .25 * e);
+    for (const s of notebookScreens) s.material.color.copy(s.material.userData.base).multiplyScalar(notebookGain);
+    for (const s of rearScreens) s.material.color.copy(s.material.userData.base).multiplyScalar(rearGain);
+    brandMaterial.color.copy(brandMaterial.userData.base).multiplyScalar((1 + .6 * d) * (1 - .35 * e));
+    stripeRed.emissiveIntensity = 1.6 * d;
+    bandRed.emissiveIntensity = 2.4 * d;
+    const albedo = (1 - .6 * e) * (1 - .72 * d);
+    for (const m of dimmable) m.color.copy(m.userData.albedo).multiplyScalar(albedo);
+    for (const m of moodTargets) m.envMapIntensity = m.userData.env * (1 - .7 * e) * (1 - .7 * d);
+    floorUniforms.uLedGain.value = ceilingGain;
+    floorUniforms.uScreenGain.value = rearGain;
+    floorUniforms.uMonitorGain.value = 1 + 2.2 * e + .3 * d;
+    floorUniforms.uBand.value = d;
   }
 
   // -------------------------------------------------------- oclusão por câmera
@@ -647,7 +678,7 @@ function patchFloorReflection(material, uniforms, mobile) {
       .replace('#include <common>', `#include <common>
 varying vec3 vFloorPos;
 uniform vec3 uFloorCam;
-uniform float uLedGain, uScreenGain, uRoofOn, uRearOn;
+uniform float uLedGain, uScreenGain, uMonitorGain, uBand, uRoofOn, uRearOn;
 float floorRect(vec2 q, vec2 h, float blur) {
   vec2 d2 = abs(q) - h;
   float d = max(d2.x, d2.y);
@@ -674,6 +705,7 @@ float floorRect(vec2 q, vec2 h, float blur) {
       vec2 hr = vec2(vFloorPos.x + R.x * tr, vFloorPos.y + R.y * tr);
       float br = .015 + tr * spread;
       glowSum += vec3(.93, 1., 1.1) * 3.2 * uLedGain * uRearOn * floorRect(hr - vec2(-.7, 2.433), vec2(3.6, .03), br);
+      glowSum += vec3(1., .1, .16) * 2.4 * uBand * uRearOn * floorRect(hr - vec2(-.7, 1.17), vec2(3.6, .08), br);
 #ifndef FLOOR_MOBILE
       float rs = floorRect(hr - vec2(-2.35, 1.74), vec2(.75, .42), br) + floorRect(hr - vec2(-.7, 1.74), vec2(.75, .42), br) + floorRect(hr - vec2(.95, 1.74), vec2(.75, .42), br);
       glowSum += vec3(.05, .12, .22) * uScreenGain * uRearOn * rs;
@@ -684,7 +716,7 @@ float floorRect(vec2 q, vec2 h, float blur) {
       vec2 hm = vec2(vFloorPos.z + R.z * tm, vFloorPos.y + R.y * tm);
       float bm = .015 + tm * spread;
       float ms = floorRect(hm - vec2(0., 1.52), vec2(.57, .32), bm) + floorRect(hm - vec2(-1.35, 1.52), vec2(.57, .32), bm) + floorRect(hm - vec2(-2.7, 1.52), vec2(.57, .32), bm);
-      glowSum += vec3(.06, .13, .24) * uScreenGain * ms;
+      glowSum += vec3(.06, .13, .24) * uMonitorGain * ms;
     }
     // O carro (x ±0,92; z ±2,56) bloqueia o que estaria atrás dele no reflexo.
     float tk = (.55 - vFloorPos.y) / R.y;

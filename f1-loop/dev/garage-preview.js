@@ -58,7 +58,7 @@ const SAMPLE = {
   test: 'Comparar com a referência · limite de 3 tentativas',
 };
 garage.setNotebook(q.get('notebook') === 'empty' ? {} : SAMPLE, FIELDS.map(([k, label]) => [k, label]));
-garage.setMood({debrief: num('debrief', 0)});
+garage.setMood({debrief: num('debrief', 0), evaluate: num('evaluate', 0)});
 
 let controls = null;
 if (q.get('orbit') === '1') { controls = new OrbitControls(camera, renderer.domElement); controls.target.copy(target); }

@@ -8,6 +8,8 @@ import {createPost} from './fx/post.js';
 import {wipeUniforms, WIPE_RANGE} from './fx/wipe-clip.js';
 import {createDust} from './fx/dust.js';
 import {createHighlight} from './fx/highlight.js';
+import {enhanceCar} from './fx/car-look.js';
+import {createChoreo} from './fx/choreo.js';
 import {createGarage} from './world/garage.js';
 import {createTunnel} from './world/tunnel.js';
 
@@ -86,7 +88,10 @@ export async function createScene(stage, {onProgress, onError}) {
   const front = new THREE.DirectionalLight('#dfe8f0', .45);
   front.position.set(3, 2, 8);
   const hemi = new THREE.HemisphereLight('#44576a', '#07090b', .4);
-  scene.add(key, key.target, rim, front, hemi);
+  // Warm kicker from above and behind draws the hot edge along engine cover and halo (R10).
+  const kicker = new THREE.DirectionalLight('#ffab66', 1.4);
+  kicker.position.set(1.2, 6.5, -8);
+  scene.add(key, key.target, rim, front, hemi, kicker);
 
   const loader = new GLTFLoader();
   loader.setMeshoptDecoder(MeshoptDecoder);
@@ -109,6 +114,7 @@ export async function createScene(stage, {onProgress, onError}) {
   for (const m of carMaterials.materials) if (m.name.toLowerCase().startsWith('pintura')) m.envMapIntensity = 1.25;
   const mechanics = createMechanics(model);
   applyInteiaBranding(model, mechanics);
+  const carLook = enhanceCar({model, mechanics, mobile});
   let triangles = 0;
   const offsetScale = new THREE.Vector3();
   // Parts smaller than a few centimetres add shadow-pass draw calls but no readable shadow.
@@ -120,7 +126,8 @@ export async function createScene(stage, {onProgress, onError}) {
     o.receiveShadow = true;
   });
   const find = pattern => mechanics.records.find(r => pattern.test(r.source));
-  const floor = createHighlight(mechanics.records.filter(r => /^floor/.test(r.source)), '#ff2d45');
+  // Telemetry cyan, not red: a red glow on red paint reads as salmon, outside the palette.
+  const floor = createHighlight(mechanics.records.filter(r => /^floor/.test(r.source)), '#38e8ff');
 
   // Soft contact shadow under the chassis and each tyre, faded when the car opens.
   const blobTexture = radialTexture();
@@ -146,9 +153,10 @@ export async function createScene(stage, {onProgress, onError}) {
   const dust = createDust({mobile});
   scene.add(dust.points);
   const post = createPost(renderer, scene, camera, {mobile});
+  const choreo = createChoreo({model, mechanics, camera, mobile, scene});
 
   const target = new THREE.Vector3(), focus = new THREE.Vector3(), offset = new THREE.Vector3(), side = new THREE.Vector3(), point = new THREE.Vector3(), buffer = new THREE.Vector2();
-  const pointer = {x: 0, y: 0, sx: 0, sy: 0};
+  const pointer = {x: 0, y: 0, sx: 0, sy: 0}, lastCamera = new THREE.Vector3();
   const gradeGarage = [[.9, .99, 1.07], [1.06, 1, .92]], gradeTunnel = [[.84, 1, 1.14], [.97, 1.02, 1.07]], gradeDebrief = [[.97, .92, 1.02], [1.05, .98, .93]];
   const dustWarm = new THREE.Color('#ffd9b8'), dustCold = new THREE.Color('#bfe9ff'), dustColor = new THREE.Color();
   let pose = null, width = 1, height = 1;
@@ -160,7 +168,7 @@ export async function createScene(stage, {onProgress, onError}) {
     post.setSize(width, height);
     camera.aspect = width / height;
     // Text owns the left column on desktop and the lower half on phones (R4).
-    camera.setViewOffset(width, height, mobile ? 0 : -width * .13, mobile ? height * .2 : -height * .03, width, height);
+    camera.setViewOffset(width, height, mobile ? 0 : -width * .15, mobile ? height * .2 : -height * .03, width, height);
     camera.updateProjectionMatrix();
     wipeUniforms.uWipeRes.value.copy(renderer.getDrawingBufferSize(buffer));
   }
@@ -180,10 +188,10 @@ export async function createScene(stage, {onProgress, onError}) {
   ];
 
   function apply(dt, time) {
-    const t = pose.tunnel, d = pose.debrief, e = pose.exposure;
+    const t = pose.tunnel, d = pose.debrief, e = pose.exposure, v = pose.evaluate;
     camera.position.fromArray(pose.camera);
     target.fromArray(pose.target);
-    if (mobile) { offset.subVectors(camera.position, target).multiplyScalar(1.5 + pose.explode * .45); camera.position.copy(target).add(offset); }
+    if (mobile) { offset.subVectors(camera.position, target).multiplyScalar(1.95 + pose.explode * .45); camera.position.copy(target).add(offset); }
     // Handheld breathing and pointer parallax stay small so the take remains legible.
     const follow = 1 - Math.exp(-dt * 3);
     pointer.sx += (pointer.x - pointer.sx) * follow; pointer.sy += (pointer.y - pointer.sy) * follow;
@@ -198,6 +206,8 @@ export async function createScene(stage, {onProgress, onError}) {
     mechanics.setSpin(t > .01);
     mechanics.update(dt * (1 + 20 * t), time * 1000, true);
     floor.set(pose.highlight, time);
+    carLook.update(dt, time, pose);
+    choreo.update(dt, time, pose);
     blobMaterial.opacity = .85 * (1 - smooth(pose.explode * 4));
 
     const inTunnel = t >= .5;
@@ -212,17 +222,18 @@ export async function createScene(stage, {onProgress, onError}) {
     }
     scene.environment = (inTunnel ? envTunnel : envGarage).texture;
     tunnel?.setFlow(t);
-    garage?.setMood({debrief: d});
+    garage.setMood({debrief: d, evaluate: v});
     garage?.update(dt, camera, time);
     tunnel?.update(dt, camera, time);
 
     key.color.lerpColors(warmKey, coldKey, t);
-    key.intensity = (3.1 - .8 * t) * (1 - .55 * d) * e;
+    key.intensity = (3.1 - .8 * t) * (1 - .6 * d) * (1 - .65 * v) * e;
     rim.color.lerpColors(warmRim, coldRim, t);
     rim.intensity = (1.7 + 1.8 * t + 1.2 * d) * e;
-    front.intensity = .3 * (1 - .6 * d) * e;
-    hemi.intensity = .28 * e;
-    scene.environmentIntensity = (.9 + .15 * t) * (1 - .35 * d) * e;
+    front.intensity = .3 * (1 - .8 * d) * (1 - .7 * v) * e;
+    hemi.intensity = .28 * (1 - .5 * v) * e;
+    kicker.intensity = 1.4 * (1 - t) * (1 + .6 * d) * e;
+    scene.environmentIntensity = (.9 + .15 * t) * (1 - .35 * d) * (1 - .4 * v) * e;
     const g = t > 0 ? [0, 1].map(k => gradeGarage[k].map((v, i) => mix(v, gradeTunnel[k][i], t))) : gradeGarage.map((row, k) => row.map((v, i) => mix(v, gradeDebrief[k][i], d)));
     post.setGrade(g[0], g[1], 1);
     post.setBloom(.5 + .35 * t + .3 * d);
@@ -263,12 +274,14 @@ export async function createScene(stage, {onProgress, onError}) {
     render(dt, time) {
       if (!pose) return;
       apply(dt, time);
+      if (lastCamera.distanceTo(camera.position) > 1.2) post.resetMotion();
+      lastCamera.copy(camera.position);
       renderer.info.reset();
       post.render(dt);
       stage.dataset.calls = String(renderer.info.render.calls);
       if (!stage.dataset.loaded) { stage.dataset.loaded = 'true'; stage.classList.add('loaded'); }
       adapt(dt);
     },
-    dispose() { post.dispose(); dust.dispose(); floor.dispose(); carMaterials.dispose(); garage?.dispose(); tunnel?.dispose(); envGarage.dispose(); envTunnel.dispose(); renderer.dispose(); },
+    dispose() { post.dispose(); dust.dispose(); floor.dispose(); carLook.dispose(); carMaterials.dispose(); garage?.dispose(); tunnel?.dispose(); envGarage.dispose(); envTunnel.dispose(); renderer.dispose(); },
   };
 }

@@ -1,0 +1,109 @@
+{
+  "started": "2026-09-14T03:27:00.634Z",
+  "frames": [
+    {
+      "name": "desktop",
+      "p": 0.2,
+      "attempt": 0,
+      "time": "2026-09-14T03:27:00.750Z",
+      "before": {
+        "src/main.js": "8ae59323f04041a99f06c9088065d79759a96f11babed22f7b6377ef67015cb9",
+        "src/scene.js": "c92153c7c6daf3138807c0e252a99f86fe215aea2d876c03a7ee18175c91ae1c",
+        "src/story.js": "c83dfe91c62fdafc9c95cde04566d90dad4a31e3e228f71a7fc818a8aab8ec2f",
+        "src/style.css": "129d797f281540a398e974ae9aa5cb63430641acd4994063c050a29cffcbd6d7"
+      },
+      "failure": "page.evaluate: Execution context was destroyed, most likely because of a navigation",
+      "after": {
+        "src/main.js": "8ae59323f04041a99f06c9088065d79759a96f11babed22f7b6377ef67015cb9",
+        "src/scene.js": "c92153c7c6daf3138807c0e252a99f86fe215aea2d876c03a7ee18175c91ae1c",
+        "src/story.js": "c83dfe91c62fdafc9c95cde04566d90dad4a31e3e228f71a7fc818a8aab8ec2f",
+        "src/style.css": "129d797f281540a398e974ae9aa5cb63430641acd4994063c050a29cffcbd6d7"
+      },
+      "unchanged": true,
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "p": 0.2,
+      "attempt": 1,
+      "time": "2026-09-14T03:27:08.569Z",
+      "before": {
+        "src/main.js": "8ae59323f04041a99f06c9088065d79759a96f11babed22f7b6377ef67015cb9",
+        "src/scene.js": "c92153c7c6daf3138807c0e252a99f86fe215aea2d876c03a7ee18175c91ae1c",
+        "src/story.js": "c83dfe91c62fdafc9c95cde04566d90dad4a31e3e228f71a7fc818a8aab8ec2f",
+        "src/style.css": "129d797f281540a398e974ae9aa5cb63430641acd4994063c050a29cffcbd6d7"
+      },
+      "path": "planejamento/08-loop-complementar/atual-desktop-0.2.png",
+      "state": {
+        "reading": false,
+        "label": "Montando as 97 peças…",
+        "data": {}
+      },
+      "after": {
+        "src/main.js": "8ae59323f04041a99f06c9088065d79759a96f11babed22f7b6377ef67015cb9",
+        "src/scene.js": "c92153c7c6daf3138807c0e252a99f86fe215aea2d876c03a7ee18175c91ae1c",
+        "src/story.js": "c83dfe91c62fdafc9c95cde04566d90dad4a31e3e228f71a7fc818a8aab8ec2f",
+        "src/style.css": "129d797f281540a398e974ae9aa5cb63430641acd4994063c050a29cffcbd6d7"
+      },
+      "unchanged": true,
+      "errors": []
+    },
+    {
+      "name": "desktop",
+      "p": 1.2,
+      "attempt": 0,
+      "time": "2026-09-14T03:27:26.929Z",
+      "before": {
+        "src/main.js": "8ae59323f04041a99f06c9088065d79759a96f11babed22f7b6377ef67015cb9",
+        "src/scene.js": "c92153c7c6daf3138807c0e252a99f86fe215aea2d876c03a7ee18175c91ae1c",
+        "src/story.js": "c83dfe91c62fdafc9c95cde04566d90dad4a31e3e228f71a7fc818a8aab8ec2f",
+        "src/style.css": "129d797f281540a398e974ae9aa5cb63430641acd4994063c050a29cffcbd6d7"
+      },
+      "failure": "page.evaluate: Execution context was destroyed, most likely because of a navigation",
+      "after": {
+        "src/main.js": "8ae59323f04041a99f06c9088065d79759a96f11babed22f7b6377ef67015cb9",
+        "src/scene.js": "ade194cc104cd68b630f356c0be8092273db563217631720668f18b6999ec15d",
+        "src/story.js": "c83dfe91c62fdafc9c95cde04566d90dad4a31e3e228f71a7fc818a8aab8ec2f",
+        "src/style.css": "129d797f281540a398e974ae9aa5cb63430641acd4994063c050a29cffcbd6d7"
+      },
+      "unchanged": false,
+      "errors": [
+        "lastCamera is not defined"
+      ]
+    },
+    {
+      "name": "desktop",
+      "p": 1.2,
+      "attempt": 1,
+      "time": "2026-09-14T03:27:36.139Z",
+      "before": {
+        "src/main.js": "8ae59323f04041a99f06c9088065d79759a96f11babed22f7b6377ef67015cb9",
+        "src/scene.js": "ade194cc104cd68b630f356c0be8092273db563217631720668f18b6999ec15d",
+        "src/story.js": "c83dfe91c62fdafc9c95cde04566d90dad4a31e3e228f71a7fc818a8aab8ec2f",
+        "src/style.css": "129d797f281540a398e974ae9aa5cb63430641acd4994063c050a29cffcbd6d7"
+      },
+      "path": "planejamento/08-loop-complementar/atual-desktop-1.2.png",
+      "state": {
+        "reading": false,
+        "label": "97 peças · modelo didático",
+        "data": {
+          "parts": "97",
+          "triangles": "260280",
+          "highlights": "3",
+          "calls": "320",
+          "loaded": "true"
+        }
+      },
+      "after": {
+        "src/main.js": "8ae59323f04041a99f06c9088065d79759a96f11babed22f7b6377ef67015cb9",
+        "src/scene.js": "ade194cc104cd68b630f356c0be8092273db563217631720668f18b6999ec15d",
+        "src/story.js": "c83dfe91c62fdafc9c95cde04566d90dad4a31e3e228f71a7fc818a8aab8ec2f",
+        "src/style.css": "129d797f281540a398e974ae9aa5cb63430641acd4994063c050a29cffcbd6d7"
+      },
+      "unchanged": true,
+      "errors": [
+        "lastCamera is not defined"
+      ]
+    }
+  ]
+}
