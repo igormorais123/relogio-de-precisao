@@ -20,8 +20,9 @@ import {createWipeClip, WIPE_SHADER_CHUNK} from '../fx/wipe-clip.js';
 //     da arquibancada, muro e garagens dos boxes) que viram reflexos alongados na pintura.
 //   - fog/cameraFar são a recomendação para a cena enquanto a pista é visível.
 //   - clip é o recorte diagonal do wipe, como no túnel e no box.
-//   - Luzes próprias: dois SpotLights sem sombra que seguem a torre mais próxima de
-//     cada lado; a contagem é fixa (as variantes de shader não mudam com a velocidade).
+//   - Luzes próprias: dois PointLights sem sombra presos às luminárias da reta (uma a cada
+//     20 m, braço sobre a pista à direita). Passam pelo carro a cada 0,25 s a 80 m/s e se
+//     revezam com peso cos², então a soma não pisca; a contagem é fixa.
 // Asfalto: reflexos analíticos das torres, das placas de LED, do muro e das garagens dos
 // boxes, calculados pelo raio refletido contra os planos dessas fontes; manchas úmidas
 // de rugosidade baixa esticam os reflexos. O carro bloqueia o reflexo que passa por ele.
@@ -43,6 +44,7 @@ export const TRACK_ROWS = {
   banner: {spacing: 12.8, half: 4.8},
   fencePost: {spacing: 4, half: 1.8},
   tower: {spacing: 80, half: 3},
+  lampPost: {spacing: 20, half: .8},
   marshal: {spacing: 160, half: 1.5},
   haze: {spacing: 80, half: .5},
   stand: {spacing: 320, half: 48},
@@ -163,6 +165,10 @@ vec3 trReflect(vec3 P, vec3 nW, float rough){
     float inX = smoothstep(-43.5 - w2, -42., H2.x) * (1. - smoothstep(-22.5, -21. + w2, H2.x));
     float inZ = 1. - smoothstep(46., 48. + w2, abs(a2));
     sum += vec3(1., .62, .28) * 1.1 * inX * inZ / (1. + w2 * .3);
+    // Luminárias da reta (x 6,2, y 8,6, uma a cada 20 m): riscos curtos que passam rente ao carro.
+    float t4 = (8.6 - P.y) / R.y; vec3 H4 = P + R * t4; float w4 = spread * t4;
+    float dz4 = mod(H4.z + uTravel - 10., 20.) - 10.;
+    sum += uLampColor * 6. * exp(-pow((H4.x - 6.2) / (.55 + w4), 2.) - pow(dz4 / (.25 + w4), 2.)) / (1. + w4 * .5);
   }
   if (R.x < -.002 && P.x > -10.5) {
     float t = (-10.58 - P.x) / R.x; vec3 H = P + R * t; float w = spread * t + .04;
@@ -192,8 +198,36 @@ vec3 trReflect(vec3 P, vec3 nW, float rough){
   vec3 t0 = (vec3(-.95, 0., -2.6) - P) / safe, t1 = (vec3(.95, 1.05, 2.6) - P) / safe;
   vec3 tmin = min(t0, t1), tmax = max(t0, t1);
   float enter = max(max(tmin.x, tmin.y), tmin.z), leave = min(min(tmax.x, tmax.y), tmax.z);
-  sum *= 1. - step(max(enter, 0.), leave);
+  // O raio que bate no carro reflete o carro: pintura escura em cima, assoalho e pneus pretos embaixo.
+  float hit = step(max(enter, 0.), leave);
+  float yHit = P.y + R.y * max(enter, 0.);
+  vec3 carSeen = mix(vec3(.004, .004, .005), vec3(.2, .014, .02), smoothstep(.22, .42, yHit)) * 9.;
+  sum = mix(sum, carSeen, hit);
   return sum * F * gloss * uReflGain;
+}`;
+
+// Luz das luminárias da reta no chão (as duas mais próximas em z) e sombra de contato do carro
+// parado na origem: caixa do assoalho e os quatro pneus (caixas do GLB).
+const CONTACT_GLSL = /* glsl */`
+float trSweep(vec3 P){
+  float dz = mod(P.z + uTravel - 10., 20.) - 10.;
+  float e = 0.;
+  for (int k = 0; k < 2; k++) {
+    float z = k == 0 ? dz : dz - sign(dz) * 20.;
+    vec3 L = vec3(6.2 - P.x, 8.6 - P.y, -z);
+    float d2 = dot(L, L);
+    e += L.y / (d2 * sqrt(d2));
+  }
+  return e;
+}
+float trContact(vec3 P){
+  vec2 q = abs(P.xz - vec2(0., -.72)) - vec2(.8, 1.8);
+  float d = length(max(q, 0.)) + min(max(q.x, q.y), 0.);
+  float body = 1. - .75 * (1. - smoothstep(-.35, .6, d));
+  vec2 f = vec2(abs(P.x) - .743, P.z - 1.52) / vec2(.3, .45);
+  vec2 r = vec2(abs(P.x) - .72, P.z + 1.84) / vec2(.32, .5);
+  float tyres = 1. - .8 * exp(-dot(f, f) * 1.4) - .8 * exp(-dot(r, r) * 1.4);
+  return body * clamp(tyres, .1, 1.);
 }`;
 
 // ------------------------------------------------------------ texturas
@@ -418,6 +452,7 @@ export function createTrack({THREE, renderer, mobile = false} = {}) {
           gl_Position = vec4(p.xy, p.w * .99998, p.w);
         }`,
       fragmentShader: /* glsl */`
+        #define SKY_LIFT ${mobile ? '1.7' : '1.0'}
         uniform vec3 uHorizon, uZenith, uGlow;
         uniform float uTime;
         varying vec3 vDir;
@@ -433,7 +468,9 @@ export function createTrack({THREE, renderer, mobile = false} = {}) {
           // Clarão da cidade: âmbar baixo e largo, frio acima, mais forte do lado da arquibancada.
           float side = .6 + .4 * smoothstep(-.2, -.9, d.x);
           float glowBand = exp(-abs(el) * 16.) * (.6 + .4 * sNoise(u * 7., 7.)) * side;
-          col += uGlow * glowBand * .034;
+          // A faixa de cima não fica preta: clarão largo da cidade, subindo pela névoa.
+          col += uGlow * glowBand * .06 * SKY_LIFT;
+          col += uGlow * exp(-max(el, 0.) * 5.) * .016 * side * SKY_LIFT;
           col += vec3(.45, .6, .8) * exp(-abs(el) * 34.) * .014;
           // Silhueta distante, próxima do tom do horizonte: a névoa a dissolve, não recorta.
           float h = .004 + .011 * sNoise(u * 38., 38.) + .009 * step(.62, sNoise(u * 150., 150.)) * sNoise(u * 600., 600.);
@@ -443,11 +480,12 @@ export function createTrack({THREE, renderer, mobile = false} = {}) {
           vec2 g = vec2(u * 2400., el * 380.);
           vec2 cell = floor(g), f = fract(g) - .5;
           float rnd = fract(sin(dot(cell, vec2(41.3, 289.1))) * 43758.5453);
-          float lit = step(.955, rnd) * sil * step(.0, el);
+          float lit = step(.972, rnd) * sil * step(.0, el);
           float dist = length(f * vec2(1., 380. / 2400. * 6.3));
           float spot = 1. - smoothstep(.06, .06 + fwidth(g.x) * 1.2, dist);
           vec3 tint = rnd > .993 ? vec3(1., .08, .1) * (.5 + .5 * step(.0, sin(uTime * 3.1 + rnd * 40.))) : mix(vec3(1., .62, .3), vec3(.75, .86, 1.), step(.982, rnd));
-          col += tint * lit * spot * 1.6;
+          // Abaixo do limiar da cauda de luz do SpeedEffect: em HDR, cada janela riscada virava um palito.
+          col += tint * lit * spot * .55;
           gl_FragColor = vec4(col, 1.);
         }`,
     }));
@@ -478,6 +516,7 @@ uniform sampler2D uAsphalt, uAsphaltN, uDetail;
 ${NOISE_GLSL}
 ${POOLS_GLSL}
 ${REFLECT_GLSL}
+${CONTACT_GLSL}
 float trBand(float x, float a, float b, float fw){return smoothstep(a-fw,a+fw,x)-smoothstep(b-fw,b+fw,x);}
 float trRough, trWet; vec2 trUv, trGx, trGy; float trTrack, trRun, trLine, trGrass; vec3 trNW = vec3(0., 1., 0.);`)
         .replace('#include <map_fragment>', /* glsl */`
@@ -533,13 +572,15 @@ float trRough, trWet; vec2 trUv, trGx, trGy; float trTrack, trRun, trLine, trGra
         // As direcionais da cena foram afinadas para o carro e lavariam o chão por igual; no asfalto
         // elas descem, as poças das torres dão o ritmo e os reflexos analíticos dão o brilho.
         .replace('#include <lights_fragment_end>', /* glsl */`#include <lights_fragment_end>
-reflectedLight.directDiffuse *= .12;
-reflectedLight.directSpecular *= .12;
-reflectedLight.indirectSpecular *= .3;
-reflectedLight.directDiffuse += uPoolColor * trPools(vTrackW.z + uTravel, vTrackW.x, vTrackW.z, 0.) * 4. * material.diffuseColor;
+float trAO = trContact(vTrackW);
+reflectedLight.directDiffuse *= .12 * trAO;
+reflectedLight.directSpecular *= .12 * trAO;
+reflectedLight.indirectDiffuse *= trAO;
+reflectedLight.indirectSpecular *= .3 * trAO;
+reflectedLight.directDiffuse += uPoolColor * (trPools(vTrackW.z + uTravel, vTrackW.x, vTrackW.z, 0.) * 4. + trSweep(vTrackW) * 110.) * material.diffuseColor * trAO;
 reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack + .7 * trRun + .8 * trLine);`);
     };
-    material.customProgramCacheKey = () => 'track-ground-v2';
+    material.customProgramCacheKey = () => 'track-ground-v3';
     own(materials, material);
     const ground = new THREE.Mesh(own(geometries, new THREE.PlaneGeometry(140, 320, 1, 1).rotateX(-Math.PI / 2)), material);
     ground.position.x = 2; ground.name = 'Asfalto, zebras pintadas e grama'; ground.receiveShadow = true;
@@ -997,13 +1038,18 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
           float seed = cHash(ci + vRow * 13.);
           if (seed < .3) discard;
           float y = vUv.y * .84;
-          float head = .6 + .16 * cHash(ci * 1.37 + vRow);
+          // Pessoas, não palitos: escala, altura e roupa variam por lugar; a luz dos holofotes pega
+          // ombros e cabeças por cima e o resto cai no escuro da arquibancada.
+          float sc = .8 + .4 * cHash(ci * 1.91 + vRow);
+          float head = (.52 + .16 * cHash(ci * 1.37 + vRow)) * sc + .06;
           float lean = (cHash(ci * 2.11 + vRow) - .5) * .08;
-          float body = step(abs(f - lean * .5), .15 + .04 * (1. - smoothstep(0., head - .12, y))) * step(y, head - .1);
-          float skull = step(length(vec2(f - lean, y - head)), .082);
+          float body = step(abs(f - lean * .5), (.13 + .05 * (1. - smoothstep(0., head - .12, y))) * sc) * step(y, head - .09 * sc);
+          float skull = step(length(vec2(f - lean, y - head)), .075 * sc);
           if (max(body, skull) < .5) discard;
-          vec3 col = vec3(.006, .007, .009) * (.7 + .6 * cHash(ci * 3.7 + vRow));
-          col += vec3(.05, .04, .03) * smoothstep(head - .04, head + .08, y);
+          float pick = cHash(ci * 7.9 + vRow * 3.1);
+          vec3 cloth = pick < .3 ? vec3(.09, .1, .12) : pick < .48 ? vec3(.16, .03, .035) : pick < .62 ? vec3(.17, .16, .15) : pick < .74 ? vec3(.15, .11, .03) : vec3(.04, .06, .1);
+          vec3 col = cloth * (.12 + .5 * smoothstep(head - .45, head, y)) * (.6 + .5 * cHash(ci * 3.7 + vRow));
+          col += vec3(.06, .045, .035) * smoothstep(head - .04, head + .08, y);
           float screen = step(.978, cHash(ci * 5.3 + vRow * 1.9)) * step(length(vec2(f - .05, y - (head - .26))), .025);
           col += vec3(.75, .85, 1.) * 3. * screen * (.7 + .3 * sin(uTime * 2. + seed * 30.));
           gl_FragColor = vec4(mix(col, fogTint(), fogAmount() * .92), 1.);
@@ -1072,6 +1118,64 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
     root.userData.distantLights = material;
   }
 
+  // ----------------------------------------------- bokeh dos holofotes
+  // Massa de luz na faixa de cima: holofotes e prédios fora de foco a 40–95 m, discos grandes e
+  // fracos (abaixo do limiar da cauda de luz, então riscam como névoa clara, não como palitos).
+  {
+    const count = mobile ? 48 : 72, r = rng(4217);
+    const pos = new Float32Array(count * 3), color = new Float32Array(count * 3), size = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      const left = r() < .55;
+      pos[i * 3] = left ? -38 - r() * 52 : 40 + r() * 55;
+      pos[i * 3 + 1] = 6 + r() * 24;
+      pos[i * 3 + 2] = r() * TRACK_LOOP;
+      const warm = r() < .55, k = (mobile ? .3 : .22) + r() * .3;
+      color.set(warm ? [k, .68 * k, .4 * k] : [.7 * k, .82 * k, k], i * 3);
+      size[i] = 2.5 + r() * 3.5;
+    }
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    geometry.setAttribute('aColor', new THREE.BufferAttribute(color, 3));
+    geometry.setAttribute('aSize', new THREE.BufferAttribute(size, 1));
+    const material = own(materials, new THREE.ShaderMaterial({
+      fog: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
+      uniforms: {...FOG_UNIFORMS(THREE), ...roll, uResY: {value: 900}},
+      vertexShader: /* glsl */`
+        uniform float uTravel, uLoop, uResY;
+        attribute vec3 aColor;
+        attribute float aSize;
+        varying vec3 vColor;
+        #include <fog_pars_vertex>
+        void main(){
+          vec3 p = position;
+          p.z = mod(p.z - uTravel + .5 * uLoop, uLoop) - .5 * uLoop;
+          vec4 mv = modelViewMatrix * vec4(p, 1.);
+          gl_Position = projectionMatrix * mv;
+          gl_PointSize = clamp(aSize * projectionMatrix[1][1] * uResY * .5 / max(-mv.z, 1.), 3., ${mobile ? '70.' : '96.'});
+          vColor = aColor;
+        #ifdef USE_FOG
+          vFogDepth = -mv.z;
+        #endif
+        }`,
+      fragmentShader: /* glsl */`
+        varying vec3 vColor;
+        ${FOG_FRAGMENT}
+        ${WIPE_SHADER_CHUNK}
+        void main(){
+          wipeDiscard();
+          float d = length(gl_PointCoord - .5) * 2.;
+          if (d > 1.) discard;
+          float disc = 1. - smoothstep(.72, 1., d);
+          float ring = .62 + .38 * smoothstep(.4, .9, d);
+          gl_FragColor = vec4(vColor * disc * ring * (1. - fogAmount() * .45), 1.);
+        }`,
+    }));
+    const points = new THREE.Points(own(geometries, geometry), material);
+    points.name = 'Bokeh dos holofotes'; points.frustumCulled = false; points.renderOrder = 4;
+    root.add(points);
+    root.userData.bokeh = material;
+  }
+
   // --------------------------------------------------- névoa em camadas
   {
     const material = own(materials, new THREE.ShaderMaterial({
@@ -1127,14 +1231,32 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
     root.add(lateral);
   }
 
+  // ---------------------------------------------------- luminárias da reta
+  // Poste na área de escape à direita (x 11,2) com braço sobre a pista e lente voltada para baixo
+  // em x 6,2 e y 8,6, uma a cada 20 m: é a luz delas que varre o carro.
+  {
+    const count = rowCount('lampPost');
+    const parts = [
+      new THREE.CylinderGeometry(.09, .13, 9.1, mobile ? 6 : 8).translate(11.2, 4.55, 0),
+      new THREE.BoxGeometry(5.6, .12, .12).translate(8.5, 8.95, 0),
+      new THREE.BoxGeometry(1.3, .22, .56).translate(6.2, 8.78, 0),
+    ];
+    const frame = mergeGeometries(nonIndexed(parts));
+    parts.forEach(g => g.dispose());
+    const poles = instanced(frame, darkSteel, count, 'Luminárias da reta');
+    const lensMaterial = rolling(new THREE.MeshBasicMaterial({color: new THREE.Color('#e6eeff').multiplyScalar(5)}), 'lamp-lens');
+    const lenses = instanced(new THREE.PlaneGeometry(1.1, .4).rotateX(Math.PI / 2).translate(6.2, 8.66, 0), lensMaterial, count, 'Lentes das luminárias');
+    for (let i = 0; i < count; i++) { place(poles, i, 0, 0, 10 + i * TRACK_ROWS.lampPost.spacing); place(lenses, i, 0, 0, 10 + i * TRACK_ROWS.lampPost.spacing); }
+  }
+
   // ---------------------------------------------------------- luzes reais
-  const spots = [[-15, 40, -2, 1100], [24, 0, 5, 800]].map(([x, along, cx, intensity]) => {
-    const light = new THREE.SpotLight('#e2ebff', 0, 0, .62, .85, 2);
-    light.position.set(x, 24.4, 0);
-    light.target.position.set(cx, 0, 4);
-    light.userData = {along, cx, intensity};
-    light.name = 'Refletor da torre mais próxima';
-    root.add(light, light.target);
+  // Duas luzes andam com as duas luminárias mais próximas; o peso cos² faz uma entregar à outra.
+  const SWEEP_INTENSITY = 170;
+  const sweeps = [0, 1].map(k => {
+    const light = new THREE.PointLight('#e2ebff', 0, 0, 2);
+    light.position.set(6.2, 8.45, 0);
+    light.name = 'Luz da luminária da reta ' + (k + 1);
+    root.add(light);
     return light;
   });
 
@@ -1191,7 +1313,7 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
     fog: {color: '#0b1014', near: 16, far: 120},
     cameraFar: 150,
     motion,
-    lights: spots,
+    lights: sweeps,
     // uTravel/uTime/uSmear compartilhados, ganho das poças e dos reflexos do asfalto.
     uniforms: {roll, pools, reflect},
     ready: fontReady,
@@ -1202,19 +1324,21 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
       roll.uTime.value = time;
       // Meio quadro a 60 fps de arrasto na amostragem do asfalto (antisserrilhado, não o blur).
       roll.uSmear.value = Math.min(1.2, motion.velocity / 120);
-      for (const light of spots) {
-        const u = light.userData;
-        let z = (u.along - motion.travel + 40) % 80;   // wrapAlong(along, travel, 80) sem chamada
-        if (z < 0) z += 80;
-        z -= 40;
+      // Luminárias em along 10 + 20k: z0 ∈ [−20, 0) e z0 + 20 ∈ [0, 20), pesos que somam 1.
+      let z0 = (10 - motion.travel) % 20;
+      if (z0 >= 0) z0 -= 20;
+      for (let k = 0; k < 2; k++) {
+        const z = z0 + 20 * k, light = sweeps[k];
         light.position.z = z;
-        light.target.position.z = z + 4;
-        const w = Math.min(1, Math.max(0, (Math.abs(z) - 25) / 15));
-        light.intensity = u.intensity * (1 - w * w * (3 - 2 * w));
+        light.intensity = SWEEP_INTENSITY * (.5 + .5 * Math.cos(Math.PI * z / 20));
       }
       const blink = Math.sin(time * Math.PI * .9) > .2 ? 1 : .06;
       root.userData.beaconMaterial.color.copy(beaconBase).multiplyScalar(blink);
-      if (renderer) root.userData.distantLights.uniforms.uResY.value = renderer.getDrawingBufferSize(buffer).y;
+      if (renderer) {
+        const resY = renderer.getDrawingBufferSize(buffer).y;
+        root.userData.distantLights.uniforms.uResY.value = resY;
+        root.userData.bokeh.uniforms.uResY.value = resY;
+      }
       return motion;
     },
     dispose() {
