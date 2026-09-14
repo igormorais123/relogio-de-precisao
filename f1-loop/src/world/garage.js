@@ -97,7 +97,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
 
   // ------------------------------------------------------ geometria fundida
   const bucketSet = () => ({map: new Map(), add(geo, mat) { if (!this.map.has(mat)) this.map.set(mat, []); this.map.get(mat).push(geo); }});
-  const STATIC = bucketSet(), REAR = bucketSet(), SIDE = bucketSet(), ROOF = bucketSet(), ENTRANCE = bucketSet();
+  const STATIC = bucketSet(), REAR = bucketSet(), SIDE = bucketSet(), ROOF = bucketSet(), ENTRANCE = bucketSet(), FACADE = bucketSet();
   const place = (geo, x, y, z, o = {}) => {
     helper.position.set(x, y, z);
     helper.rotation.set(o.rx || 0, o.ry || 0, o.rz || 0, o.order || 'XYZ');
@@ -191,14 +191,14 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
 
   // Pátio e fachada oposta contextualizam a tomada por trás do box aberto.
   box(STATIC, 34, .1, 22, 0, -.07, 16, epoxy);
-  box(STATIC, 34, 7, .3, 0, 3.5, 9.5, graphite);
+  box(FACADE, 34, 7, .3, 0, 3.5, 9.5, graphite);
   for (const x of [-12, -6, 0, 6, 12]) {
-    box(STATIC, 5.4, 4.4, .08, x, 2.3, 9.3, charcoal);
-    for (let y = .4; y < 4.5; y += .4) box(STATIC, 5.3, .024, .025, x, y, 9.24, steel);
-    box(STATIC, 5.5, .08, .1, x, 5.1, 9.2, ledCool);
-    box(STATIC, .12, 6.7, .3, x - 2.85, 3.35, 9.2, steel);
+    box(FACADE, 5.4, 4.4, .08, x, 2.3, 9.3, charcoal);
+    for (let y = .4; y < 4.5; y += .4) box(FACADE, 5.3, .024, .025, x, y, 9.24, steel);
+    box(FACADE, 5.5, .08, .1, x, 5.1, 9.2, ledCool);
+    box(FACADE, .12, 6.7, .3, x - 2.85, 3.35, 9.2, steel);
   }
-  box(STATIC, 33, .07, .08, 0, 5.8, 9.25, stripeRed);
+  box(FACADE, 33, .07, .08, 0, 5.8, 9.25, stripeRed);
   // ------------------------------------------------ armários e bancada traseira
   function cabinet(B, x, z, w = 1.35, facing = 1) {
     box(B, w, .95, .72, x, .53, z, graphite, {r: .014});
@@ -309,12 +309,14 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   const sideWall = new THREE.Group(); sideWall.name = 'Box · parede lateral';
   const roof = new THREE.Group(); roof.name = 'Box · teto';
   const entrance = new THREE.Group(); entrance.name = 'Box · portal';
-  root.add(statics, rearWall, sideWall, roof, entrance);
+  const facade = new THREE.Group(); facade.name = 'Box · fachada do pátio';
+  root.add(statics, rearWall, sideWall, roof, entrance, facade);
   build(STATIC, statics, true);
   build(REAR, rearWall, false);
   build(SIDE, sideWall, false);
   build(ROOF, roof, false);
   build(ENTRANCE, entrance, true);
+  build(FACADE, facade, true);
 
   function build(B, group, cast) {
     for (const [mat, list] of B.map) {
@@ -490,6 +492,8 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     // A laje só aparece enquanto as duas paredes que a sustentam estão visíveis.
     roof.visible = local.y < 3.1 && rearWall.visible && sideWall.visible;
     entrance.visible = local.z < 5.3;
+    // Like the box walls, cut away the facade before the camera crosses its nearest face.
+    facade.visible = local.z < 8.95;
     floorUniforms.uFloorCam.value.copy(local);
     floorUniforms.uRoofOn.value = roof.visible ? 1 : 0;
     floorUniforms.uRearOn.value = rearWall.visible ? 1 : 0;

@@ -224,10 +224,21 @@ export async function createScene(stage, {onProgress, onError, signal}) {
 
   function apply(dt, time) {
     const t = pose.tunnel, d = pose.debrief, e = pose.exposure, v = pose.evaluate;
+    const p = pose.index + pose.local;
+    const mobileBay = mobile ? smooth((p - 1.68) / .10) * (1 - smooth((p - 1.83) / .14)) : 0;
     camera.position.fromArray(pose.camera);
     target.fromArray(pose.target);
     // Portrait is narrow: the phone pulls back, more when the car is open or on a lateral track take (pose.pull).
     if (mobile) { offset.subVectors(camera.position, target).multiplyScalar(1.4 + pose.explode * .45 + (pose.pull || 0)); camera.position.copy(target).add(offset); }
+    // Portrait reverse shot stays inside the box; the lift clears its rear wall in transit.
+    if (mobileBay > 0) {
+      camera.position.x = mix(camera.position.x, -1.5, mobileBay);
+      camera.position.y = mix(camera.position.y, 3.3, mobileBay) + 1.2 * 4 * mobileBay * (1 - mobileBay);
+      camera.position.z = mix(camera.position.z, -5.6, mobileBay);
+      target.x = mix(target.x, 0, mobileBay);
+      target.y = mix(target.y, .4, mobileBay);
+      target.z = mix(target.z, 0, mobileBay);
+    }
     // Handheld breathing and pointer parallax stay small so the take remains legible.
     const follow = 1 - Math.exp(-dt * 3);
     pointer.sx += (pointer.x - pointer.sx) * follow; pointer.sy += (pointer.y - pointer.sy) * follow;
@@ -237,10 +248,11 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     // Track run: the frame drops the text-column offset and centres the car; the speed camera adds
     // millimetre shake, a slow sway and the FOV kick on top of the take.
     const c = pose.center || 0, run = pose.speed || 0, r = pose.track || 0;
-    camera.setViewOffset(width, height, mobile ? 0 : -width * .15 * (1 - c), (mobile ? height * .2 : -height * .03) * (1 - c), width, height);
+    camera.setViewOffset(width, height, mobile ? 0 : -width * .15 * (1 - c), (mobile ? height * .2 : -height * .03) * (1 - c) * (1 - mobileBay), width, height);
     speedCamera(time, run, shake, pose.fov);
     const s = pose.shake || 0;
     camera.fov = (pose.fov + shake.fovKick * s) * (mobile ? 1.32 : 1);
+    camera.fov = mix(camera.fov, 75, mobileBay);
     camera.far = r > 0 ? track.cameraFar : 80;
     camera.updateProjectionMatrix();
     camera.lookAt(target);
