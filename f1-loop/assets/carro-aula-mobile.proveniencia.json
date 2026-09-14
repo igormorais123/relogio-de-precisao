@@ -1,7 +1,7 @@
 {
   "createdAt": "2026-09-13T03:59:03.254Z",
-  "source": "C:\\Users\\igorm\\projetos\\INTEIA-laboratorio-3d\\web\\assets\\carro-movable.glb",
-  "destination": "C:\\Users\\igorm\\projetos\\relogio-de-precisao\\f1-loop\\public\\assets\\carro-aula-mobile.glb",
+  "source": "INTEIA-laboratorio-3d/web/assets/carro-movable.glb",
+  "destination": "relogio-de-precisao/f1-loop/public/assets/carro-aula-mobile.glb",
   "sourceSha256": "f192b6a4e09f5ec1f65b2ccf55f53ac8d84eb62d13ac19a1347c7f9aca02a3bc",
   "outputSha256": "260e6ba585be62ecf01bea10a567228bb0ea4e25dd30f7e2728b015171d68598",
   "bytesBefore": 26454116,
