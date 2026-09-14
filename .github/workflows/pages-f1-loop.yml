@@ -1,0 +1,56 @@
+name: Publicar F1 Loop
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'f1-loop/**'
+      - '.github/workflows/pages-f1-loop.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-f1-loop
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: f1-loop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: f1-loop/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+      - name: Montar site do Pages
+        run: |
+          mkdir -p ../_site/f1-loop
+          cp -R dist/. ../_site/f1-loop/
+          touch ../_site/.nojekyll
+          printf '%s\n' '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./f1-loop/"><title>F1 Loop · INTEIA</title></head><body><a href="./f1-loop/">Abrir a aula F1 Loop</a></body></html>' > ../_site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}f1-loop/
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

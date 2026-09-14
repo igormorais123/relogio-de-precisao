@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>F1 Loop — engenharia de loop com um carro</title>
+    <meta name="description" content="Uma aula só de engenharia de loop: produzir, criticar, revisar, verificar. O carro de Fórmula 1 é a metáfora; o aluno leva o gesto para o dia seguinte com IA." />
+    <meta name="theme-color" content="#202930" />
+    <link rel="icon" href="/inteia-simbolo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#scroll">Ir à narrativa</a>
+    <div id="preloader" class="preloader" aria-live="polite">
+      <div class="preloader__mark" aria-hidden="true">
+        <img src="/inteia-simbolo.svg" width="72" height="52" alt="" />
+      </div>
+      <div class="preloader__pct"><span id="preloader-pct">0</span>%</div>
+      <div class="preloader__label">Abrindo o CFD.</div>
+    </div>
+
+    <div id="unsupported" class="unsupported" hidden>
+      <div class="unsupported__inner">
+        <h1>Último estado verde</h1>
+        <p>Seu navegador não tem WebGL. A aula continua aqui, sem o carro.</p>
+        <ol id="unsupported-list"></ol>
+      </div>
+    </div>
+
+    <canvas id="gl" aria-hidden="true"></canvas>
+    <div class="progress" id="progress" aria-hidden="true"><i></i></div>
+
+    <header class="hud">
+      <a class="hud__logo" href="#capitulo-0" aria-label="INTEIA F1 Loop, voltar ao início">
+        <img src="/inteia-simbolo.svg" width="28" height="20" alt="" />
+        <span>F1 Loop</span>
+      </a>
+      <output class="hud__clock" id="clock" aria-live="off">run 000/320</output>
+      <div class="hud__right">
+        <button class="hud__reg" id="reg-btn" aria-expanded="false" aria-controls="registro" title="Dossiê do upgrade">Dossiê <b id="reg-count">00</b></button>
+        <button class="hud__menu" id="menu-btn" aria-expanded="false" aria-controls="menu">Capítulos</button>
+      </div>
+    </header>
+
+    <nav class="dots" id="dots" aria-label="Estações da fábrica"></nav>
+
+    <div class="menu" id="menu" hidden>
+      <ol class="menu__list" id="menu-list"></ol>
+      <p class="menu__foot">Sete estações. Um loop. Um assoalho.</p>
+    </div>
+
+    <aside class="registro" id="registro" hidden aria-label="Dossiê do upgrade">
+      <div class="registro__head">
+        <h2>Dossiê do upgrade</h2>
+        <p>Hipótese, mudança, comando, resultado, decisão. Fica só neste navegador.</p>
+      </div>
+      <ol class="registro__list" id="registro-list"></ol>
+      <p class="registro__empty" id="registro-empty">Leituras e decisões ficam registradas aqui.</p>
+      <div class="registro__foot">
+        <button id="reg-export">Exportar JSON</button>
+        <button id="reg-clear" class="is-quiet">Limpar</button>
+        <button id="reg-close" class="is-quiet">Fechar</button>
+      </div>
+    </aside>
+
+    <aside class="ficha" id="ficha" aria-hidden="true">
+      <small class="ficha__fase" id="ficha-fase"></small>
+      <p class="ficha__essencia" id="ficha-essencia"></p>
+      <ol class="ficha__list" id="ficha-list"></ol>
+      <p class="ficha__f1" id="ficha-f1">
+        <small>Fato de pista</small>
+        <b id="ficha-f1-termo"></b>
+        <span id="ficha-f1-texto"></span>
+      </p>
+    </aside>
+
+    <div class="board" id="board" aria-hidden="true">
+      <small>Pit board</small>
+      <b id="board-text">ALVO · JUIZ: FP1</b>
+    </div>
+
+    <div class="scenarios" id="scenarios" hidden aria-label="Cenários de correlação">
+      <svg class="scenarios__chart" id="drift" viewBox="0 0 280 64" aria-label="Delta previsto contra medido"></svg>
+      <button data-scenario="cfd" class="is-active">CFD</button>
+      <button data-scenario="tunel">Túnel 60%</button>
+      <button data-scenario="pista">Pista seca</button>
+      <button data-scenario="piso">Piso novo</button>
+      <output id="deviation">0 pt</output>
+    </div>
+
+    <div class="decisao" id="decisao" hidden aria-label="Decisão do upgrade">
+      <button data-acao="reverter" class="is-active">Reverter</button>
+      <button data-acao="manter">Manter</button>
+      <button data-acao="tentar" class="is-quiet">Tentar de novo</button>
+      <output id="falhas">falhas 0 · BOX</output>
+    </div>
+
+    <footer class="creditos" id="creditos" aria-hidden="true">
+      <b>Último estado verde</b>
+      <span>Fatos verificáveis em f1-licoes.md · deltas ilustrativos · sem afiliação FIA ou equipes · INTEIA</span>
+    </footer>
+
+    <div class="hint" id="hint" aria-hidden="true"><span>Role para abrir o CFD</span><i></i></div>
+    <div class="tooltip" id="tooltip" hidden></div>
+    <main id="scroll" class="scroll" aria-label="Narrativa"></main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

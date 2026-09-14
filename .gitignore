@@ -25,3 +25,5 @@ graphify-out/cache/
 graphify-out/__pycache__/
 __pycache__/
 *.pyc
+
+.playwright-mcp/
