@@ -21,20 +21,20 @@ const CAMERA=[
  [0.00,[8,6.1,1.8],aim(8,.6,.3)],
  [0.25,[24,7.5,3.2],aim(24,.6,.4)],
  [0.50,[58,10.5,3.6],aim(58,.3,.9)],
- // Travel: crane over the box while the car opens (orbit in explosion begins).
- // Text-free travels carry a component close-up (corn-02/09): a long lens, one part placed at 55% of
- // the width with focus locked on it (CLOSES) and the rest of the car in bokeh, extending toward the
- // empty text side, never past the chapter dots. From the +X flank the rear of the car is on screen
- // right, so the subjects are the parts at that end (a front part crops the car at 136–200%).
- // 0.72: rear wing at the top of the crane.
- [0.72,[88,10.6,4.6],[.19,.61,-3.04]],
+ // Travel: text-free travels carry a component close-up (corn-02/09): one part at 55% of the width
+ // with focus locked on it (CLOSES) and the rest of the car soft, never past the chapter dots.
+ // 0.72: the crane climbs over the right rear quarter on a 20° lens until the rear wing is a third
+ // of the frame; only the back half of the car is in shot, cut on the empty text side.
+ [0.72,[62,5.5,5.2],[.38,.45,-2.45]],
  // 02 Hipótese · orbit in explosion: high rear orbit around the parts, floor isolated (32% → 43%).
- [1.00,[112,12.7,6],aim(112,.3,.9)],
- [1.25,[138,11.7,6],aim(138,.1,.9)],
- [1.50,[160,12.1,5.8],aim(160,0,1.1)],
- // Explosion peak: the isolated floor, the hypothesis part, centred between the flying parts
- // (wheels spread to ±2.4 m, so the lens stays at 32° to keep them inside the dots).
- [1.64,[170,11.5,4.5],[-1.21,.54,-.98]],
+ // The body opens a little later (explode .35 at 1.0), so the orbit can start close to the wing.
+ [1.00,[105,10,6.5],aim(105,.2,.35)],
+ [1.25,[145,11,6],aim(145,0,.35)],
+ [1.50,[170,11,5],aim(170,0,.35)],
+ // Explosion peak: the isolated floor, the hypothesis part, from 3 m high on a 20° lens behind the
+ // car: no model-kit view from above, the floor fills half the width and the flying wheels sit at
+ // the frame edges.
+ [1.64,[170,10,3],[-.72,.36,-.97]],
  // Travel: the crane holds high while the diagonal wipe crosses (1.76–2.00), so the box floor
  // fills the frame until the tunnel covers it; the descent happens inside the tunnel.
  [1.80,[180,9.4,3.5],[.1,.6,-.2]],
@@ -56,14 +56,17 @@ const CAMERA=[
  // The whip lands softly (tangent ×0.35) so the reading starts at lesson speed.
  [3.00,[60,12.0,2.8],[-4.35,1.2,-3],.35],
  [3.25,[34,9.6,2.2],[-2.2,.9,-2.2]],
- [3.50,[-5,6.2,1.3],aim(-5,-.2,.35)],
+ // The lens rides above the car and looks down, so the rear wall panel stays above the frame.
+ [3.50,[-5,6,2.7],aim(-5,-.2,.35)],
  // Travel: push-in past the front-left wheel until the central monitor is 35–40% of the width,
  // and only then the rack (RACK from 3.5) hands the focus to the evidence. The crane keeps
- // rising through the hold, so the lens never stops.
- [3.74,[-45,1.98,1.7],[-4.59,1.5,-1.51]],
- // 05 Corrigir · box. The crane rises straight off the island over the closed nose, then pulls
- // back while the body lifts (explode 3.95–4.2), looking down on the revised floor.
- [4.00,[-10,4.5,4.0],aim(-10,-.2,.75)],
+ // rising through the hold (tangent ×1.3), so the lens never stops.
+ [3.74,[-45,1.7,3.2],[-4.57,1.45,-1.5],1.3],
+ // 05 Corrigir · box. The crane rises off the island and has the whole closed car inside the reading
+ // zone from 3.96, when the 05 title opens; then it pulls back while the body lifts
+ // (explode 3.95–4.2), looking down on the revised floor.
+ [3.93,[-8,5.8,4.4],aim(-8,-.2,.35)],
+ [4.00,[-4,6.2,4.1],aim(-4,-.1,.35)],
  [4.25,[0,8.5,4.2],aim(0,.2,.4)],
  [4.50,[10,9,3.8],aim(10,.2,.4)],
  // Travel: descending crane onto the nose while the car closes, landing on the first frame.
@@ -74,12 +77,12 @@ const CAMERA=[
 const TRACKS={
  // Long-lens zooms at 0.72 and 1.64 make the component close-ups, 30–34 on the track, 20 on the
  // monitor; 38 is back before copy arrives.
- fov:[[0,38],[.5,38],[.6,32],[.72,26],[.84,30],[.94,38],[1.5,38],[1.56,34],[1.64,32],[1.74,33],[1.86,36],[2,38],[2.5,38],[2.62,30],[2.74,34],[2.86,34],[3,38],[3.45,36],[3.7,20],[3.8,20],[3.9,27],[4,38],[4.5,38],[4.66,34],[5,38]],
+ fov:[[0,38],[.5,38],[.6,30],[.72,20],[.84,28],[.94,38],[1.5,38],[1.56,30],[1.64,20],[1.74,26],[1.86,36],[2,38],[2.5,38],[2.62,30],[2.74,34],[2.86,34],[3,38],[3.45,36],[3.7,20],[3.8,20],[3.9,37],[4,38],[4.5,38],[4.66,34],[5,38]],
  // The car opens on the way to the bench, peaks after the copy leaves and slams shut at the wipe.
- explode:[[0,0],[.55,0],[1,.5],[1.45,.6],[1.62,.8],[1.86,0],[3.95,0],[4.2,.45],[4.55,.45],[4.85,0],[5,0]],
+ explode:[[0,0],[.62,0],[1,.35],[1.45,.6],[1.62,.8],[1.86,0],[3.95,0],[4.2,.45],[4.55,.45],[4.85,0],[5,0]],
  // Shallow focus lives in the closes and the Avaliar rack; reading pauses keep the whole subject sharp;
  // the track keeps it low so the bokeh does not erase the speed streaks.
- bokeh:[[0,.11],[.5,.11],[.72,.5],[.9,.25],[1,.2],[1.5,.2],[1.64,.5],[1.8,.35],[2,.25],[2.5,.25],[2.58,.12],[2.92,.12],[3,.25],[3.5,.25],[3.7,.7],[3.84,.7],[3.96,.35],[4,.11],[4.5,.11],[4.66,.45],[5,.11]],
+ bokeh:[[0,.11],[.5,.11],[.72,.5],[.9,.25],[1,.2],[1.5,.2],[1.64,.5],[1.8,.35],[2,.25],[2.5,.25],[2.58,.12],[2.92,.12],[3,.25],[3.5,.25],[3.7,.7],[3.84,.7],[3.96,.35],[4,.11],[4.5,.11],[4.66,.22],[5,.11]],
  // Avaliar is lit by the evidence: the room drops and the monitors take over.
  evaluate:[[0,0],[2.95,0],[3.15,1],[3.84,1],[3.98,0],[5,0]],
  exposure:[[0,1],[1.8,1],[2.2,.9],[2.8,.9],[3.2,1],[4.8,1],[5,.92]],
@@ -92,14 +95,13 @@ const TRACKS={
  shake:[[0,0],[2.52,0],[2.64,.7],[2.74,1],[2.86,1],[2.96,0],[5,0]],
  // No copy on screen during the run: the frame is centred on the car instead of clearing the text column.
  center:[[0,0],[2.5,0],[2.62,1],[2.86,1],[3,0],[5,0]],
- // Extra pull-back on phones (added to scene.js's portrait factor): the lateral take is a whole car
- // side-on, which a 390 px frame only holds from further away.
+ // Extra pull-back on phones (added to the portrait factor) while copy is still on screen.
  pull:[[0,0],[2.5,0],[2.62,.75],[2.72,.1],[2.86,0],[5,0]]
 };
 // Focus narrates (R8): it rides the face of the car turned to the lens, so the subject of each
 // pause is sharp from any angle. Avaliar racks it to the island monitors only once the push-in has
 // made them big (3.5 on); each close locks it on its part with a short range (LOCK, CLOSES).
-const RACK=[[0,0],[3.5,0],[3.7,1],[3.84,1],[3.96,0],[5,0]];
+const RACK=[[0,0],[3.5,0],[3.7,1],[3.8,1],[3.92,0],[5,0]];
 // Part centres at the explode amount of each close (tools/car-hull.json): rear wing, floor.
 const CLOSES=[[.72,[.3,.6,-2.25]],[1.64,[0,.29,-.85]]];
 const LOCK=[[0,0],[.58,0],[.66,1],[.8,1],[.9,0],[1.5,0],[1.57,1],[1.7,1],[1.78,0],[5,0]];
@@ -160,16 +162,49 @@ export function sampleStory(progress){
  pose.bokehScale=1+4.4*pose.bokeh;
  // World routing is data: a new world is one more wipe (scene.js keeps a map of worlds by name).
  const w=WIPES.find(w=>p>w.from&&p<w.to);
- pose.world=WIPES.reduce((world,x)=>p>=x.to?x.incoming:world,WIPES[0].outgoing);
+ const settled=WIPES.reduce((world,x)=>p>=x.to?x.incoming:world,WIPES[0].outgoing);
  pose.outgoing=null;
  if(w){const s=smooth((p-w.from)/(w.to-w.from));pose.sweep=s;pose.incoming=w.incoming;pose.outgoing=w.outgoing;pose.wipe=Math.sin(Math.PI*s);}
+ // world: the world that owns most of the frame ('garage' | 'tunnel' | 'track'), stable for labels.
+ pose.world=w?(pose.sweep>=.5?w.incoming:w.outgoing):settled;
  // Weight of a named world on screen: the swept share during a wipe, 0 or 1 when settled.
- const weight=name=>w?(w.incoming===name?pose.sweep:w.outgoing===name?1-pose.sweep:0):pose.world===name?1:0;
+ const weight=name=>w?(w.incoming===name?pose.sweep:w.outgoing===name?1-pose.sweep:0):settled===name?1:0;
  pose.tunnel=weight('tunnel');
  pose.track=weight('track');
  // Dark haze rises just before each wipe and clears after it (scene.js: fog, background, dust).
  pose.haze=Math.max(0,...WIPES.map(x=>Math.min(smooth((p-x.from+x.hazeLead)/Math.min(.16,x.hazeLead)),1-smooth((p-x.to)/.15))));
  return pose;
+}
+
+// Portrait framing (phones, ≈390×844), pure so scene.js and the tests share it.
+// Copy on phones reads from about i−0.02 to i+0.52 in the lower half, so the 3D is lifted into the
+// upper band (offsetY). Outside the copy (PORTRAIT_FREE) the car is the subject: the lens aims at its
+// centre, the frame is not lifted, and the distance is fitted so the car fills ≈58% of the width.
+// The Avaliar push-in stays on the monitor (its subject), and Corrigir's copy opens at 3.96.
+const PORTRAIT_FREE=[[0,0],[.52,0],[.58,1],[.94,1],[.99,0],[1.52,0],[1.58,1],[1.97,1],[2,0],[2.46,0],[2.5,1],[2.97,1],[3,0],[4.52,0],[4.58,1],[4.94,1],[4.99,0],[5,0]];
+const PORTRAIT_FILL=.58;
+export function portraitFrame(pose,aspect=390/844){
+ const p=pose.index+pose.local,free=scalar(PORTRAIT_FREE,p),explode=pose.explode||0;
+ let target=[...pose.target],camera=[...pose.camera],fov=pose.fov*1.32,offsetY=.2*(1-free);
+ let k=1.4+explode*.45+(pose.pull||0);
+ if(free>0){
+  target=target.map((v,i)=>v+([0,.5,0][i]-v)*free);
+  const dx=camera[0]-target[0],dy=camera[1]-target[1],dz=camera[2]-target[2],len=Math.hypot(dx,dy,dz)||1,h=Math.hypot(dx,dz)||1;
+  // Half-width of the car across the lens: the side view shows its length, the end view its width
+  // plus the wheels that fly out with the explode.
+  const half=Math.abs(dz)/h*(.95+1.5*explode)+Math.abs(dx)/h*2.6;
+  const fit=Math.max(3.2,half/(PORTRAIT_FILL*Math.tan(fov/2*RAD)*aspect))/len;
+  k+=(fit-k)*free;
+ }
+ camera=target.map((v,i)=>v+(camera[i]-v)*k);
+ // Reverse shot inside the box (1.68–1.97): a wide lens keeps the lens in front of the rear wall.
+ const bay=smooth((p-1.68)/.1)*(1-smooth((p-1.83)/.14));
+ if(bay>0){
+  camera=[camera[0]+(-1.5-camera[0])*bay,camera[1]+(3.3-camera[1])*bay+4.8*bay*(1-bay),camera[2]+(-5.6-camera[2])*bay];
+  target=target.map((v,i)=>v+([0,.4,0][i]-v)*bay);
+  fov+=(75-fov)*bay;offsetY*=1-bay;
+ }
+ return {camera,target,fov,offsetY,free};
 }
 export function assessChoice(chapter,choice){return {correct:choice===chapter.correct,message:chapter.feedback};}
 export function exportNotebook(values,now=new Date().toISOString()){
