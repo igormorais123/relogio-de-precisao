@@ -1,5 +1,9 @@
 name: Publicar F1 Loop
 
+# Publica f1-loop/dist na branch gh-pages, que é a fonte do GitHub Pages.
+# Enquanto os jobs do GitHub Actions estiverem bloqueados na conta, rode o
+# mesmo script localmente: bash f1-loop/tools/publicar-gh-pages.sh
+
 on:
   push:
     branches: [main]
@@ -9,19 +13,16 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: pages-f1-loop
   cancel-in-progress: true
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: f1-loop
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -29,28 +30,7 @@ jobs:
           node-version: '24'
           cache: npm
           cache-dependency-path: f1-loop/package-lock.json
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
-      - name: Montar site do Pages
-        run: |
-          mkdir -p ../_site/f1-loop
-          cp -R dist/. ../_site/f1-loop/
-          touch ../_site/.nojekyll
-          printf '%s\n' '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./f1-loop/"><title>F1 Loop · INTEIA</title></head><body><a href="./f1-loop/">Abrir a aula F1 Loop</a></body></html>' > ../_site/index.html
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: _site
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}f1-loop/
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Testar, construir e publicar
+        run: bash f1-loop/tools/publicar-gh-pages.sh
+        env:
+          GH_PAGES_REMOTE: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git

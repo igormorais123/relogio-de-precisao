@@ -65,6 +65,19 @@ npm test
 npm run dev   # http://127.0.0.1:5198
 ```
 
-Os dois repositórios devem ficar lado a lado: `tools/optimize-car.mjs`, `verify-car.mjs` e `audit-assets.mjs` leem `../../INTEIA-laboratorio-3d`. Publicação: cada push em `main` que toque `f1-loop/` dispara `.github/workflows/pages-f1-loop.yml` e atualiza a aula no GitHub Pages.
+Os dois repositórios devem ficar lado a lado: `tools/optimize-car.mjs`, `verify-car.mjs` e `audit-assets.mjs` leem `../../INTEIA-laboratorio-3d`.
+
+## Publicação
+
+- Aula: https://igormorais123.github.io/relogio-de-precisao/f1-loop/
+- Laboratório 3D: https://igormorais123.github.io/INTEIA-laboratorio-3d/
+
+O GitHub Pages deste repositório serve a branch `gh-pages`. Para republicar depois de mudar a aula, na raiz do repositório:
+
+```sh
+bash f1-loop/tools/publicar-gh-pages.sh
+```
+
+O script testa, constrói e envia `f1-loop/dist` para `gh-pages`. A action `.github/workflows/pages-f1-loop.yml` roda o mesmo script a cada push em `main` que toque `f1-loop/`, mas **os jobs do GitHub Actions estão bloqueados na conta por pendência de faturamento** ("The job was not started because your account is locked due to a billing issue", 13/09/2026). Até resolver em GitHub → Settings → Billing, publique pelo script local.
 
 Para continuar com o mesmo método no Claude Code, peça: "leia `f1-loop/PROXIMOS-PASSOS.md` e execute o plano com ultracode, fase por fase, com avaliadores rigorosos".
