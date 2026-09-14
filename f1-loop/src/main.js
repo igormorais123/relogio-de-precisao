@@ -70,7 +70,7 @@ function frame(now){
  if(snap||reduced.matches){shownP=targetP;snap=false;}else{shownP+=(targetP-shownP)*(1-Math.exp(-dt*5));if(Math.abs(targetP-shownP)<1e-4)shownP=targetP;}
  paint();
  if(state.reading||!scene)return;
- pose=sampleStory(shownP);scene.setPose(pose);scene.render(dt,now/1000,idle?1000/30:1000/60);placeHotspot();
+ pose=sampleStory(shownP);const place=pose.track>.5?'PISTA':SCENE_LABELS[pose.index];if($('#scene-label').textContent!==place)$('#scene-label').textContent=place;scene.setPose(pose);scene.render(dt,now/1000,idle?1000/30:1000/60);placeHotspot();
  schedule();
 }
 function setReading(on){state.reading=on;document.body.classList.toggle('reading',on);$('#reading').setAttribute('aria-pressed',String(on));$('#reading').textContent=on?'Modo cinema':'Modo leitura';$$('.lesson').forEach(d=>d.open=on);$$('.chapter').forEach(s=>{s.style.removeProperty('--in');s.style.removeProperty('--out');s.classList.remove('copy-off','dissolving');});measure();if(on){$('#load-state').textContent='Leitura · movimento pausado';$('#hotspot').classList.add('off');paint();}else{if(scene)$('#load-state').textContent='';else loadScene();snap=true;schedule();}}
