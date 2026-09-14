@@ -8,7 +8,7 @@ const BAY={front:-.15,rear:-2.1,lip:.40};
 // Seated on the floor (top ≈0.14 m) with the crank on the car centreline, turbo towards the gearbox.
 const ENGINE_AT=new THREE.Vector3(0,.43,-.72),ENGINE_LENGTH=.85;
 // The authored clip turns the crank 4 times in 8 s; 1.5× reads as 45 rpm: legible, no strobing at 30 fps.
-const CLIP_RATE=1.5,WORK_LIGHT=6;
+const CLIP_RATE=1.5,WORK_LIGHT=2.6;
 const HINGE=new THREE.Vector3(0,.75,-.9);
 // Same cut as the car (scene.js): parts under a few centimetres add shadow triangles but no readable shadow.
 const SHADOW_RADIUS=.09,UPLOAD_TRIANGLES=60000;
@@ -26,7 +26,7 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  // Warm work light over the bay. It joins the scene only while the bay is open (the light count of every
  // material changes), and the programs for that count are compiled in prepare().
- const light=new THREE.PointLight('#ffb36b',0,3.4,1.6);light.name='Luz de trabalho do motor';light.position.set(.5,1.15,-.5);
+ const light=new THREE.PointLight('#ffb36b',0,3.4,1.6);light.name='Luz de trabalho do motor';light.position.set(.6,1.5,-.35);
  const root=new THREE.Group();root.name='Motor no compartimento';root.position.copy(ENGINE_AT);root.visible=false;scene.add(root);
 
  let state='idle',ready=false,disposed=false,split=false,reveal=0,abort=null,mixer=null;
