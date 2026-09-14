@@ -76,7 +76,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   scene.fog = new THREE.Fog(FOG, 15, 40);
   const camera = new THREE.PerspectiveCamera(30, 1, .05, 80);
   stage.append(renderer.domElement);
-  renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); onError(); });
+  renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); onError(); }, {once: true});
 
   // Warm key against a cold world (R10); the environment map supplies the softboxes.
   const warmKey = new THREE.Color('#ffcf9e'), coldKey = new THREE.Color('#dcecff');
@@ -112,7 +112,8 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   else signal?.addEventListener('abort', () => abort.abort(), {once: true});
   let model;
   try {
-    const names = mobile ? ['carro-aula-mobile-v2.glb', 'carro-aula-mobile.glb'] : ['carro-aula-v2.glb', 'carro-aula.glb'];
+    // The uncompressed source GLBs stay in the repository for provenance but are not deployed (tools/publicar-gh-pages.sh).
+    const names = mobile ? ['carro-aula-mobile-v2.glb'] : ['carro-aula-v2.glb'];
     const raw = await fetchModel(names, abort.signal, f => onProgress(f * .8, 'Carregando o carro'));
     onProgress(.84, 'Montando o carro');
     await MeshoptDecoder.ready;

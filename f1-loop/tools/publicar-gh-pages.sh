@@ -27,6 +27,9 @@ fi
 find "$WORK/site" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
 mkdir -p "$WORK/site/f1-loop"
 cp -R dist/. "$WORK/site/f1-loop/"
+# Fontes de proveniência (GLB sem compressão, PNG e TTF originais, Lato fora de uso) ficam no repositório, não no site.
+rm -f "$WORK/site/f1-loop/assets/"{carro-aula.glb,carro-aula-mobile.glb,box-aula-referencia.glb,box-poster.png} \
+      "$WORK/site/f1-loop/fonts/"{Lato-Regular.ttf,Lato-Regular.woff2,Barlow-Regular.ttf,BebasNeue-Regular.ttf}
 touch "$WORK/site/.nojekyll"
 printf '%s\n' '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=./f1-loop/"><title>F1 Loop · INTEIA</title></head><body><a href="./f1-loop/">Abrir a aula F1 Loop</a></body></html>' > "$WORK/site/index.html"
 
