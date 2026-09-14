@@ -11,7 +11,7 @@ export const emblem='M16 8H36L20 84H0ZM39 84L75 8H96L117 84H95L91 66H68L60 84ZM7
 export function brandSVG({light=false,compact=false}={}){
  const ink=light?'#f0f2f3':'#202930',red='#d92135';
  if(compact)return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 0 136 96"><path fill="${red}" fill-rule="evenodd" d="${emblem}"/></svg>`;
- return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 116" role="img" aria-label="INTEIA"><path fill="${red}" fill-rule="evenodd" d="${emblem}" transform="translate(0 8)"/><path d="M141 19V96" stroke="${ink}" stroke-opacity=".22"/><g transform="translate(183 17) skewX(-12)">${glyphs.map(([letter,d,accent])=>`<path data-letter="${letter}" fill="${accent?red:ink}" fill-rule="evenodd" d="${d}"/>`).join('')}</g><text x="174" y="106" font-family="Arial, sans-serif" font-size="14" font-weight="500" letter-spacing="4.5" fill="${ink}">LABORATÓRIO 3D</text></svg>`;
+ return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 116" role="img" aria-label="INTEIA"><path fill="${red}" fill-rule="evenodd" d="${emblem}" transform="translate(0 8)"/><path d="M141 19V96" stroke="${ink}" stroke-opacity=".22"/><g transform="translate(183 17) skewX(-12)">${glyphs.map(([letter,d,accent])=>`<path data-letter="${letter}" fill="${accent?red:ink}" fill-rule="evenodd" d="${d}"/>`).join('')}</g></svg>`;
 }
 export function drawBrand(ctx,width,height,{light=false}={}){
  ctx.clearRect(0,0,width,height);const scale=Math.min(width/640,height/116);ctx.save();ctx.translate((width-640*scale)/2,(height-116*scale)/2);ctx.scale(scale,scale);
