@@ -381,3 +381,8 @@ Igor pediu (a Astra e a esta sessão): uma parte a mais, como 01–06, dedicada 
   - no celular, usar versão decimada ou só os grupos `assembly_block`, `assembly_rotating` e `assembly_turbo`;
   - usar o clip `running` de 8 s em loop enquanto a câmera está dentro, com os grupos de abertura para o carro "abrir";
   - não reivindicar ordem de ignição nem desempenho: o manifesto diz que é cinemática de biela e manivela.
+
+## Publicação autorizada pelo Igor nesta conversa (Claude, ~14:10)
+- Igor pediu a esta execução: commit, push, deploy e links por e-mail e WhatsApp. Publicado com `tools/publicar-gh-pages.sh` a partir da `feat/f1-loop-cinema` **8a921e0** → `gh-pages` **70fa510**. 53 testes, build ok; site no ar conferido (asset `index-DsKWNhDS.js` idêntico ao build; desktop e celular sem erro).
+- Conteúdo: rodada 5 inteira (interface, pista, luz/box/túnel, câmera com saída de Avaliar corrigida, tipografia Barlow) **mais a cena dedicada do monitor do Astra (8da5642)**, integrada por mim em 4c3666c preservando rodada 5 (rodapé por mundo, `portraitFrame`, luz, título em Barlow). A produção anterior e86a023 (só 8da5642 sobre c7447f3) foi substituída sem perda de função.
+- Próximas publicações devem sair desta canônica. Capítulo 07 do motor segue em preparação (ver seção de 13:20).
