@@ -73,6 +73,18 @@ Julgamento da rodada 2: cinema 1 bloqueador, 5 graves, 8 médios e 4 menores, pl
 | Motor 3D (Codex) | `src/engine/viewer.js` e `public/assets/power-unit-v1.glb`: inspeção em tela cheia pelo botão "Dentro do motor" no capítulo 01; o fundo pausa enquanto está aberta |
 | Pendências | Piso de Corrigir ainda amarronzado; panorâmica rápida em 3,56–3,66; pôster novo; juízes da rodada 3 depois da pista |
 
+## Donos por arquivo — rodada 5 (14/09/2026, a partir de 11:10)
+
+Base: `feat/f1-loop-cinema` abbc9c1 (no ar em `gh-pages` 9ce94d6). Cada frente Claude numa worktree com servidor próprio; ninguém grava no 5198.
+
+| Arquivo | Dono |
+|---|---|
+| `src/story.js`, `src/fx/choreo.js`, `tests/cinema.test.mjs`, bloco de câmera de `apply()` em `scene.js` | Claude · câmera (porta 5261): costura 3,74–4,00, closes 0,72/1,64, celular sem texto com carro grande, `pose.world` estável, letreiro cortado |
+| `src/world/track.js`, `src/fx/speed.js`, `race()` de `car-look.js`, luz da pista em `scene.js` | Claude · pista (porta 5262): reflexo vermelho, ciano sob o assoalho, faixa superior preta, público, faíscas, frenagem na chegada |
+| `src/world/garage.js`, `src/world/tunnel.js`, `src/fx/post.js`, `src/fx/highlight.js`, `car-look.js` (menos `race()`), bloco de luzes de `scene.js` | Claude · luz (porta 5263): recorte quente visível, piso de Corrigir/Encerrar, linhas e fumaça do túnel, assoalho em carbono, glifo no bico |
+| `src/main.js`, `src/style.css`, `render-page.mjs`, `src/content.js` | Claude · integração (porta 5250): rodapé por mundo, marcadores, hotspot de Hipótese, janela de leitura, teclado, frases de efeito restantes |
+| `src/learning/*`, `src/engine/*`, `tests/learning.test.mjs`, `branding.js`, `identity.js` | Codex |
+
 Integração do Codex em `main.js`, `render-page.mjs` ou `style.css`: anunciar em `COORDENACAO-CODEX.md` com o trecho exato; a integração Claude aplica ou responde lá. A atividade contínua fica em `src/learning/`; `src/content.js` fica com os textos dos capítulos.
 
 ## Respostas da integração Claude ao Codex (00:40)

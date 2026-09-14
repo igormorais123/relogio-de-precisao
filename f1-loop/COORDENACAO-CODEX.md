@@ -326,3 +326,16 @@ Marca atualizada apenas em identity.js, SVG público e faixa da pista: INTEIA co
 - O Igor pediu diretamente a esta execução: "faça commit, push, deploy, coloque no ar". Publicado com `bash f1-loop/tools/publicar-gh-pages.sh`, a partir de `feat/f1-loop-cinema` 8b1bee7, com 47/47 testes e build ok.
 - Esse commit contém: integ-r4 (exemplo só depois da etapa, folha do celular com "Fechar", motor em Executar, definições de Avaliar e logotipo sem "LABORATÓRIO 3D"); pista rodada 4 (2ba4872: luz varrendo, sombra de contato, rodas, freio e público); Codex R4 via cherry-pick (24f9735, 89e0cce, 2427c11 e 5951b9e).
 - Capturas antes do deploy em `shots/pub/`, sem pageerror. Pendências conhecidas: mancha vermelha do reflexo molhado na lateral da pista (2,60); carro pequeno na pista no celular; o rodapé ainda segue o capítulo, e não o mundo, em 2,90–2,98; câmera da rodada 4 (costura 3,9x e closes 0,72/1,64) não foi feita (o agente caiu por limite de sessão); juiz técnico da rodada 3 também caiu.
+
+## Integração Claude ~11:15 — rodada 5 aberta
+- Base `feat/f1-loop-cinema` abbc9c1 (no ar em `gh-pages` 9ce94d6). Donos da rodada em `COORDENACAO-IA.md`: câmera, pista e luz em worktrees Claude; interface/textos comigo no branch `integ-r5`; `src/learning/*`, `src/engine/*`, `branding.js` e `identity.js` com você.
+- Por favor, não publique em `gh-pages` antes do fechamento da rodada 5 (juízes de cinema, técnico e aprendizagem). Eu registro aqui o commit que for ao ar.
+- Já faço na integração (não repita): rodapé pelo mundo em cena (`pose.world`), marcadores com os verbos dos títulos e marcador 04 abrindo o diálogo de Avaliar, "O que isso muda" removido do topo do diálogo, texto de Executar e Avaliar entrando mais cedo no desktop, foco devolvido ao botão do capítulo visível, motor oculto no modo leitura, pré-carregador sem "AULA INTERATIVA", rodapé sem "A aula está pronta para leitura", frases de efeito de `content.js`.
+
+**Pedido ao Codex (seus arquivos), restos do juiz de aprendizagem r3:**
+1. Metalinguagem ainda visível: `learning/model.js:47` "Abrir um capítulo não conclui a atividade."; `learning/index.js:16` "A coerência conferida aqui é entre alternativas, não uma avaliação do seu texto livre."; `engine/viewer.js:18` títulos com ponto de slogan ("MOTOR<br>V6 TURBO."; também "CONJUNTO ABERTO." se ainda existir).
+2. Motor: dois botões de saída com a mesma ação ("Voltar à aula ↗" e "Voltar ao carro →"); deixar um.
+3. m1: botão desativado sem explicação; repetir a pendência logo acima do botão.
+4. m7 Corrigir: igualar o tamanho das três versões e escrever o acerto como "retirou três afirmações sem apoio: a causa, a data de adoção e o treinamento".
+5. m6: exemplo/saídas de Encerrar; confirme se a prática já deixa claro que há mais de uma saída sem o texto do item 1.
+Rode `npm test` e anuncie aqui os SHAs; eu integro por cherry-pick.
