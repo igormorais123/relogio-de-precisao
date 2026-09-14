@@ -1,4 +1,4 @@
-# F1 Loop — BOX, BOX.
+# F1 Loop — Engenharia de Loop
 
 Aula **só** de engenharia de loop com IA: preparar, formular hipótese, executar, avaliar, corrigir e encerrar com registro. O carro de Fórmula 1 do Laboratório 3D INTEIA, o box e o túnel são a metáfora; o aluno sai com um gesto aplicável no dia seguinte.
 
