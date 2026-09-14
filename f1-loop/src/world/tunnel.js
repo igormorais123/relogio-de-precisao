@@ -141,6 +141,28 @@ const NOISE_GLSL = /* glsl */`
 float tHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
 float tNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(tHash(i),tHash(i+vec2(1,0)),f.x),mix(tHash(i+vec2(0,1)),tHash(i+vec2(1,1)),f.x),f.y);}
 `;
+// Car silhouette as boxes (car coordinates, shrunk to the body). A flow point whose view ray still
+// meets the car beyond it sits between the camera and the car: fading it lets lines and smoke pass
+// around the body instead of veiling it. Behind the car the depth test already hides them.
+const CAR_BOXES = [
+  [-.70, .06, -1.5, .70, .64, .9], [-.30, .14, -1.7, .30, .95, 1.0], [-.18, .9, -.55, .18, 1.12, -.1],
+  [-.20, .14, 1.0, .20, .5, 2.45], [-.88, .08, 2.1, .88, .3, 2.56], [-.85, .02, -2.5, .85, .1, 1.1],
+  [-.62, .3, -2.5, .62, .86, -2.03],
+  [.56, 0, 1.19, .93, .66, 1.85], [-.93, 0, 1.19, -.56, .66, 1.85],
+  [.52, 0, -2.18, .93, .69, -1.5], [-.93, 0, -2.18, -.52, .69, -1.5],
+];
+const glf = v => v.toFixed(3);
+const CAR_OCCLUDER = /* glsl */`
+float carAhead(vec3 w){
+  vec3 d=w-cameraPosition;
+  d+=vec3(equal(d,vec3(0.)))*1e-5;
+  vec3 inv=1./d;
+  float hit=0.;
+${CAR_BOXES.map(([x0, y0, z0, x1, y1, z1]) => `  {vec3 a=(vec3(${glf(x0)},${glf(y0)},${glf(z0)})-cameraPosition)*inv, b=(vec3(${glf(x1)},${glf(y1)},${glf(z1)})-cameraPosition)*inv;
+   vec3 n=min(a,b), x=max(a,b);
+   hit=max(hit, step(max(max(max(n.x,n.y),n.z),1.), min(min(x.x,x.y),x.z)));}`).join('\n')}
+  return hit;
+}`;
 const PLANE_VERTEX = /* glsl */`
 varying vec2 vUv;
 #include <fog_pars_vertex>
@@ -485,6 +507,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
       varying float vAlpha, vWake, vLen, vRad, vSeed, vLight;
       varying vec2 vDir;
       #include <fog_pars_vertex>
+      ${CAR_OCCLUDER}
       void main(){
         float lane=position.x;
         float t=fract(position.y+uTime*uRate*(.9+.2*position.z));
@@ -521,9 +544,8 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
         float puff=.5+.5*sin(t*53.+lane*2.3+sin(t*17.+lane)*1.7);
         float pulse=.35+.65*puff;
         vAlpha=uFlow*uGain*fade*pulse*mix(1.,.22,wake)*clamp(10./thick,.2,1.)*smoothstep(1.2,1.9,-mv.z);
-        // Thin the foreground over the car while retaining depth behind it.
-        float bodyCrossing=(1.-smoothstep(2.1,3.2,abs(W.z)))*smoothstep(.05,.85,W.x);
-        vAlpha*=mix(1.,.32,bodyCrossing);
+        // In front of the body the smoke keeps 12%: the paint never reads translucent.
+        vAlpha*=mix(1.,.12,carAhead(W));
         // Seen from the flank each lane lines up into one long, solid band that the depth of
         // field widens into a white arc over the car; the side view keeps a quarter of it.
         float flank=smoothstep(.72,.97,abs(normalize(cameraPosition-W).x));
@@ -622,12 +644,13 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
       uniform float uWidth, uMinPx;
       attribute vec3 aStart, aEnd, aInfo;
       attribute vec2 aU;
-      varying float vU, vAcross, vSeed, vAmber, vThin, vNear;
+      varying float vU, vAcross, vSeed, vAmber, vThin, vNear, vOcc;
       #include <fog_pars_vertex>
+      ${CAR_OCCLUDER}
       void main(){
         vec4 mA=modelViewMatrix*vec4(aStart,1.), mB=modelViewMatrix*vec4(aEnd,1.);
         vec4 cA=projectionMatrix*mA, cB=projectionMatrix*mB;
-        vU=0.; vAcross=0.; vSeed=aInfo.x; vAmber=aInfo.y; vThin=0.; vNear=0.;
+        vU=0.; vAcross=0.; vSeed=aInfo.x; vAmber=aInfo.y; vThin=0.; vNear=0.; vOcc=0.;
       #ifdef USE_FOG
         vFogDepth=0.;
       #endif
@@ -644,6 +667,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
         gl_Position=c;
         vU=tail?aU.y:aU.x; vAcross=position.y; vThin=clamp(worldPx/uMinPx,0.,1.);
         vNear=smoothstep(1.2,1.9,-m.z);
+        vOcc=carAhead(tail?aEnd:aStart);
       #ifdef USE_FOG
         vFogDepth=-m.z;
       #endif
@@ -651,7 +675,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
     fragmentShader: /* glsl */`
       uniform float uTime, uFlow, uReveal, uPulses, uPulseSpeed;
       uniform vec3 uCyan, uAmber;
-      varying float vU, vAcross, vSeed, vAmber, vThin, vNear;
+      varying float vU, vAcross, vSeed, vAmber, vThin, vNear, vOcc;
       ${FOG_FRAGMENT}
       ${WIPE_SHADER_CHUNK}
       void main(){
@@ -663,7 +687,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
         float p=fract(vU*uPulses-uTime*uPulseSpeed+vSeed);
         float pulse=pow(p,8.)*.8+pow(p,3.)*.2;
         vec3 col=mix(uCyan,uAmber,vAmber);
-        float I=(.09+1.5*pulse)*profile*ends*reveal*uFlow*mix(.6,1.,vThin)*vNear;
+        float I=(.09+1.5*pulse)*profile*ends*reveal*uFlow*mix(.6,1.,vThin)*vNear*(1.-.94*vOcc);
         gl_FragColor=vec4(col*I*(1.-fogAmount()),1.);
       }`,
   });
