@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
+import {engineShot} from './engine-shot.js';
 
 // Engine bay in the car model frame (tools/car-hull.json): from behind the cockpit rim to the tail,
 // above the sidepod lip. The body shell is one mesh, so the cover is the same geometry split by planes.
@@ -157,7 +158,27 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
   await precompile();
   if(disposed)return;
   await upload();
+  if(disposed)return;
+  await rehearse();
   if(!disposed){ready=true;state='ready';}
+ }
+ // Each lesson looks where the story never did (garage corners, rear wing, shadow casters): the first cold pass
+ // spiked 106–381 ms on a 4× slowed phone (pub07 r6). The real scene is rendered once from each lesson view,
+ // off screen into the composer buffer, one view per frame while Encerrar is read; the closed car is restored.
+ async function rehearse(){
+  const view=camera.clone(),aim=new THREE.Vector3();
+  for(const p of [.2,.38,.61,.72,.84]){
+   if(disposed)return;
+   const take=engineShot(p,mobile),wasSplit=split,wasVisible=root.visible,constant=cutPlane.constant,previous=renderer.getRenderTarget();
+   view.copy(camera);view.position.fromArray(take.camera);view.fov=take.fov;view.updateProjectionMatrix();view.lookAt(aim.fromArray(take.target));view.updateMatrixWorld();
+   try{
+    setSplit(true);root.visible=true;poseCover(take.open);cutPlane.constant=THREE.MathUtils.lerp(.7,.004,smooth(take.cut));
+    renderer.setRenderTarget(target());renderer.render(scene,view);
+   }finally{
+    renderer.setRenderTarget(previous);cutPlane.constant=constant;root.visible=wasVisible;if(!wasSplit)setSplit(false);
+   }
+   await nextFrame();
+  }
  }
  function releaseEngine(){
   engineGeometries.forEach(g=>g.dispose());engineMaterials.forEach(m=>m.dispose());cutMaterials.forEach(m=>m.dispose());engineTextures.forEach(t=>t.dispose());
