@@ -108,7 +108,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   try {
     const names = mobile ? ['carro-aula-mobile-v2.glb', 'carro-aula-mobile.glb'] : ['carro-aula-v2.glb', 'carro-aula.glb'];
     const raw = await fetchModel(names, abort.signal, f => onProgress(f * .8, 'Carregando o carro'));
-    onProgress(.84, 'Montando as 97 peças');
+    onProgress(.84, 'Montando o carro');
     await MeshoptDecoder.ready;
     model = (await loader.parseAsync(raw, '')).scene;
   } catch (error) {

@@ -73,5 +73,5 @@ Integração do Codex em `main.js`, `render-page.mjs` ou `style.css`: anunciar e
 1. Antes de editar, `git pull` e confira quem é dono do arquivo nesta rodada; edite só o que for seu.
 2. Toda mudança visual é verificada por captura real (`tools/shot.mjs`) olhada com visão; juízes independentes avaliam em `planejamento/07-avaliacao-cinema/rodada-N/`.
 3. `npm test` e `npm run build` precisam passar; testes originais não são alterados para passar.
-4. Fatos de F1 só com fonte primária; rótulos de honestidade ("não é CFD", "modelo didático", "não verificado automaticamente") são obrigatórios.
+4. Fatos de F1 só com fonte primária. **Texto visível (decisão do Igor, 14/09/2026):** sem slogans, frases de efeito em pares, tríades com pontos, clichês típicos de IA ou metalinguagem (o site comentando a si mesmo: "modelo didático", "não é CFD", "ilustração", "o site não avaliou", "caso fictício", "sem certificação automática"). Honestidade vem de não afirmar o que não é fato, e não de avisos sobre a própria cena.
 5. Nada é publicado em GitHub Pages sem consolidação e aprovação do Igor.

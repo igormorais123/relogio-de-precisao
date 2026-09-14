@@ -33,7 +33,7 @@ test('complete human action sequence records correction and bounded decision wit
 test('free criterion is preserved literally without keyword grading or claim of semantic approval',()=>{
  const criterion='  Meu critério próprio <não avaliado>\nsegunda linha  ';
  const result=applyLearningAction(createLearningState(),{stage:0,criterion,selfReview:true});
- assert.equal(result.passed,true);assert.equal(result.state.criterion,criterion);assert.equal(result.state.criterionReview,'not-assessed');assert.match(result.message,/não avaliou/);
+ assert.equal(result.passed,true);assert.equal(result.state.criterion,criterion);assert.equal(result.state.criterionReview,'not-assessed');assert.match(result.message,/Critério guardado/);
 });
 test('Execute archives exact simulation request, source and intact candidate only on explicit save action',()=>{
  let s=createLearningState();s=applyLearningAction(s,{stage:0,criterion:'Conferir',selfReview:true}).state;s=applyLearningAction(s,{stage:1,hypothesis:'fidelidade'}).state;
@@ -52,7 +52,7 @@ test('three legitimate outcomes require a coherent scope/reason pair, never a ge
  for(const [decision,reason] of [['comunicar','autorizacao'],['inconclusivo','observacao'],['decisao-necessaria','causa-pendente'],['producao','observacao']]) assert.equal(checkDecision(decision,reason,true).passed,false);
 });
 test('static markup contains fictional source, candidate and all six stages without global dialog',()=>{
- const html=renderLearningMarkup();assert.match(html,/INTEIRAMENTE FICTÍCIO/);assert.match(html,/12 minutos/);assert.match(html,/20 de maio/);
+ const html=renderLearningMarkup();assert.match(html,/CASO PARA PRATICAR/);assert.match(html,/12 minutos/);assert.match(html,/20 de maio/);
  assert.equal((html.match(/data-lr-stage=/g)||[]).length,6);assert.doesNotMatch(html,/<dialog|<script/);assert.match(html,/<noscript>/);
 });
 
