@@ -215,6 +215,8 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
    if(!paused&&!reduced.matches)mixer.update(dt*CLIP_RATE);
   },
   dispose(){
+   // A lost context disposes the scene from main.js onError; a second call has nothing left to release.
+   if(disposed)return;
    disposed=true;abort?.abort();observer.disconnect();signal?.removeEventListener('abort',cancel);
    if(split)setSplit(false);
    cover.removeFromParent();coverMaterials.forEach(m=>m.dispose());restMaterials.forEach(m=>m.dispose());
