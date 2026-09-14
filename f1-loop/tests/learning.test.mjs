@@ -57,7 +57,7 @@ test('three legitimate outcomes require a coherent scope/reason pair, never a ge
  for(const [decision,reason] of [['comunicar','autorizacao'],['inconclusivo','observacao'],['decisao-necessaria','causa-pendente'],['producao','observacao']]) assert.equal(checkDecision(decision,reason,true).passed,false);
 });
 test('static markup contains fictional source, candidate and all six stages without global dialog',()=>{
- const html=renderLearningMarkup();assert.match(html,/CASO PARA PRATICAR/);assert.match(html,/12 minutos/);assert.match(html,/20 de maio/);
+ const html=renderLearningMarkup();assert.doesNotMatch(html,/CASO PARA PRATICAR/);assert.match(html,/12 minutos/);assert.match(html,/20 de maio/);
  assert.equal((html.match(/data-lr-stage=/g)||[]).length,6);assert.doesNotMatch(html,/<dialog|<script/);assert.match(html,/<noscript>/);
 });
 

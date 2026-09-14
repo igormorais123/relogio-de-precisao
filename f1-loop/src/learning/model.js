@@ -8,7 +8,7 @@ export const SOURCE = [
 export const CLAIMS = [
   { text: 'A mediana passou de 12 minutos para 9 minutos, com 50 pedidos em cada versão.', verdict: 'sustentada', source: '2', explanation: 'A frase 2 sustenta os dois valores e os tamanhos dos grupos. Isso descreve a observação; não demonstra a causa.' },
   { text: 'O novo formulário causou a redução de 3 minutos.', verdict: 'nao-sustentada', source: '3', explanation: 'A frase 3 informa duas mudanças simultâneas. A diferença de 3 minutos existe, mas atribuí-la ao formulário ultrapassa a evidência.' },
-  { text: 'O formulário será adotado definitivamente em 20 de maio de 2026.', verdict: 'nao-sustentada', source: '4', explanation: 'A frase 4 trata da adoção e informa que este registro não fornece data nem autorização. Por isso, ele não sustenta a adoção em 20 de maio. Isso não prova que a data seja falsa; retire a afirmação até obter o ato competente.' },
+  { text: 'O formulário será adotado definitivamente em 20 de maio de 2026.', verdict: 'nao-sustentada', source: '4', explanation: 'A frase 4 trata da adoção e informa que este registro não fornece data nem autorização. Por isso, ele não sustenta a adoção em 20 de maio. Isso não prova que a data seja falsa, mas o comunicado não pode afirmá-la.' },
   { text: 'A equipe da versão candidata recebeu treinamento no novo formulário antes do teste.', verdict: 'nao-verificada', source: 'nenhuma', explanation: 'O registro não fala de treinamento. Decidir exige a ficha de capacitação da equipe, que não foi aberta. Não verificada não quer dizer falsa: retire a frase ou busque o documento.' }
 ];
 export const SIMULATION_REQUEST = 'Redija um comunicado interno com base somente no registro de 14 de maio de 2026. Preserve a data, os grupos de 50 pedidos e as medianas de 12 e 9 minutos. Separe observação de causa. Não acrescente data ou autorização de adoção definitiva.';
@@ -20,7 +20,7 @@ export const CORRECTIONS = [
 export const STAGES = ['Preparar', 'Hipótese', 'Executar', 'Avaliar', 'Corrigir', 'Encerrar'];
 export function createLearningState() { return { completed: [], criterion: '', criterionReview: 'not-assessed', claimAttempts: 0, hypothesis: '', execution: null, correctedText: '', decision: '', decisionReason: '', decisionNote: '', history: [] }; }
 export function checkClaims(answers = [], attempt = 1) {
-  const guides = ['Confira separadamente os dois valores e o tamanho de cada grupo.', 'Quantas condições mudaram juntas? O teste separou seus efeitos?', 'O que este registro permite afirmar sobre a data? Qual documento seria necessário para confirmá-la?', 'Alguma frase do registro menciona capacitação? Que documento permitiria conferir essa informação?'];
+  const guides = ['Confira separadamente os dois valores e o tamanho de cada grupo.', 'Quantas condições mudaram juntas? O teste separou seus efeitos?', 'Alguma frase do registro trata da adoção? O que ela diz sobre data e autorização?', 'Alguma frase do registro menciona capacitação? Que documento permitiria conferir essa informação?'];
   const findings = CLAIMS.map((claim, i) => {
     const answer = answers[i];
     const passed = answer?.source === claim.source && answer?.verdict === claim.verdict;

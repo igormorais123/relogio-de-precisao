@@ -76,3 +76,5 @@ dialog{word-spacing:.03em}.lr-lab{line-height:1.6}.small{font-size:12px}
 @media print{.monitor-scene{height:auto!important;padding:20px!important}.monitor-scene-pin{position:static!important;height:auto!important}.monitor-reading-text{position:static!important;width:auto!important;height:auto!important;clip-path:none!important}.monitor-scene-controls{display:none!important}}
 
 .enhanced:not(.reading) .monitor-scene-heading h2{font-size:clamp(18px,2vw,27px);line-height:1.25}
+/* The sheet close sits on its own line, clear of the source link (learning judge r5, m3). */
+.enhanced:not(.reading) .lesson[open] .lesson-close{display:block;margin-top:14px}
