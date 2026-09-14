@@ -443,11 +443,33 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   // --------------------------------------------------------------- desenho
   let lastValues = {}, lastFields = [];
   let lessonBeat = 0;
+  // As três fichas do monitor central ficam pré-desenhadas em texturas próprias, já enviadas à GPU:
+  // trocar de ficha (rolagem ou Voltar/Próxima) troca só o map, sem redesenhar 1024 px nem subir textura.
+  const caseScreen = notebookScreens[1];
+  const caseCards = [0, 1, 2].map(i => {
+    if (i === 0) return {canvas: caseScreen.canvas, ctx: caseScreen.ctx, texture: caseScreen.texture, title: ''};
+    const canvas = document.createElement('canvas');
+    canvas.width = caseScreen.canvas.width; canvas.height = caseScreen.canvas.height;
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = maxAniso;
+    textures.add(texture);
+    return {canvas, ctx: canvas.getContext('2d'), texture, title: ''};
+  });
+  function drawCaseCards() {
+    for (let i = 0; i < caseCards.length; i++) { drawCaseScreen(caseCards[i], i); renderer?.initTexture?.(caseCards[i].texture); }
+    showCaseCard();
+  }
+  function showCaseCard() {
+    caseScreen.material.map = caseCards[lessonBeat].texture;
+    caseScreen.mesh.userData.lessonBeat = lessonBeat;
+    caseScreen.mesh.userData.lessonTitle = caseCards[lessonBeat].title;
+  }
   function setLessonProgress(progress, reading = null) {
     const beat = reading === null ? (progress < 3.70 ? 0 : progress < 3.77 ? 1 : 2) : Math.min(2,Math.floor(reading*3));
     if (beat === lessonBeat) return;
     lessonBeat = beat;
-    drawCaseScreen(notebookScreens[1]);
+    showCaseCard();
   }
   function setNotebook(values = {}, fields = []) {
     lastValues = values || {};
@@ -455,7 +477,6 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     const labels = {...FALLBACK_LABELS};
     for (const entry of lastFields) if (Array.isArray(entry) && entry[0]) labels[entry[0]] = entry[1] || labels[entry[0]] || entry[0];
     drawSourceScreen(notebookScreens[0]);
-    drawCaseScreen(notebookScreens[1]);
     drawDecisionScreen(notebookScreens[2], lastValues, labels);
   }
   function drawRear() {
@@ -465,10 +486,11 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   }
   drawRear();
   setNotebook({}, []);
+  drawCaseCards();
   if (typeof document !== 'undefined' && document.fonts?.load) {
     // Os dois pesos da Barlow precisam estar prontos; sem isso o canvas desenha em Arial.
     Promise.all([document.fonts.load(`80px ${DISPLAY}`), document.fonts.load(`400 40px ${BODY}`), document.fonts.load(`600 40px ${BODY}`)])
-      .then(() => { if (!disposed) { drawRear(); setNotebook(lastValues, lastFields); } })
+      .then(() => { if (!disposed) { drawRear(); setNotebook(lastValues, lastFields); drawCaseCards(); } })
       .catch(() => {});
   }
 
@@ -646,8 +668,8 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
 
   // The camera's existing push-in becomes a short lesson. Textures only upload
   // when a scroll beat changes; reversing the scroll restores the earlier card.
-  function drawCaseScreen(screen) {
-    const {ctx, canvas, texture, mesh} = screen;
+  function drawCaseScreen(screen, lessonBeat) {
+    const {ctx, canvas, texture} = screen;
     const W = canvas.width, H = canvas.height, s = W / 1024;
     paintScreenBase(ctx, W, H);
     const m = 52 * s;
@@ -670,8 +692,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
       ctx.fillStyle=i===lessonBeat?'#ffd447':'#34414a';
       ctx.fillRect(W-m-(3-i)*52*s,526*s,38*s,8*s);
     }
-    mesh.userData.lessonBeat=lessonBeat;
-    mesh.userData.lessonTitle=card.title;
+    screen.title=card.title;
     texture.needsUpdate = true;
   }
 
