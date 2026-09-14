@@ -16,13 +16,23 @@ const RED = '#D92135';
 const STAGES = ['Preparar', 'Hipótese', 'Executar', 'Avaliar', 'Corrigir', 'Encerrar'];
 const DECISIONS = {aceitar: 'Aceitar', reverter: 'Reverter', revisar: 'Revisar', inconclusivo: 'Inconclusivo', 'decisao-necessaria': 'Decisão necessária'};
 const FALLBACK_LABELS = {task: 'Tarefa', reference: 'Fonte e versão de referência', criterion: 'Critério', hypothesis: 'Hipótese', test: 'Teste e limite', evidence: 'Evidência observada', correction: 'Correção e regressões', next: 'Pendência e próxima volta', decision: 'Decisão'};
-// Um monitor por pergunta do plano Avaliar; os demais campos entram como linhas de apoio.
-const NOTEBOOK_SCREENS = [
-  {title: 'Evidência', main: 'evidence', rows: ['test', 'hypothesis']},
-  {title: 'Critério', main: 'criterion', rows: ['task', 'reference']},
-  {title: 'Decisão', main: 'decision', rows: ['correction', 'next']},
+// Ilha de Avaliar: o caso da aula (comunicado sobre o teste do formulário, src/learning/model.js).
+// Esquerda: a fonte; centro: a conferência frase a frase; direita: o registro do aluno ou,
+// sem registro, a consequência do critério. Nenhuma tela mostra campo vazio no plano de clímax.
+const CASE_SOURCE = [
+  'Em 14/05/2026, um setor comparou dois formulários de atendimento.',
+  'Referência: 50 pedidos, mediana de 12 min. Candidata: 50 pedidos, 9 min.',
+  'Formulário e equipe mudaram juntos. A causa não foi isolada.',
+  'Não há data nem autorização para adoção definitiva.',
 ];
-const EMPTY = '— sem registro —';
+const VERDICT = {ok: '#6fe0a8', no: '#ff4b5c', unk: '#ffb54a'};
+const CASE_CLAIMS = [
+  {text: 'Medianas de 12 e 9 min, 50 por versão', where: 'Registro, frase 2', verdict: ['SUSTENTADA'], tone: 'ok'},
+  {text: 'O novo formulário causou a redução', where: 'Registro, frase 3', verdict: ['NÃO SUSTENTADA'], tone: 'no'},
+  {text: 'Adoção definitiva em 20 de maio', where: 'Registro, frase 4', verdict: ['NÃO SUSTENTADA', 'OU NÃO VERIFICADA'], tone: 'no'},
+  {text: 'Equipe treinada antes do teste', where: 'Nenhuma frase do registro', verdict: ['NÃO VERIFICADA'], tone: 'unk'},
+];
+const STUDENT_FIELDS = ['evidence', 'criterion', 'decision'];
 
 export function createGarage({renderer, scene, mobile = false} = {}) {
   const root = new THREE.Group();
@@ -61,12 +71,12 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   // a distância e a rugosidade, e a silhueta do carro bloqueia o reflexo.
   const floorUniforms = {
     uFloorCam: {value: new THREE.Vector3(5, 1.5, 5)},
-    uLedGain: {value: 1}, uScreenGain: {value: 1}, uMonitorGain: {value: 1}, uBand: {value: 0}, uDirectSpec: {value: 1},
+    uLedGain: {value: 1}, uScreenGain: {value: 1}, uMonitorGain: {value: 1}, uBand: {value: 0}, uDirectSpec: {value: 1}, uDirectDiffuse: {value: 1},
     uRoofOn: {value: 1}, uRearOn: {value: 1},
   };
   for (const m of [epoxy, bay]) patchFloorReflection(m, floorUniforms, mobile);
   const redPaint = std(RED, .42, .05, .5);
-  const plate = std('#2f363b', .55, .6, .35);
+  const plate = std('#22282c', .55, .6, .35);
   const graphite = std('#1d262d', .66, .08, .45);
   const charcoal = std('#12181c', .5, .2, .5);
   const black = std('#090c0f', .5, .15, .5);
@@ -313,14 +323,14 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
 
   // ----------------------------------------------------------------- telas
   const screenGain = 1.5;
-  function makeScreen(parent, w, h, x, y, z, ry, cw, ch) {
+  function makeScreen(parent, w, h, x, y, z, ry, cw, ch, gain = screenGain) {
     const canvas = document.createElement('canvas');
     canvas.width = cw; canvas.height = ch;
     const texture = new THREE.CanvasTexture(canvas);
     texture.colorSpace = THREE.SRGBColorSpace;
     texture.anisotropy = maxAniso;
     textures.add(texture);
-    const material = new THREE.MeshBasicMaterial({map: texture, color: new THREE.Color(screenGain, screenGain, screenGain)});
+    const material = new THREE.MeshBasicMaterial({map: texture, color: new THREE.Color(gain, gain, gain)});
     material.userData.base = material.color.clone();
     materials.add(material);
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), material);
@@ -328,8 +338,13 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     parent.add(mesh);
     return {canvas, ctx: canvas.getContext('2d'), texture, material, mesh};
   }
-  const [cw, ch] = mobile ? [768, 432] : [1024, 576];
-  const notebookScreens = [...MON_Z].reverse().map(z => makeScreen(statics, MON.w, MON.h, MON.x + .004, MON.y, z, Math.PI / 2, cw, ch));
+  // O monitor central é lido em close (35–40% da largura): textura maior que a das laterais.
+  // Emissivo moderado: texto claro acima do limiar do bloom vira halo e perde a leitura.
+  const notebookGain = 1.05;
+  const notebookScreens = [...MON_Z].reverse().map((z, i) => {
+    const [cw, ch] = i === 1 ? (mobile ? [1024, 576] : [1536, 864]) : (mobile ? [768, 432] : [1024, 576]);
+    return makeScreen(statics, MON.w, MON.h, MON.x + .004, MON.y, z, Math.PI / 2, cw, ch, notebookGain);
+  });
   const rearScreens = rearScreenX.map(x => makeScreen(rearWall, 1.5, .84, x, 1.74, RZ + .102, 0, mobile ? 512 : 1024, mobile ? 288 : 576));
 
   const brandCanvas = document.createElement('canvas');
@@ -379,6 +394,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     envTarget = pmrem.fromScene(envScene, .025, .1, 60);
     pmrem.dispose();
   }
+  envScene.userData.carOnly.visible = true;
   for (const m of materials) {
     if (m.isMeshStandardMaterial) { m.envMap = envTarget?.texture || null; m.envMapIntensity = m.userData.env; }
     clip.patch(m);
@@ -391,7 +407,9 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     lastFields = Array.isArray(fields) ? fields : [];
     const labels = {...FALLBACK_LABELS};
     for (const entry of lastFields) if (Array.isArray(entry) && entry[0]) labels[entry[0]] = entry[1] || labels[entry[0]] || entry[0];
-    notebookScreens.forEach((screen, i) => drawNotebookScreen(screen, NOTEBOOK_SCREENS[i], i, lastValues, labels));
+    drawSourceScreen(notebookScreens[0]);
+    drawCaseScreen(notebookScreens[1]);
+    drawDecisionScreen(notebookScreens[2], lastValues, labels);
   }
   function drawRear() {
     rearScreens.forEach((screen, i) => drawStageScreen(screen, i));
@@ -426,8 +444,8 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     monitorGlow.intensity = lightBase.get(monitorGlow) * (1 + 1.4 * e + .4 * d);
     monitorWash.intensity = 34 * e + 2 * d;
     redWash.intensity = 14 * d * (1 - e);
-    const notebookGain = 1 + .9 * e + .2 * d, rearGain = (1 + .7 * d) * (1 - .25 * e);
-    for (const s of notebookScreens) s.material.color.copy(s.material.userData.base).multiplyScalar(notebookGain);
+    const islandGain = 1 + .35 * e + .15 * d, rearGain = (1 + .7 * d) * (1 - .25 * e);
+    for (const s of notebookScreens) s.material.color.copy(s.material.userData.base).multiplyScalar(islandGain);
     for (const s of rearScreens) s.material.color.copy(s.material.userData.base).multiplyScalar(rearGain);
     brandMaterial.color.copy(brandMaterial.userData.base).multiplyScalar((1 + .6 * d) * (1 - .35 * e));
     stripeRed.emissiveIntensity = 1.6 * d;
@@ -439,7 +457,11 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     floorUniforms.uScreenGain.value = rearGain;
     floorUniforms.uMonitorGain.value = 1 + 2.2 * e + .3 * d;
     floorUniforms.uBand.value = d;
-    floorUniforms.uDirectSpec.value = (1 - .8 * e) * (1 - .85 * d);
+    // Base .4: o brilho largo das luzes da cena (key quente, rim âmbar) lavava o epóxi de marrom.
+    floorUniforms.uDirectSpec.value = .4 * (1 - .8 * e) * (1 - .85 * d);
+    // As direcionais da cena (key, rim âmbar, kicker) foram feitas para o carro; no epóxi
+    // elas levantavam o preto. A sombra de contato mantém a proporção, só o nível desce.
+    floorUniforms.uDirectDiffuse.value = .36 * (1 - .4 * d);
   }
 
   // -------------------------------------------------------- oclusão por câmera
@@ -504,70 +526,150 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     panel(7.2, 1.2, [-.7, 1.8, -6.44], [-.7, 1.8, 0], '#35546c', .7);
     for (const x of rearScreenX) panel(1.5, .84, [x, 1.74, -6.38], [x, 1.74, 0], '#2a4760', 1.5);
     for (const z of MON_Z) panel(1.14, .64, [-4.7, 1.52, z], [0, 1.52, z], '#2c4b66', 1.7);
+    // Softbox âmbar alto atrás do carro: no verniz, o Fresnel o desenha como linha quente
+    // contínua no topo da carenagem e do halo (R10), sem luz pontual extra. Fica oculto no
+    // mapa do próprio box (o epóxi o espalharia como mancha marrom) e só entra no do carro.
+    panel(7.5, .38, [0, 3.35, -6.05], [0, .4, 0], '#ffa347', 5.5);
+    env.userData.carOnly = g.children[g.children.length - 1];
+    env.userData.carOnly.visible = false;
     panel(12, 2.2, [7.5, 1.5, 0], [0, 1.5, 0], '#5d7688', .75);
     panel(3.2, 1.6, [6, 6, 3], [0, .5, 0], '#ffc690', 2.4);
     panel(.4, .3, [LAMP.x + .35, 1.5, LAMP.z + .42], [LAMP.x + .35, 0, LAMP.z + .42], '#ffa24f', 10);
     return env;
   }
 
-  function drawNotebookScreen(screen, spec, index, values, labels) {
+  // Cabeçalho comum das telas da ilha: barra vermelha, título e rótulo à direita.
+  function screenHeader(ctx, W, s, title, tag) {
+    const m = 52 * s;
+    ctx.textBaseline = 'alphabetic';
+    ctx.textAlign = 'left';
+    ctx.fillStyle = RED;
+    ctx.fillRect(m, 40 * s, 12 * s, 66 * s);
+    ctx.fillStyle = '#eef3f6';
+    ctx.font = `${86 * s}px ${DISPLAY}`;
+    ctx.fillText(title, m + 30 * s, 104 * s);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#8ea6b4';
+    ctx.font = `${24 * s}px ${BODY}`;
+    setSpacing(ctx, 3 * s);
+    ctx.fillText(tag, W - m, 74 * s);
+    setSpacing(ctx, 0);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(210,228,240,.18)';
+    ctx.fillRect(m, 128 * s, W - 2 * m, 2 * s);
+    return m;
+  }
+
+  function drawSourceScreen(screen) {
     const {ctx, canvas, texture} = screen;
     const W = canvas.width, H = canvas.height, s = W / 1024;
     paintScreenBase(ctx, W, H);
-    const m = 52 * s;
-    ctx.fillStyle = RED;
-    ctx.fillRect(m, 46 * s, 12 * s, 70 * s);
-    ctx.fillStyle = '#f3f6f8';
-    ctx.font = `${96 * s}px ${DISPLAY}`;
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(spec.title.toUpperCase(), m + 30 * s, 114 * s);
-    ctx.textAlign = 'right';
-    ctx.fillStyle = '#7f98a8';
-    ctx.font = `${24 * s}px ${BODY}`;
-    setSpacing(ctx, 3 * s);
-    ctx.fillText(`CADERNO · ${String(index + 1).padStart(2, '0')}/03`, W - m, 78 * s);
-    setSpacing(ctx, 0);
-    ctx.textAlign = 'left';
-    ctx.fillStyle = 'rgba(210,228,240,.16)';
-    ctx.fillRect(m, 140 * s, W - 2 * m, 2 * s);
-
-    const raw = typeof values[spec.main] === 'string' ? values[spec.main].trim() : '';
-    if (!raw) {
-      ctx.fillStyle = '#6f8898';
-      ctx.font = `${58 * s}px ${BODY}`;
-      ctx.fillText(EMPTY, m, 222 * s);
-    } else if (spec.main === 'decision' && DECISIONS[raw]) {
-      ctx.fillStyle = '#f3f6f8';
-      ctx.font = `${128 * s}px ${DISPLAY}`;
-      ctx.fillText(DECISIONS[raw].toUpperCase(), m, 262 * s);
+    const m = screenHeader(ctx, W, s, 'REGISTRO DO TESTE', 'FONTE · 14/05/2026');
+    CASE_SOURCE.forEach((sentence, i) => {
+      const y = (190 + i * 92) * s;
       ctx.fillStyle = RED;
-      ctx.fillRect(m, 284 * s, 120 * s, 8 * s);
-    } else {
-      ctx.fillStyle = '#eef3f6';
-      ctx.font = `${56 * s}px ${BODY}`;
-      wrap(ctx, raw, W - 2 * m, 3).forEach((line, i) => ctx.fillText(line, m, (218 + i * 64) * s));
-    }
-
-    spec.rows.forEach((key, i) => {
-      const y = (382 + i * 72) * s;
-      const value = typeof values[key] === 'string' ? values[key].trim() : '';
-      ctx.fillStyle = '#7f98a8';
-      ctx.font = `${22 * s}px ${BODY}`;
-      setSpacing(ctx, 2.5 * s);
-      ctx.fillText(String(labels[key] || key).toUpperCase(), m, y);
-      setSpacing(ctx, 0);
-      ctx.fillStyle = value ? '#c9d6dd' : '#5f7684';
-      ctx.font = `${32 * s}px ${BODY}`;
-      ctx.fillText(value ? wrap(ctx, value, W - 2 * m, 1)[0] : EMPTY, m, y + 36 * s);
+      ctx.font = `${58 * s}px ${DISPLAY}`;
+      ctx.fillText(String(i + 1), m, y + 22 * s);
+      ctx.fillStyle = '#dfe7ec';
+      ctx.font = `${31 * s}px ${BODY}`;
+      wrap(ctx, sentence, W - 2 * m - 56 * s, 2).forEach((line, k) => ctx.fillText(line, m + 56 * s, y + k * 38 * s));
     });
+    ctx.fillStyle = '#8ea6b4';
+    ctx.font = `${24 * s}px ${BODY}`;
+    ctx.fillText('Caso fictício da aula · comunicado interno', m, 552 * s);
+    texture.needsUpdate = true;
+  }
 
-    ctx.fillStyle = 'rgba(210,228,240,.12)';
-    ctx.fillRect(m, 510 * s, W - 2 * m, 2 * s);
+  function drawCaseScreen(screen) {
+    const {ctx, canvas, texture} = screen;
+    const W = canvas.width, H = canvas.height, s = W / 1024;
+    paintScreenBase(ctx, W, H);
+    const m = screenHeader(ctx, W, s, 'COMUNICADO × REGISTRO', 'FRASE A FRASE');
+    const verdictX = W - m, textW = 560 * s;
+    CASE_CLAIMS.forEach((claim, i) => {
+      const top = (140 + i * 82) * s, mid = top + 41 * s;
+      if (i) { ctx.fillStyle = 'rgba(210,228,240,.08)'; ctx.fillRect(m, top, W - 2 * m, 2 * s); }
+      ctx.fillStyle = VERDICT[claim.tone];
+      ctx.fillRect(m, top + 14 * s, 6 * s, 54 * s);
+      ctx.fillStyle = '#8ea6b4';
+      ctx.font = `${44 * s}px ${DISPLAY}`;
+      ctx.fillText(String(i + 1), m + 22 * s, mid + 15 * s);
+      ctx.fillStyle = '#eef3f6';
+      ctx.font = `${31 * s}px ${BODY}`;
+      ctx.fillText(wrap(ctx, claim.text, textW, 1)[0], m + 62 * s, mid - 2 * s);
+      ctx.fillStyle = '#8ea6b4';
+      ctx.font = `${21 * s}px ${BODY}`;
+      ctx.fillText(claim.where, m + 62 * s, mid + 26 * s);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = VERDICT[claim.tone];
+      const two = claim.verdict.length > 1;
+      ctx.font = `${(two ? 34 : 48) * s}px ${DISPLAY}`;
+      claim.verdict.forEach((line, k) => ctx.fillText(line, verdictX, mid + (two ? (k ? 34 : -2) : 17) * s));
+      ctx.textAlign = 'left';
+    });
+    // Critério: a faixa inferior dá o veredito do conjunto.
+    const band = 474 * s;
+    ctx.fillStyle = 'rgba(217,33,53,.24)';
+    ctx.fillRect(m, band, W - 2 * m, 74 * s);
     ctx.fillStyle = RED;
-    ctx.beginPath(); ctx.arc(m + 7 * s, 540 * s, 6 * s, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#93a8b5';
-    ctx.font = `${26 * s}px ${BODY}`;
-    ctx.fillText('Registro do aluno · não verificado automaticamente', m + 26 * s, 549 * s);
+    ctx.fillRect(m, band, 10 * s, 74 * s);
+    ctx.fillStyle = '#eef3f6';
+    ctx.font = `${30 * s}px ${BODY}`;
+    setSpacing(ctx, 3 * s);
+    ctx.fillText('CRITÉRIO', m + 34 * s, band + 48 * s);
+    setSpacing(ctx, 0);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#ff5a69';
+    ctx.font = `${64 * s}px ${DISPLAY}`;
+    ctx.fillText('NÃO PASSOU', W - m - 24 * s, band + 60 * s);
+    ctx.textAlign = 'left';
+    texture.needsUpdate = true;
+  }
+
+  // Direita: o registro do aluno quando existe; sem registro, a consequência do critério no caso.
+  function drawDecisionScreen(screen, values, labels) {
+    const {ctx, canvas, texture} = screen;
+    const W = canvas.width, H = canvas.height, s = W / 1024;
+    paintScreenBase(ctx, W, H);
+    const filled = STUDENT_FIELDS.map(key => [key, typeof values[key] === 'string' ? values[key].trim() : '']).filter(([, v]) => v);
+    if (filled.length) {
+      const m = screenHeader(ctx, W, s, 'SEU REGISTRO', 'NÃO VERIFICADO AUTOMATICAMENTE');
+      let y = 186 * s;
+      for (const [key, value] of filled) {
+        ctx.fillStyle = '#8ea6b4';
+        ctx.font = `${22 * s}px ${BODY}`;
+        setSpacing(ctx, 2.5 * s);
+        ctx.fillText(String(labels[key] || key).toUpperCase(), m, y);
+        setSpacing(ctx, 0);
+        if (key === 'decision' && DECISIONS[value]) {
+          ctx.fillStyle = '#eef3f6';
+          ctx.font = `${72 * s}px ${DISPLAY}`;
+          ctx.fillText(DECISIONS[value].toUpperCase(), m, y + 70 * s);
+          y += 120 * s;
+        } else {
+          ctx.fillStyle = '#dfe7ec';
+          ctx.font = `${32 * s}px ${BODY}`;
+          const lines = wrap(ctx, value, W - 2 * m, 2);
+          lines.forEach((line, k) => ctx.fillText(line, m, y + (42 + k * 38) * s));
+          y += (70 + lines.length * 38) * s;
+        }
+      }
+      texture.needsUpdate = true;
+      return;
+    }
+    const m = screenHeader(ctx, W, s, 'DECISÃO', 'CRITÉRIO NÃO PASSOU');
+    ctx.fillStyle = '#eef3f6';
+    ctx.font = `${150 * s}px ${DISPLAY}`;
+    ctx.fillText('CORRIGIR', m, 290 * s);
+    ctx.fillStyle = RED;
+    ctx.fillRect(m, 314 * s, 140 * s, 8 * s);
+    ctx.fillStyle = '#dfe7ec';
+    ctx.font = `${32 * s}px ${BODY}`;
+    ctx.fillText('Retirar a causa e a data sem apoio.', m, 382 * s);
+    ctx.fillText('Manter data do teste, medianas e grupos.', m, 426 * s);
+    ctx.fillStyle = '#8ea6b4';
+    ctx.font = `${24 * s}px ${BODY}`;
+    ctx.fillText('Conferir de novo cada frase contra o registro.', m, 540 * s);
     texture.needsUpdate = true;
   }
 
@@ -679,7 +781,7 @@ function patchFloorReflection(material, uniforms, mobile) {
       .replace('#include <common>', `#include <common>
 varying vec3 vFloorPos;
 uniform vec3 uFloorCam;
-uniform float uLedGain, uScreenGain, uMonitorGain, uBand, uDirectSpec, uRoofOn, uRearOn;
+uniform float uLedGain, uScreenGain, uMonitorGain, uBand, uDirectSpec, uDirectDiffuse, uRoofOn, uRearOn;
 float floorRect(vec2 q, vec2 h, float blur) {
   vec2 d2 = abs(q) - h;
   float d = max(d2.x, d2.y);
@@ -688,7 +790,8 @@ float floorRect(vec2 q, vec2 h, float blur) {
       // Nos capítulos escuros o epóxi deixa de devolver o brilho das luzes diretas
       // da cena (rim/key): sobra só o reflexo das fontes do próprio box.
       .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
-reflectedLight.directSpecular *= uDirectSpec;`)
+reflectedLight.directSpecular *= uDirectSpec;
+reflectedLight.directDiffuse *= uDirectDiffuse;`)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
 {
   vec3 V = vFloorPos - uFloorCam;

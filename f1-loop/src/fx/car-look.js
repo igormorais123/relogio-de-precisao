@@ -5,7 +5,24 @@
 // parented to the rim's record root so they follow spin and the exploded view.
 import * as THREE from 'three';
 
-const PAINT = '#d92135';
+// Deep pigment: AgX desaturates bright reds toward salmon, so the albedo stays low and the
+// gloss comes from the clear coat, not from a broad base-layer specular.
+const PAINT = '#a3081c';
+// Punctual lights on a glassy coat read as isolated pin dots (plastic); long reflections
+// come from the environment strips instead.
+const COAT_DIRECT = .35;
+
+function paintShader(material) {
+  const previous = material.onBeforeCompile;
+  material.onBeforeCompile = (shader, renderer) => {
+    previous?.call(material, shader, renderer);
+    shader.fragmentShader = shader.fragmentShader.replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
+#ifdef USE_CLEARCOAT
+clearcoatSpecularDirect *= ${COAT_DIRECT.toFixed(3)};
+#endif`);
+  };
+  material.customProgramCacheKey = () => 'car-look-paint-v2';
+}
 
 // Varyings in object space: the pattern stays glued to the part while it spins or explodes.
 function localVaryings(shader, tag) {
@@ -141,13 +158,14 @@ export function enhanceCar({model, mechanics, mobile}) {
   for (const m of materials.values()) {
     if (!m.name.toLowerCase().startsWith('pintura') || !m.isMeshPhysicalMaterial) continue;
     m.color.set(PAINT);
-    m.roughness = .34;
+    m.roughness = .42;
     m.metalness = 0;
     m.clearcoat = 1;
-    m.clearcoatRoughness = .04; // sharp strip reflections without exposing facet ripples
+    m.clearcoatRoughness = .065; // long strip reflections, soft enough to hide facet ripples
     m.ior = 1.5;
-    m.specularIntensity = .6;
-    m.envMapIntensity = 1.55;
+    m.specularIntensity = .3;
+    m.envMapIntensity = 1.35;
+    paintShader(m);
     m.needsUpdate = true;
   }
 
