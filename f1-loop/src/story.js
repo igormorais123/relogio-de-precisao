@@ -68,11 +68,11 @@ const CAMERA=[
  // The monitor holds big and steady while its lesson plays (garage.setLessonProgress beats at 3.70 and
  // 3.77): the lens only creeps up (≈0.7 m), so it never stops and never pulls the screen around.
  [3.70,[-45,1.7,3],[-4.57,1.45,-1.5]],
- [3.82,[-52,1.4,3.7],[-4.57,1.45,-1.5]],
+ [3.80,[-52,1.4,3.7],[-4.57,1.45,-1.5]],
  // 05 Corrigir · box. The crane rises off the island in the last stretch and has the whole closed car
  // inside the reading zone from 3.96, when the 05 title opens, looking down on the revised floor; then
  // it pulls back while the body lifts (explode 3.95–4.2).
- [4.00,[-12,5.2,5.4],aim(-12,-.1,.35),.7],
+ [4.00,[-12,5.2,5.4],aim(-12,-.5,.35),.45],
  // Tilted ≈4° further down than the pull-back suggests: the rear-wall sign leaves the top edge.
  [4.25,[0,8.5,5.2],aim(0,.2,.3)],
  [4.50,[10,9,3.8],aim(10,.2,.4)],
@@ -194,7 +194,7 @@ export function sampleStory(progress){
 // (inside the box, this side of the circuit walls, short of the fog) and never goes past 1.5× it.
 // The Avaliar push-in stays on the monitor (its subject), and Corrigir's copy opens at 3.96.
 const PORTRAIT_FREE=[[0,0],[.52,0],[.58,1],[.94,1],[.99,0],[1.52,0],[1.58,1],[1.97,1],[2,0],[2.46,0],[2.5,1],[2.97,1],[3,0],[4.52,0],[4.58,1],[4.94,1],[4.99,0],[5,0]];
-const PORTRAIT_FILL=.62,PORTRAIT_WIDE=72,PORTRAIT_SWING=[[0,0],[.96,0],[1.1,1],[1.7,1],[1.82,0],[5,0]],PORTRAIT_TILT=[[0,0],[3.9,0],[4.05,1],[4.5,1],[4.58,0],[5,0]];
+const PORTRAIT_FILL=.62,PORTRAIT_WIDE=72,PORTRAIT_SWING=[[0,0],[.96,0],[1.1,1],[1.7,1],[1.82,0],[5,0]],PORTRAIT_TILT=[[0,.6],[.3,.6],[.45,0],[3.9,0],[4.05,1.5],[4.5,1.5],[4.58,0],[4.85,0],[5,.6]];
 const lens=(half,d,aspect)=>2*Math.atan(half/(PORTRAIT_FILL*aspect*d))/RAD;
 export function portraitFrame(pose,aspect=390/844){
  const p=pose.index+pose.local,free=scalar(PORTRAIT_FREE,p),explode=pose.explode||0;
@@ -206,10 +206,10 @@ export function portraitFrame(pose,aspect=390/844){
  // orbit runs ≈24° ahead of it (reading and the floor close), so the narrow frame leaves the rack out.
  const swing=scalar(PORTRAIT_SWING,p)*24*RAD,turn=(x,z,cx,cz)=>[cx+(x-cx)*Math.cos(swing)+(z-cz)*Math.sin(swing),cz-(x-cx)*Math.sin(swing)+(z-cz)*Math.cos(swing)];
  if(swing)[camera[0],camera[2]]=turn(camera[0],camera[2],target[0],target[2]);
- // The lifted portrait frame shows more of the rear wall: in Corrigir the lens rises ≈4° more so
- // the INTEIA sign leaves the top instead of sitting cut under the header logo.
+ // The lifted portrait frame shows more of the rear wall: in Corrigir and on the loop frame the lens
+ // rises ≈7° more so the INTEIA sign leaves the top instead of sitting cut under the header logo.
  const tilt=scalar(PORTRAIT_TILT,p);
- if(tilt)camera[1]+=Math.hypot(camera[0]-target[0],camera[2]-target[2])*Math.tan(4*RAD)*tilt;
+ if(tilt)camera[1]+=Math.hypot(camera[0]-target[0],camera[2]-target[2])*Math.tan(7*RAD)*tilt;
  let fov=2*Math.atan(Math.tan(pose.fov*1.32/2*RAD)*k/kd)/RAD,offsetY=.2*(1-free);
  if(free>0){
   const centre=[0,.5,0],v=pose.camera.map((x,i)=>x-centre[i]);
