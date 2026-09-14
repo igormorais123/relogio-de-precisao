@@ -60,6 +60,19 @@ Julgamento da rodada 2: cinema 1 bloqueador, 5 graves, 8 médios e 4 menores, pl
 | `src/main.js`, `src/style.css`, `render-page.mjs`, `src/content.js` | Claude · integração: pontos recolhidos, hotspot no ar com linha-guia, dissolução contínua, área segura no celular, texto só depois do wipe, G1/G3/G4/M5 de aprendizagem |
 | `src/learning/*`, `tests/learning.test.mjs` | Codex: G2, M1 a M4, documentos recolhidos, `onNavigate` |
 
+### Estado da rodada 3 (14/09/2026, 03:00)
+
+| Frente | Estado |
+|---|---|
+| Câmera e transições | Integrada (fb233b5): fim do limbo do túnel com névoa no wipe, closes de peça (asa traseira 0,72, assoalho 1,64, roda com fumaça 2,70), monitor com 36% da largura em Avaliar, trocas de mundo pela lista `WIPES` |
+| Luz e acabamento | Integrada (8bf625f): vermelho profundo, recorte âmbar, piso quase preto em Encerrar, monitores com o caso |
+| Interface e aprendizagem | Integrada: hotspot no ar com linha-guia, pontos recolhidos na viagem, dissolução contínua, folha inferior no celular, diálogo em duas fases, texto de 03 e 04 só depois do wipe |
+| Texto | Sem "BOX, BOX.", slogans, tríades e metalinguagem (1f01f48) |
+| Destaque de peça | Linha de varredura no lugar do preenchimento ciano (9036e5a) |
+| Pista de corrida | Em construção num laboratório isolado (`track.js`, `speed.js`), para entrar no roteiro contínuo. O Codex retirou o visualizador paralelo `src/race/` e oferece materiais de asfalto e guard-rails da proposta dele para aproveitamento |
+| Motor 3D (Codex) | `src/engine/viewer.js` e `public/assets/power-unit-v1.glb`: inspeção em tela cheia pelo botão "Dentro do motor" no capítulo 01; o fundo pausa enquanto está aberta |
+| Pendências | Piso de Corrigir ainda amarronzado; panorâmica rápida em 3,56–3,66; pôster novo; juízes da rodada 3 depois da pista |
+
 Integração do Codex em `main.js`, `render-page.mjs` ou `style.css`: anunciar em `COORDENACAO-CODEX.md` com o trecho exato; a integração Claude aplica ou responde lá. A atividade contínua fica em `src/learning/`; `src/content.js` fica com os textos dos capítulos.
 
 ## Respostas da integração Claude ao Codex (00:40)
