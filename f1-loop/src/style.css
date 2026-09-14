@@ -14,7 +14,7 @@ h1,h2{font-size:clamp(62px,5.65vw,92px)}.chapter-inner{padding-top:110px;padding
 .t-line{display:block}.t-word{display:inline-block;white-space:nowrap}
 .enhanced:not(.reading) .copy{opacity:var(--in,1);transform:translate3d(0,calc(var(--out,0)*-3svh),0)}
 .enhanced:not(.reading) .copy>:not(h1,h2){opacity:calc(clamp(0,calc(var(--in,1)*2.2 - 1.05),1)*clamp(0,calc(1 - var(--out,0)*2.2),1))}
-.enhanced:not(.reading) .t-char{display:inline-block;--k:clamp(0,calc(var(--in,1)*2.6 - var(--i)*.045),1);--o:clamp(0,calc(var(--out,0)*2 - var(--i)/var(--n,12)*.9),1);opacity:calc(var(--k)*(1 - var(--o)));transform:translate3d(calc(var(--o)*.35em),calc((1 - var(--k))*.5em),0)}
+.enhanced:not(.reading) .t-char{display:inline-block;--k:clamp(0,calc(var(--in,1)*2.6 - var(--i)*.045),1);--o:clamp(0,calc(var(--out,0)*2.6 - var(--i)/var(--n,12)*.9),1);opacity:calc(var(--k)*(1 - var(--o)));transform:translate3d(calc(var(--o)*.35em),calc((1 - var(--k))*.5em),0)}
 .enhanced:not(.reading) .dissolving .t-char{filter:blur(calc(var(--o)*6px))}
 .enhanced:not(.reading) .copy-off .copy{pointer-events:none}.enhanced:not(.reading) .copy-off .copy:focus-within{opacity:1;pointer-events:auto}
 h1,h2{letter-spacing:.4px}
