@@ -42,7 +42,7 @@ function paintCopy(){
 }
 function paint(){
  const p=targetP,index=Math.min(5,Math.floor(p)),local=p-index;
- if(index!==state.chapter){state.chapter=index;document.body.dataset.chapter=String(index);$$('.chapters-nav a').forEach((a,i)=>{if(i===index)a.setAttribute('aria-current','step');else a.removeAttribute('aria-current');});$('#scene-label').textContent=SCENE_LABELS[index];}
+ if(index!==state.chapter){state.chapter=index;if(!state.reading)$$('.lesson[open]').forEach(d=>d.open=false);document.body.dataset.chapter=String(index);$$('.chapters-nav a').forEach((a,i)=>{if(i===index)a.setAttribute('aria-current','step');else a.removeAttribute('aria-current');});$('#scene-label').textContent=SCENE_LABELS[index];}
  document.body.classList.toggle('arriving',index>0&&index<5&&local<.16);
  $('#progress-bar').style.transform=`scaleX(${Math.min(1,p/5)})`;
  if(!state.reading)paintCopy();
@@ -80,7 +80,7 @@ reduced.addEventListener('change',e=>setReading(e.matches));
 function openDialog(dialog){if(dialog.open)return;opener=document.activeElement;activeDialog=dialog;document.body.classList.add('modal-open');dialog.showModal();}
 function closeDialog(dialog){dialog.close();}
 $$('dialog').forEach(d=>{d.addEventListener('close',()=>{document.body.classList.remove('modal-open');activeDialog=null;opener?.focus({preventScroll:true});measure();});d.querySelector('[data-close]').onclick=()=>closeDialog(d);});
-function openLesson(index,fromLab){if(fromLab)document.getElementById(CHAPTERS[index].id).scrollIntoView();else learningLab.updateChapter(index);currentLesson=index;const c=CHAPTERS[index];$('#dialog-step').textContent=`0${index+1} / ${c.name}`;$('#dialog-title').textContent=c.title.replaceAll('\n',' ');$('#dialog-body').textContent=c.body;$('#dialog-f1').textContent=c.lesson;$('#dialog-source').textContent=c.sourceName+' ↗';$('#dialog-source').href=c.source;$('#question').textContent=c.question;$('#quick-label').textContent=c.prompt;$('#dialog-example').hidden=!c.example;$('#dialog-example').textContent=c.example||'';$('#quick-note').value=state.values[c.field]||'';$('#feedback').textContent='';$('#choices').replaceChildren();
+function openLesson(index,fromLab){if(fromLab)document.getElementById(CHAPTERS[index].id).scrollIntoView();else learningLab.updateChapter(index);currentLesson=index;const c=CHAPTERS[index];$('#dialog-step').textContent=`0${index+1} / ${c.name}`;$('#dialog-title').textContent=c.title.replaceAll('\n',' ');$('#dialog-body').textContent=c.body;$('#dialog-f1').textContent=c.lesson;$('#dialog-source').textContent=c.sourceName+' ↗';$('#dialog-source').href=c.source;$('#question').textContent=c.question;$('#quick-label').textContent=c.prompt;$('#dialog-example').hidden=!c.example||!learningLab.getState().completed.includes(index);$('#dialog-example').textContent=c.example||'';$('#quick-note').value=state.values[c.field]||'';$('#feedback').textContent='';$('#choices').replaceChildren();
  const choose=i=>{state.answers[c.id]=i;$$('#choices button').forEach((el,n)=>el.setAttribute('aria-pressed',String(n===i)));const result=assessChoice(c,i);$('#feedback').textContent=result.correct?result.message:`Reveja a decisão. A alternativa mais sustentada é “${c.choices[c.correct]}”. ${result.message}`;};
  c.choices.forEach((choice,i)=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.setAttribute('aria-pressed','false');b.onclick=()=>choose(i);$('#choices').append(b);});
  if(state.answers[c.id]!==undefined)choose(state.answers[c.id]);
@@ -91,6 +91,9 @@ function openLesson(index,fromLab){if(fromLab)document.getElementById(CHAPTERS[i
   input.id='extra-'+key;label.append(span,input);return label;}));
  openDialog($('#lesson-dialog'));}
 $$('[data-open]').forEach(b=>b.onclick=()=>openLesson(Number(b.dataset.open)));
+// The worked example is a model answer: it appears only after the student completes this chapter's practice step.
+$('#lesson-dialog').addEventListener('learning-action',()=>{$('#dialog-example').hidden=!CHAPTERS[currentLesson].example||!learningLab.getState().completed.includes(currentLesson);});
+$$('.lesson-close').forEach(b=>b.onclick=()=>{b.closest('details').open=false;});
 $('#hotspot').onclick=()=>{const index=Number($('#hotspot').dataset.index||0);if(index===3){$('#notebook').click();$('#field-evidence').focus();$('#field-evidence').scrollIntoView({block:'center'});}else openLesson(index);};
 $('#quick-note').addEventListener('input',e=>{state.values[CHAPTERS[currentLesson].field]=e.target.value;save();});
 $('#save-note').onclick=()=>{state.values[CHAPTERS[currentLesson].field]=$('#quick-note').value;if(save())closeDialog($('#lesson-dialog'));};
