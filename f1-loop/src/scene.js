@@ -97,6 +97,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   // Warm kicker from above and behind draws the hot edge along engine cover and halo (R10).
   const kicker = new THREE.DirectionalLight('#ffab66', 1.4);
   kicker.position.set(1.2, 6.5, -8);
+  const rimEdge = new THREE.Vector3(-.2, .75, -.63).normalize();
   scene.add(key, key.target, rim, front, hemi, kicker);
 
   const loader = new GLTFLoader();
@@ -304,14 +305,14 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     }
     scene.environment = r >= .5 && track.envTexture ? track.envTexture : (inTunnel ? envTunnel : envGarage).texture;
     tunnel?.setFlow(t);
-    garage.setMood({debrief: d, evaluate: v});
+    // Corrigir (≈3.9–4.75) gets its own light: fill down, blacks back to black, car the brightest thing.
+    const fix = smooth((p - 3.9) / .2) * (1 - smooth((p - 4.6) / .25));
+    garage.setMood({debrief: d, evaluate: v, fix, focus: pose.highlight || 0});
     garage.setLessonProgress(p);
     garage?.update(dt, camera, time);
     tunnel?.update(dt, camera, time);
 
     key.color.lerpColors(warmKey, coldKey, Math.max(t, r));
-    // Corrigir (≈3.9–4.75) gets its own light: fill down, blacks back to black, car the brightest thing.
-    const fix = smooth((pose.index + pose.local - 3.9) / .2) * (1 - smooth((pose.index + pose.local - 4.6) / .25));
     key.intensity = (3.1 - .8 * t) * (1 - .6 * d) * (1 - .65 * v) * (1 - .2 * fix) * e;
     rim.color.lerpColors(warmRim, coldRim, t);
     // Steep amber rim also lands on the floor: kept low in the box, the edge line comes from the coat.
@@ -329,6 +330,9 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       kicker.intensity = mix(kicker.intensity, .55 * e, r);
       scene.environmentIntensity = mix(scene.environmentIntensity, .95 * e, r);
     }
+    // The edge line is drawn in the car shaders from behind and above (car-look setRim): it outlines
+    // engine cover and halo without landing on the floor; cyan and fainter in the tunnel.
+    carLook.setRim(rim.color, mix((2.4 - 1.6 * t) * (1 + .25 * d), 1.2, r) * e, rimEdge);
     // Out early in the wipe: at half weight the cyan point light still lit the floor edge on the track.
     for (let i = 0; i < tunnelLights.length; i++) tunnelLights[i].intensity = tunnelLightBase[i] * (1 - smooth(r / .3));
     const g = t > 0 ? [0, 1].map(k => gradeGarage[k].map((v, i) => mix(v, gradeTunnel[k][i], t))) : gradeGarage.map((row, k) => row.map((v, i) => mix(v, gradeDebrief[k][i], d)));

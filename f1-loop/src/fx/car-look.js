@@ -1,5 +1,5 @@
 // Surface finish pass for the lesson car (paint depth, rims, brakes, tyre sidewalls).
-// Contract: enhanceCar({model, mechanics, mobile}) -> {update(dt, time, pose), race(speed, brake, time), dispose()}.
+// Contract: enhanceCar({model, mechanics, mobile}) -> {update(dt, time, pose), setRim(color, strength, direction), race(speed, brake, time), dispose()}.
 // Geometry and part names stay untouched: rims and tyres get procedural shading in their
 // own local frame (axle = local X), and each wheel gains one brake disc and one caliper
 // parented to the rim's record root so they follow spin and the exploded view.
@@ -11,6 +11,37 @@ const PAINT = '#a3081c';
 // Punctual lights on a glassy coat read as isolated pin dots (plastic); long reflections
 // come from the environment strips instead.
 const COAT_DIRECT = .35;
+
+// Warm rim edge (R10): a fresnel term gated by a light direction behind and above the car, so only
+// the edges facing it (engine cover, halo, sidepod shoulders) catch a thin amber line. Added to the
+// coat layer, whose own Fresnel would otherwise dim it at grazing angles. Car materials only: the
+// floor never receives it.
+// A thresholded edge, not a power falloff: on dark carbon and thin arms a soft falloff tinted whole
+// surfaces orange. The coat weight scales it (paint 1, carbon about a quarter).
+const RIM_CHUNK = `{
+  vec3 rimDir = normalize((viewMatrix * vec4(uRimDir, 0.)).xyz);
+  float rimEdge = smoothstep(uRimPower, 1., 1. - saturate(dot(geometryNormal, geometryViewDir)));
+  vec3 rimLight = uRimColor * (uRimStrength * rimEdge * rimEdge * smoothstep(.1, .75, dot(geometryNormal, rimDir)));
+#ifdef USE_CLEARCOAT
+  clearcoatSpecularDirect += rimLight;
+#else
+  reflectedLight.directSpecular += rimLight;
+#endif
+}
+#include <aomap_fragment>`;
+
+function rimPatch(material, uniforms) {
+  const previous = material.onBeforeCompile, key = material.customProgramCacheKey.bind(material);
+  material.onBeforeCompile = function (shader, renderer) {
+    previous?.call(this, shader, renderer);
+    Object.assign(shader.uniforms, uniforms);
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', '#include <common>\nuniform vec3 uRimColor, uRimDir;\nuniform float uRimStrength, uRimPower;')
+      .replace('#include <aomap_fragment>', RIM_CHUNK);
+  };
+  material.customProgramCacheKey = () => key() + '-rim-v1';
+  material.needsUpdate = true;
+}
 
 function paintShader(material) {
   const previous = material.onBeforeCompile;
@@ -184,6 +215,32 @@ export function enhanceCar({model, mechanics, mobile}) {
     m.needsUpdate = true;
   }
 
+  const rimUniforms = {uRimColor: {value: new THREE.Color('#ffa24a')}, uRimDir: {value: new THREE.Vector3(-.2, .75, -.63).normalize()}, uRimStrength: {value: 0}, uRimPower: {value: .72}};
+  for (const m of materials.values()) {
+    const name = m.name.toLowerCase();
+    if (m.isMeshPhysicalMaterial && (name.startsWith('pintura') || name === 'carbono')) rimPatch(m, rimUniforms);
+  }
+  // Sharing the mid-grey body carbon, the exploded floor read as a translucent editor selection:
+  // the floor parts get a darker, glossier copy (same program, own colour and coat).
+  let floorCarbon = null;
+  for (const r of mechanics.records) if (/^floor/.test(r.source)) r.root.traverse(o => {
+    if (!o.isMesh || Array.isArray(o.material) || o.material.name !== 'Carbono') return;
+    if (!floorCarbon) {
+      const source = o.material;
+      floorCarbon = source.clone();
+      floorCarbon.name = source.name;
+      floorCarbon.onBeforeCompile = source.onBeforeCompile;
+      floorCarbon.customProgramCacheKey = source.customProgramCacheKey;
+      floorCarbon.color.setScalar(.38);
+      floorCarbon.clearcoat = .45;
+      floorCarbon.clearcoatRoughness = .14;
+    }
+    o.material = floorCarbon;
+  });
+  // The thin nose antenna renders as a stray "/\" glyph on the nose at lesson distances. Moved off the
+  // camera layer: mechanics rewrites record visibility every frame.
+  model.traverse(o => { if (o.isMesh && o.name === 'antennas__04') o.layers.set(31); });
+
   // 2 + 3. Wheel-only material copies, shared by the four wheels (no extra draw calls).
   const owned = [], added = [], holders = [];
   const share = (source, setup) => {
@@ -249,6 +306,12 @@ export function enhanceCar({model, mechanics, mobile}) {
       if (first) { first = false; for (const mesh of added) mesh.castShadow = false; }
       for (const h of holders) h.holder.rotation.x = h.angle - h.wheel.spinPivot.rotation.x;
     },
+    // Rim edge: colour, strength (0 = off) and world direction towards the light.
+    setRim(color, strength, direction) {
+      rimUniforms.uRimColor.value.copy(color);
+      rimUniforms.uRimStrength.value = Math.max(0, strength);
+      rimUniforms.uRimDir.value.copy(direction).normalize();
+    },
     // Pista: speed 0..1 (pose.speed) e brake 0..1 (desaceleração). A luz de chuva pisca a 4 Hz com
     // o carro andando e fica acesa e mais forte na frenagem; os discos ganham brasa. Sem alocação.
     race(speed, brake, time) {
@@ -275,6 +338,7 @@ export function enhanceCar({model, mechanics, mobile}) {
       discGeo.dispose(); caliperGeo.dispose();
       discMaterial.map.dispose(); discMaterial.emissiveMap.dispose(); discMaterial.dispose(); caliperMaterial.dispose();
       for (const m of owned) m.dispose();
+      floorCarbon?.dispose();
     },
   };
 }

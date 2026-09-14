@@ -16,9 +16,12 @@ export function createHighlight(records, color) {
       void main(){
         // A thin scan line crossing the part carries the emphasis; the rim stays a faint trace because thin floor plates
         // have normals that make the whole surface read as rim, which looked like an editor selection.
-        float rim=pow(1.-abs(dot(normalize(vNormal),normalize(vView))),4.5);
-        float scan=smoothstep(.955,1.,fract(vWorld.z*1.2-uTime*.35));
-        float a=uAmount*(rim*.07+scan*.16);
+        // Additive fill over stacked floor plates read as a translucent cyan body: only grazing edges and
+        // one hairline sweep remain, front faces only.
+        float rim=smoothstep(.78,1.,1.-abs(dot(normalize(vNormal),normalize(vView))));
+        float s=fract(vWorld.z*1.2-uTime*.35);
+        float scan=smoothstep(.976,.992,s)*(1.-smoothstep(.992,1.,s));
+        float a=uAmount*(rim*.18+scan*.55)*float(gl_FrontFacing);
         gl_FragColor=vec4(uColor*a*1.6,1.);
       }`,
   });
