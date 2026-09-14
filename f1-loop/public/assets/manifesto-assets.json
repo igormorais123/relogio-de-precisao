@@ -318,6 +318,51 @@
       "path": "public/assets/box-aula-referencia.glb",
       "bytes": 10302288,
       "sha256": "b443c6e556e96d6c247dde32d0df9153d3fd0ec0e992329fd2a85dea6638e608"
+    },
+    {
+      "path": "public/assets/carro-aula-v2.glb",
+      "bytes": 2293292,
+      "sha256": "02bae139775f9c99f069e8ba664f4076cbbaaf8afdce6545a81afb77462ca245"
+    },
+    {
+      "path": "public/assets/carro-aula-v2.proveniencia.json",
+      "bytes": 7185,
+      "sha256": "8e78afd91287a812889fd7a642f1c6474fa4451bd13f82ec46ca3d3509177ef9"
+    },
+    {
+      "path": "public/assets/carro-aula-v2.validacao.json",
+      "bytes": 1041,
+      "sha256": "3e86b6f05580bb866f12472d6fad010a6b2058a3148a71eb2602eb1a2dbe0f03"
+    },
+    {
+      "path": "public/assets/carro-aula-mobile-v2.glb",
+      "bytes": 1406824,
+      "sha256": "00cf72ae674b5ba1b8579821540b9f07278b49de911df763f8a1c17e5d1073d8"
+    },
+    {
+      "path": "public/assets/carro-aula-mobile-v2.proveniencia.json",
+      "bytes": 7225,
+      "sha256": "3f48679fb70192d3a35c1d82781faeda80283489e59b0f41b6d14138cfee96c1"
+    },
+    {
+      "path": "public/assets/carro-aula-mobile-v2.validacao.json",
+      "bytes": 1048,
+      "sha256": "dd920c0e1346d75081b98b6c4e22c0f5db249cfdbf448b393ed9e21d213c7f82"
+    },
+    {
+      "path": "public/fonts/BebasNeue-Regular.woff2",
+      "bytes": 15268,
+      "sha256": "914585e10b8efc9a3f49c78d18c104cf517ec6c522e0daac9f934c1ff3bec625"
+    },
+    {
+      "path": "public/fonts/Lato-Regular.woff2",
+      "bytes": 52452,
+      "sha256": "9169940b79bd57989f014bd7d92413fc1c2b4a46f73b559e88af5f3166f99baf"
+    },
+    {
+      "path": "public/fonts/proveniencia-woff2.json",
+      "bytes": 2052,
+      "sha256": "ccf62301ba4dae7285bab7dcdfcb3c459a276120fbad577e743e3fa8a93cec61"
     }
   ],
   "unchangedCopies": [
@@ -331,7 +376,14 @@
     "three": "0.186.0",
     "meshoptimizerBuild": "1.1, bundled in installed Three.js",
     "simplifierSha256": "614402ffac05c8a40711f0d9a5d9a904dadc3ee2e7ed56d4568751dbd7fc8c35",
-    "runtimeDecoderRequired": false
+    "runtimeDecoderRequired": false,
+    "v2": {
+      "meshoptimizer": "1.2.0 (npm, fora do repositório)",
+      "sharp": "0.35.4 (npm, fora do repositório)",
+      "gltfTransformCliValidator": "@gltf-transform/cli 4.5.0 validate: 0 erros, 0 avisos nos dois v2",
+      "runtimeDecoderRequired": "MeshoptDecoder de three/addons/libs/meshopt_decoder.module.js",
+      "positionEncoding": "float32 + EXPONENTIAL (transforms dos nós intocados)"
+    }
   },
   "reproducibility": [
     {
@@ -340,15 +392,107 @@
       "sha256": "731a4346bff6f2d535a74d0dd292671782eca496600b6432e87e851dcf490259"
     },
     {
-      "path": "tools/verify-car.mjs",
-      "bytes": 5677,
-      "sha256": "c68e5d4c3708d806b2e03fb279fddf9853ebf7ee112c2d7280cbcb8622e8bf7c"
-    },
-    {
       "path": "tools/audit-assets.mjs",
       "bytes": 4791,
       "sha256": "326463ce0db9cdfaaf88f84de42bb71e9fca7902726b36cd7ae27ab8eb38ff93"
+    },
+    {
+      "path": "tools/optimize-car-v2.mjs",
+      "bytes": 17723,
+      "sha256": "a1a325bf213df13c2a85169ac68cdfd706bcb81b7a8f4756765d471b915cc694"
+    },
+    {
+      "path": "tools/verify-car.mjs",
+      "bytes": 8476,
+      "sha256": "9ef031717ff3bab00883f2fa4ea027ca598c23e0275b9ecc18affa3be0139e4b"
+    },
+    {
+      "path": "dev/assets-compare.html",
+      "bytes": 935,
+      "sha256": "943e6624b3201a9299ecc4e3bc8074ebf7708e119195140888989a2cefa9387a"
+    },
+    {
+      "path": "dev/assets-compare.js",
+      "bytes": 5465,
+      "sha256": "0d656203ee9d91c252fc63f1100d0b8d342f8764faca47ef118297119c3f0b33"
     }
   ],
-  "scope": "SHA-256 verifies the listed bytes only. It does not certify visual quality, licensing, physical fidelity or device performance."
+  "scope": "SHA-256 verifies the listed bytes only. It does not certify visual quality, licensing, physical fidelity or device performance.",
+  "updatedAt": "2026-09-14T02:56:53.538Z",
+  "v2VisualComparison": {
+    "capturedAt": "2026-09-14T02:55:45.221Z",
+    "page": "dev/assets-compare.html",
+    "renderer": "ANGLE (NVIDIA, NVIDIA GeForce RTX 3060 Ti (0x00002486) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+    "screenshots": "shots/assets/*.png (ignorado pelo git)",
+    "method": "Mesmo setupStudio/applyCarMaterials/applyInteiaBranding; diferença por pixel = máximo entre canais RGB",
+    "views": [
+      {
+        "set": "desktop",
+        "view": "hero",
+        "meanAbsDiff255": 0.059,
+        "pixelsOver16Percent": 0.016
+      },
+      {
+        "set": "desktop",
+        "view": "lado",
+        "meanAbsDiff255": 0.083,
+        "pixelsOver16Percent": 0.015
+      },
+      {
+        "set": "desktop",
+        "view": "decalque",
+        "meanAbsDiff255": 0.244,
+        "pixelsOver16Percent": 0.003
+      },
+      {
+        "set": "desktop",
+        "view": "volante",
+        "meanAbsDiff255": 0.138,
+        "pixelsOver16Percent": 0.026
+      },
+      {
+        "set": "desktop",
+        "view": "pneu",
+        "meanAbsDiff255": 0.138,
+        "pixelsOver16Percent": 0.017
+      },
+      {
+        "set": "desktop",
+        "view": "traseira",
+        "meanAbsDiff255": 0.04,
+        "pixelsOver16Percent": 0.014
+      },
+      {
+        "set": "desktop",
+        "view": "asa",
+        "meanAbsDiff255": 0.104,
+        "pixelsOver16Percent": 0.006
+      },
+      {
+        "set": "mobile",
+        "view": "hero",
+        "meanAbsDiff255": 0.059,
+        "pixelsOver16Percent": 0.018
+      },
+      {
+        "set": "mobile",
+        "view": "decalque",
+        "meanAbsDiff255": 0.225,
+        "pixelsOver16Percent": 0.003
+      },
+      {
+        "set": "mobile",
+        "view": "volante",
+        "meanAbsDiff255": 0.298,
+        "pixelsOver16Percent": 0.391
+      },
+      {
+        "set": "mobile",
+        "view": "pneu",
+        "meanAbsDiff255": 0.143,
+        "pixelsOver16Percent": 0.018
+      }
+    ],
+    "judgement": "Sem perda perceptível em pintura, carbono, pneus, volante/display e decalque nas vistas capturadas."
+  }
 }

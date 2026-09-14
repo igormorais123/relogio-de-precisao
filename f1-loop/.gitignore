@@ -3,3 +3,6 @@ dist/
 .local/
 
 .playwright-mcp/
+
+vite-dev.log
+shots/

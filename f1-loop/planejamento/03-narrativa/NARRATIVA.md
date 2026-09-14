@@ -67,7 +67,7 @@ O ciclo operacional é produzir → criticar → revisar → verificar. Prepara�
 
 **Três lições:** hipótese explícita; verificação adequada; orçamento definido.
 
-**Cena:** o assoalho é destacado no carro; uma linha discreta liga a peça à frase da hipótese. O resto permanece estável. O túnel aparece ao fundo como ambiente de exploração visual, sem mapa de pressão nem número de carga inventado.
+**Cena:** na bancada do box, o carro se abre em vista explodida vista do alto e só o assoalho recebe destaque; um hotspot "UMA MUDANÇA" marca a peça. O resto permanece estável. Sem mapa de pressão nem número de carga inventado.
 
 **Ação do aluno:** escrever “Se eu mudar X, espero observar Y; vou conferir com Z”. Definir um teto antes da geração. A sugestão didática é duas revisões ou dez minutos, ajustável pelo professor; não apresentar esse teto como duração real já consumida.
 
@@ -83,7 +83,7 @@ O ciclo operacional é produzir → criticar → revisar → verificar. Prepara�
 
 **Três lições:** produzir uma candidata; preservar a base; manter o escopo.
 
-**Cena:** vista explodida parcial; a peça em estudo se afasta e retorna. Um cartão “Base” continua visível enquanto surge “Candidata”. O movimento ilustra seleção e montagem; não representa a fabricação de uma geometria nova que o modelo não contém.
+**Cena:** um corte diagonal troca o box pelo túnel de ensaio; a câmera passa rente ao carro montado enquanto a fumaça contorna a carroceria, com o rótulo "visualização didática, não é CFD" no rodapé e no piso. O movimento ilustra a observação produzida por um teste; não mede o escoamento deste carro.
 
 **Ação do aluno:** executar o pedido na ferramenta de IA disponível, salvar a saída real e registrar o que mudou. O site só pode dizer que executou uma IA se houver integração real; copiar um prompt ou escolher um botão não é execução.
 
@@ -99,7 +99,7 @@ O ciclo operacional é produzir → criticar → revisar → verificar. Prepara�
 
 **Três lições:** crítico separado; evidência conferida; verificador com limites.
 
-**Cena:** passagem lateral lenta pelo carro no túnel. Ao lado, três campos independentes: “O que a imagem mostra”, “O que a fonte informa” e “O que foi verificado”. A fumaça pode ilustrar fluxo, mas não preenche automaticamente o campo de evidência.
+**Cena:** um segundo corte diagonal devolve o box; na estação de engenharia, o foco sai do carro, que fica desfocado em primeiro plano, e vai para três monitores com o registro do próprio aluno (critério, evidência, decisão). Campo vazio aparece como "sem registro". A imagem bonita do carro não é evidência.
 
 **Ação do aluno:** revisar afirmação por afirmação e registrar “Atende”, “Não atende” ou “Não verificado”. Explicar qual critério permite a classificação. Testar também a propriedade que deveria permanecer.
 
@@ -115,7 +115,7 @@ O ciclo operacional é produzir → criticar → revisar → verificar. Prepara�
 
 **Três lições:** revisar o necessário; verificar novamente; reverter regressões.
 
-**Cena:** retorno ao box; a peça destacada volta à posição de referência durante a comparação. Um painel liga cada alteração ao achado que a motivou. Não pintar o carro de verde por simples chegada do scroll.
+**Cena:** retorno ao carro no box; a carroceria se ergue e o mesmo assoalho da hipótese aparece destacado como peça revisada, rotulada como ilustração sem ganho aerodinâmico demonstrado. Não pintar o carro de verde por simples chegada do scroll.
 
 **Ação do aluno:** corrigir somente um achado confirmado ou justificar a aceitação sem revisão. Repetir a verificação que falhou e as verificações relevantes para o que já funcionava. Se o instrumento estiver errado, apresentar a evidência disso antes de mudar o critério.
 

@@ -1,0 +1,42 @@
+{
+  "createdAt": "2026-09-14T02:56:53.539Z",
+  "toolchain": {
+    "python": "3.14.6",
+    "fonttools": "4.63.0",
+    "brotli": "instalado no Python do sistema"
+  },
+  "coverage": "Basic Latin, Latin-1 Supplement, Latin Extended-A, General Punctuation (inclui – — ‘ ’ “ ” … •), €, setas U+2190–2199 e ↶; · × ° ª º estão no Latin-1",
+  "note": "Glifos ausentes no TTF de origem não podem ser criados pelo subconjunto; o navegador usa a fonte de fallback para eles. Kerning e recursos OpenType (GPOS/GSUB) preservados. TTF originais mantidos.",
+  "fonts": [
+    {
+      "source": "public/fonts/BebasNeue-Regular.ttf",
+      "output": "public/fonts/BebasNeue-Regular.woff2",
+      "bytesBefore": 61400,
+      "bytesAfter": 15268,
+      "sourceSha256": "08e4623805102d819f58601e46e345648846075e363b2ceb23313c2d1c83ec73",
+      "outputSha256": "914585e10b8efc9a3f49c78d18c104cf517ec6c522e0daac9f934c1ff3bec625",
+      "retainedCodepoints": 341,
+      "requestedButAbsentInSourceTtf": [
+        "→",
+        "↗",
+        "↓",
+        "↶",
+        "↑"
+      ],
+      "command": "py -m fontTools.subset public/fonts/BebasNeue-Regular.ttf --unicodes=\"U+0020-007E,U+00A0-00FF,U+0100-017F,U+2000-206F,U+20AC,U+2190-2199,U+21B6\" --layout-features=\"*\" --flavor=woff2 --output-file=public/fonts/BebasNeue-Regular.woff2"
+    },
+    {
+      "source": "public/fonts/Lato-Regular.ttf",
+      "output": "public/fonts/Lato-Regular.woff2",
+      "bytesBefore": 656568,
+      "bytesAfter": 52452,
+      "sourceSha256": "d636e4683231f931eda222d588e944d082bfd3bdba02f928bee461c0f185b251",
+      "outputSha256": "9169940b79bd57989f014bd7d92413fc1c2b4a46f73b559e88af5f3166f99baf",
+      "retainedCodepoints": 378,
+      "requestedButAbsentInSourceTtf": [
+        "↶"
+      ],
+      "command": "py -m fontTools.subset public/fonts/Lato-Regular.ttf --unicodes=\"U+0020-007E,U+00A0-00FF,U+0100-017F,U+2000-206F,U+20AC,U+2190-2199,U+21B6\" --layout-features=\"*\" --flavor=woff2 --output-file=public/fonts/Lato-Regular.woff2"
+    }
+  ]
+}

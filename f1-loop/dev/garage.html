@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Box procedural · pré-visualização</title>
+<style>
+@font-face{font-family:Bebas;src:url('/fonts/BebasNeue-Regular.woff2') format('woff2');font-display:block}
+@font-face{font-family:Lato;src:url('/fonts/Lato-Regular.woff2') format('woff2');font-display:block}
+html,body{margin:0;height:100%;background:#0b1014;overflow:hidden}
+canvas{display:block;width:100vw;height:100vh}
+#hud{position:fixed;left:12px;bottom:10px;font:11px/1.4 Lato,Arial,sans-serif;color:#8fa3ae;pointer-events:none;white-space:pre}
+body.clean #hud{display:none}
+</style>
+</head>
+<body>
+<div id="hud">carregando…</div>
+<script type="module" src="./garage-preview.js"></script>
+</body>
+</html>

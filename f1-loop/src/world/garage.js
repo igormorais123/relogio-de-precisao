@@ -1,0 +1,699 @@
+import * as THREE from 'three';
+import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
+import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
+import {drawBrand} from '../../materia-prima/modulos-atualizados/identity.js';
+import {createWipeClip} from '../fx/wipe-clip.js';
+
+// Box INTEIA procedural, derivado do box do laboratório (11 × 15 m).
+// Mundo frio e escuro (grafite, gelo apagado, LED frio no teto) com pontos
+// quentes de bancada (R10). A geometria estática é fundida por material; só
+// ficam separados os grupos cientes da câmera e as telas com CanvasTexture.
+// Carro, luz-chave com sombra, névoa e pós pertencem à cena principal.
+
+const DISPLAY = 'Bebas, "Bebas Neue", "Arial Narrow", Impact, sans-serif';
+const BODY = 'Lato, Arial, sans-serif';
+const RED = '#D92135';
+const STAGES = ['Preparar', 'Hipótese', 'Executar', 'Avaliar', 'Corrigir', 'Encerrar'];
+const DECISIONS = {aceitar: 'Aceitar', reverter: 'Reverter', revisar: 'Revisar', inconclusivo: 'Inconclusivo', 'decisao-necessaria': 'Decisão necessária'};
+const FALLBACK_LABELS = {task: 'Tarefa', reference: 'Fonte e versão de referência', criterion: 'Critério', hypothesis: 'Hipótese', test: 'Teste e limite', evidence: 'Evidência observada', correction: 'Correção e regressões', next: 'Pendência e próxima volta', decision: 'Decisão'};
+// Um monitor por pergunta do plano Avaliar; os demais campos entram como linhas de apoio.
+const NOTEBOOK_SCREENS = [
+  {title: 'Evidência', main: 'evidence', rows: ['test', 'hypothesis']},
+  {title: 'Critério', main: 'criterion', rows: ['task', 'reference']},
+  {title: 'Decisão', main: 'decision', rows: ['correction', 'next']},
+];
+const EMPTY = '— sem registro —';
+
+export function createGarage({renderer, scene, mobile = false} = {}) {
+  const root = new THREE.Group();
+  root.name = 'Box INTEIA (procedural)';
+  const clip = createWipeClip('garage');
+  const materials = new Set();
+  const textures = new Set();
+  const helper = new THREE.Object3D();
+  const maxAniso = Math.min(8, renderer?.capabilities?.getMaxAnisotropy?.() || 1);
+  let disposed = false;
+
+  // ---------------------------------------------------------------- materiais
+  const std = (color, roughness, metalness = 0, env = .55, extra = {}) => {
+    const m = new THREE.MeshStandardMaterial({color, roughness, metalness, ...extra});
+    m.userData.env = env;
+    materials.add(m);
+    return m;
+  };
+  const glow = (color, power) => {
+    const m = new THREE.MeshBasicMaterial({color: new THREE.Color(color).multiplyScalar(power)});
+    m.userData.noShadow = true;
+    m.userData.base = m.color.clone();
+    materials.add(m);
+    return m;
+  };
+  const grain = makeGrain(mobile ? 128 : 256);
+  textures.add(grain);
+  grain.repeat.set(7, 8);
+
+  const epoxy = std('#222a2f', .52, 0, .35, {roughnessMap: grain});
+  epoxy.userData.noShadow = true;
+  const bay = std('#14191c', .55, 0, .3, {roughnessMap: grain});
+  bay.userData.noShadow = true;
+  // Reflexo analítico no epóxi: o raio refletido é intersectado com os planos
+  // das luminárias, da faixa de LED traseira e das telas; o borrão cresce com
+  // a distância e a rugosidade, e a silhueta do carro bloqueia o reflexo.
+  const floorUniforms = {
+    uFloorCam: {value: new THREE.Vector3(5, 1.5, 5)},
+    uLedGain: {value: 1}, uScreenGain: {value: 1},
+    uRoofOn: {value: 1}, uRearOn: {value: 1},
+  };
+  for (const m of [epoxy, bay]) patchFloorReflection(m, floorUniforms, mobile);
+  const redPaint = std(RED, .42, .05, .5);
+  const plate = std('#2f363b', .55, .6, .35);
+  const graphite = std('#1d262d', .66, .08, .45);
+  const charcoal = std('#12181c', .5, .2, .5);
+  const black = std('#090c0f', .5, .15, .5);
+  const ice = std('#4a555d', .5, 0, .45);
+  const slat = std('#1a2126', .78, 0, .35);
+  const steel = std('#a3abb1', .3, 1, 1.0);
+  const benchTop = std('#555d63', .3, .85, .9);
+  const rubber = std('#131517', .86, 0, .35);
+  const ceiling = std('#0c1114', .92, 0, .25);
+  const drawer = std('#262e34', .45, .15, .55);
+  const ledCool = glow('#e6efff', 3.2);
+  const ledAmber = glow('#ffab5e', 6);
+  const ledRed = glow('#ff3347', 2.2);
+
+  // ------------------------------------------------------ geometria fundida
+  const bucketSet = () => ({map: new Map(), add(geo, mat) { if (!this.map.has(mat)) this.map.set(mat, []); this.map.get(mat).push(geo); }});
+  const STATIC = bucketSet(), REAR = bucketSet(), SIDE = bucketSet(), ROOF = bucketSet(), ENTRANCE = bucketSet();
+  const place = (geo, x, y, z, o = {}) => {
+    helper.position.set(x, y, z);
+    helper.rotation.set(o.rx || 0, o.ry || 0, o.rz || 0, o.order || 'XYZ');
+    helper.updateMatrix();
+    return geo.applyMatrix4(helper.matrix);
+  };
+  const box = (B, w, h, d, x, y, z, mat, o = {}) => {
+    const r = o.r && !mobile ? Math.min(o.r, w * .45, h * .45, d * .45) : 0;
+    B.add(place(r ? new RoundedBoxGeometry(w, h, d, 1, r) : new THREE.BoxGeometry(w, h, d), x, y, z, o), mat);
+  };
+  const cyl = (B, rt, rb, h, x, y, z, mat, o = {}) => B.add(place(new THREE.CylinderGeometry(rt, rb, h, o.seg || (mobile ? 10 : 18)), x, y, z, o), mat);
+  const tube = (B, points, r, mat, seg = 24) => {
+    const curve = new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p)));
+    B.add(new THREE.TubeGeometry(curve, mobile ? Math.max(4, seg >> 1) : seg, r, mobile ? 5 : 8, false), mat);
+  };
+  const detail = !mobile;
+
+  // ---------------------------------------------------------------- piso
+  // Epóxi contínuo avançando para o lado aberto (+X/+Z), onde a névoa o engole.
+  box(STATIC, 14.6, .1, 15.8, 1.7, -.054, 1.3, epoxy);
+  box(STATIC, 3.4, .004, 7.6, 0, -.002, 0, bay);
+  for (const x of [-1.77, 1.77]) box(STATIC, .04, .004, 8.24, x, 0, 0, redPaint);
+  for (const z of [-4.1, 4.1]) box(STATIC, 3.58, .004, .04, 0, 0, z, redPaint);
+  for (const x of [-1.05, 1.05]) for (const z of [-1.65, 1.65]) {
+    box(STATIC, .72, .006, .8, x, .001, z, plate);
+    if (detail) for (const dx of [-.3, .3]) for (const dz of [-.34, .34]) cyl(STATIC, .012, .012, .004, x + dx, .005, z + dz, black, {seg: 8});
+  }
+  for (const x of [-3.25, 3.25, 6.5]) box(STATIC, .01, .002, 15, x, -.004, 0, black);
+  for (const z of [-4.7, 4.7]) box(STATIC, 14, .002, .01, 1.5, -.004, z, black);
+
+  // ------------------------------------------------------- parede traseira
+  // Grafite modular com LED frio lavando o painel técnico; marca como letreiro.
+  const RZ = -6.5;
+  box(REAR, 11.2, 3.8, .14, 0, 1.9, RZ - .07, graphite);
+  for (let x = -4.55; x < 5.5; x += 1.3) box(REAR, .014, 3.6, .02, x, 1.9, RZ + .01, black);
+  box(REAR, 11.2, .16, .03, 0, .08, RZ + .015, black);
+  box(REAR, 11.2, .045, .02, 0, 2.6, RZ + .012, redPaint);
+  box(REAR, 7.3, 1.36, .05, -.7, 1.76, RZ + .025, charcoal, {r: .012});
+  box(REAR, 7.45, .06, .22, -.7, 2.47, RZ + .11, benchTop, {r: .01});
+  box(REAR, 7.2, .014, .05, -.7, 2.433, RZ + .17, ledCool);
+  for (const x of [-4.35, 2.95]) box(REAR, .05, .05, .2, x, 2.41, RZ + .1, steel);
+  for (const x of [3.75, 5.0]) box(REAR, 1.22, 2.9, .03, x, 1.72, RZ + .02, ice);
+  const rearScreenX = [-2.35, -.7, .95];
+  for (const x of rearScreenX) box(REAR, 1.56, .9, .05, x, 1.74, RZ + .075, black, {r: .01});
+
+  // ---------------------------------------------------------- parede lateral
+  // Painel acústico escuro atrás da ilha (monitores leem sobre fundo escuro);
+  // painéis gelo só na frente, fora do plano Avaliar.
+  const SX = -5.5;
+  box(SIDE, .14, 3.8, 13.3, SX - .07, 1.9, -.1, graphite);
+  box(SIDE, .03, .16, 13.3, SX + .015, .08, -.1, black);
+  box(SIDE, .02, .045, 13.3, SX + .012, 2.6, -.1, redPaint);
+  const slatStep = mobile ? .22 : .11;
+  for (let z = -3.9; z <= 1.2; z += slatStep) box(SIDE, .04, 2.3, .06, SX + .03, 1.35, z, slat);
+  box(SIDE, .05, .05, 5.25, SX + .03, 2.53, -1.35, charcoal);
+  box(SIDE, .012, .012, 5.1, SX + .045, 2.5, -1.35, ledCool);
+  // Eletrocalha da ilha, do piso à laje, presa à parede lateral.
+  box(SIDE, .09, 3.75, .09, SX + .25, 1.875, -3.72, charcoal);
+  for (const z of [2.15, 3.65, 5.15]) {
+    box(SIDE, .03, 2.5, 1.44, SX + .02, 1.5, z, ice);
+    box(SIDE, .07, .07, .28, SX + .06, .42, z, charcoal);
+    if (detail) box(SIDE, .02, .024, .06, SX + .1, .42, z, steel);
+  }
+
+  // ------------------------------------------------------------------ teto
+  // Laje escura (tudo que pende tem onde se prender), luminárias lineares frias.
+  box(ROOF, 11.4, .1, 13.6, 0, 3.8, -.1, ceiling);
+  for (const z of [-4.2, -1.8, .6, 3]) {
+    box(ROOF, 4.65, .07, .34, 0, 3.26, z, charcoal, {r: .015});
+    box(ROOF, 4.4, .012, .24, 0, 3.222, z, ledCool);
+    for (const x of [-2, 2]) cyl(ROOF, .006, .006, .46, x, 3.52, z, steel, {seg: 6});
+  }
+  for (const x of [-3.35, 3.35]) {
+    box(ROOF, .42, .12, 10, x, 3.5, -.45, charcoal, {r: .01});
+    if (detail) for (let z = -5; z < 4.6; z += .65) box(ROOF, .46, .02, .025, x, 3.57, z, steel);
+    for (const z of [-4, 0, 3]) cyl(ROOF, .01, .01, .2, x, 3.66, z, steel, {seg: 6});
+  }
+  const coil = [];
+  for (let i = 0; i < 150; i++) { const t = i / 149; coil.push([3.3 + Math.sin(t * 46) * .065, 3.46 - t * .9, -4.6 + Math.cos(t * 46) * .065]); }
+  tube(ROOF, [[3.3, 3.75, -4.6], ...coil], .011, redPaint, 220);
+
+  // -------------------------------------------------------- portal de entrada
+  for (const x of [-5.35, 5.35]) box(ENTRANCE, .22, 3.7, .24, x, 1.85, 5.6, charcoal);
+  box(ENTRANCE, 10.92, .24, .24, 0, 3.62, 5.6, charcoal);
+
+  // ------------------------------------------------ armários e bancada traseira
+  function cabinet(B, x, z, w = 1.35, facing = 1) {
+    box(B, w, .95, .72, x, .53, z, graphite, {r: .014});
+    box(B, w + .05, .065, .78, x, 1.035, z, benchTop, {r: .01});
+    const front = z + facing * .375;
+    for (let i = 0; i < 5; i++) {
+      box(B, w - .06, .135, .025, x, .21 + i * .16, front, drawer, {r: .006});
+      box(B, w - .2, .018, .022, x, .255 + i * .16, front + facing * .02, steel);
+    }
+    for (const dx of [-w * .38, w * .38]) for (const dz of [-.25, .25]) cyl(B, .026, .026, .1, x + dx, .05, z + dz, black, {seg: 8});
+  }
+  for (const x of [-3.5, -2.08, -.66, .76, 2.18]) cabinet(STATIC, x, -5.77);
+  // Armário alto de peças, no canto.
+  box(STATIC, .92, 2.25, .72, -4.72, 1.13, -5.77, graphite, {r: .014});
+  for (const x of [-4.945, -4.495]) {
+    box(STATIC, .43, 2.1, .03, x, 1.15, -5.395, drawer, {r: .006});
+    box(STATIC, .025, .3, .035, x + (x < -4.7 ? .15 : -.15), 1.2, -5.37, steel);
+    if (detail) for (let i = 0; i < 6; i++) box(STATIC, .28, .012, .006, x, .3 + i * .034, -5.378, black);
+  }
+
+  // Luminária de trabalho âmbar sobre a bancada (ponto quente do plano de abertura).
+  const LAMP = {x: -3.62, z: -5.95};
+  cyl(STATIC, .11, .12, .03, LAMP.x, 1.083, LAMP.z, black);
+  tube(STATIC, [[LAMP.x, 1.09, LAMP.z], [LAMP.x + .02, 1.45, LAMP.z - .02], [LAMP.x + .12, 1.72, LAMP.z + .12]], .012, charcoal, 12);
+  tube(STATIC, [[LAMP.x + .12, 1.72, LAMP.z + .12], [LAMP.x + .3, 1.66, LAMP.z + .32]], .012, charcoal, 6);
+  cyl(STATIC, .045, .11, .16, LAMP.x + .33, 1.6, LAMP.z + .36, black, {rx: .55, seg: 16});
+  cyl(STATIC, .085, .085, .006, LAMP.x + .35, 1.54, LAMP.z + .4, ledAmber, {rx: .55, seg: 16});
+
+  // ----------------------------------------------------- ilha de engenharia
+  const IX = -4.45;
+  const MON_Z = [-2.7, -1.35, 0];
+  const MON = {w: 1.14, h: .64, x: -4.72, y: 1.52};
+  box(STATIC, .9, .05, 4.5, IX, .755, -1.4, charcoal, {r: .01});
+  box(STATIC, .9, .012, 4.5, IX, .786, -1.4, benchTop);
+  for (const z of [-3.5, .7]) box(STATIC, .72, .73, .05, IX, .365, z, graphite);
+  box(STATIC, .03, .42, 4.1, IX - .38, .5, -1.4, graphite);
+  // Trilho de monitores apoiado em dois postes presos ao tampo.
+  for (const z of [-3.42, .62]) { cyl(STATIC, .028, .028, .96, -4.86, 1.27, z, steel); box(STATIC, .16, .02, .16, -4.86, .8, z, black); }
+  box(STATIC, .05, .07, 4.12, -4.86, 1.62, -1.4, steel, {r: .01});
+  for (const z of MON_Z) {
+    box(STATIC, .045, MON.h + .05, MON.w + .05, MON.x - .02, MON.y, z, black, {r: .01});
+    box(STATIC, .1, .08, .08, -4.8, 1.6, z, charcoal);
+    box(STATIC, .18, .02, .46, -4.08, .8, z, black, {r: .006});
+    if (detail) for (let row = 0; row < 4; row++) for (let col = 0; col < 12; col++) box(STATIC, .026, .006, .028, -4.14 + row * .038, .812, z - .205 + col * .037, charcoal);
+    box(STATIC, .2, .004, .22, -4.08, .794, z + .42, rubber);
+    box(STATIC, .06, .03, .1, -4.08, .81, z + .42, charcoal, {r: .012});
+  }
+  // Cadeiras recuadas, entre os monitores e abaixo da linha de visão do plano Avaliar.
+  for (const z of [-2.02, -.62]) {
+    const cx = -3.72;
+    box(STATIC, .46, .08, .46, cx, .5, z, charcoal, {r: .02});
+    box(STATIC, .07, .46, .44, cx + .27, .8, z, charcoal, {r: .02, rz: -.12});
+    cyl(STATIC, .03, .04, .38, cx, .27, z, steel);
+    for (const dz of [-.27, .27]) box(STATIC, .26, .035, .05, cx + .02, .66, z + dz, black, {r: .01});
+    for (let a = 0; a < 5; a++) {
+      const angle = a * Math.PI * 2 / 5 + .3, px = cx + Math.cos(angle) * .26, pz = z + Math.sin(angle) * .26;
+      box(STATIC, .27, .025, .04, cx + Math.cos(angle) * .13, .09, z + Math.sin(angle) * .13, steel, {ry: -angle});
+      cyl(STATIC, .035, .035, .04, px, .04, pz, rubber, {rz: Math.PI / 2, ry: -angle, order: 'YXZ', seg: 10});
+    }
+  }
+  // Luminária de mesa âmbar na ponta da ilha.
+  const DESK_LAMP = {x: -4.62, z: -3.55};
+  cyl(STATIC, .07, .08, .025, DESK_LAMP.x, .805, DESK_LAMP.z, black);
+  tube(STATIC, [[DESK_LAMP.x, .81, DESK_LAMP.z], [DESK_LAMP.x + .05, 1.18, DESK_LAMP.z + .02], [DESK_LAMP.x + .3, 1.3, DESK_LAMP.z + .12]], .01, charcoal, 12);
+  cyl(STATIC, .035, .075, .11, DESK_LAMP.x + .34, 1.26, DESK_LAMP.z + .13, black, {rz: -.5, seg: 14});
+  cyl(STATIC, .06, .06, .006, DESK_LAMP.x + .37, 1.21, DESK_LAMP.z + .14, ledAmber, {rz: -.5, seg: 14});
+
+  // ------------------------------------------------------ carrinho de ferramentas
+  const TX = 2.75, TZ = -3.85;
+  cabinet(STATIC, TX, TZ, 1.05, 1);
+  for (const x of [TX - .43, TX + .43]) for (const z of [TZ - .27, TZ + .27]) { cyl(STATIC, .065, .065, .045, x, .065, z, rubber, {rz: Math.PI / 2, seg: 12}); box(STATIC, .025, .09, .1, x, .13, z, steel); }
+  tube(STATIC, [[TX - .48, .72, TZ - .36], [TX - .48, 1.14, TZ - .36], [TX + .48, 1.14, TZ - .36], [TX + .48, .72, TZ - .36]], .016, steel, 16);
+  box(STATIC, .83, .012, .35, TX, 1.074, TZ + .03, rubber);
+  if (detail) for (let i = 0; i < 5; i++) { const x = TX - .28 + i * .14; cyl(STATIC, .022, .022, .038, x, 1.09, TZ - .22, steel, {seg: 10}); }
+  cyl(STATIC, .052, .048, .23, TX + .05, 1.13, TZ + .05, charcoal, {rz: Math.PI / 2});
+  box(STATIC, .05, .13, .07, TX + .05, 1.09, TZ + .05, redPaint, {r: .01});
+  tube(STATIC, [[TX + .05, 1.03, TZ + .05], [TX + .35, .45, TZ + .3], [TX + .6, .03, TZ + .2], [TX + .9, .03, TZ + .8], [TX + .5, .03, TZ + 1.3]], .012, black, 32);
+
+  // ------------------------------------------------------ prateleira de pneus
+  const RX = 4.45, RKZ = -5.0;
+  for (const x of [RX - .52, RX + .52]) for (const z of [RKZ - .53, RKZ + .53]) box(STATIC, .035, 2.35, .035, x, 1.175, z, steel);
+  const tireSeg = mobile ? 24 : 40;
+  const profile = [[.19, -.13], [.29, -.17], [.335, -.15], [.35, -.1], [.35, .1], [.335, .15], [.29, .17], [.19, .13], [.19, -.13]].map(p => new THREE.Vector2(...p));
+  for (const y of [.16, 1.22]) {
+    box(STATIC, 1.16, .035, 1.18, RX, y, RKZ, steel);
+    for (const dz of [-.29, .29]) {
+      STATIC.add(place(new THREE.LatheGeometry(profile, tireSeg), RX, y + .37, RKZ + dz, {rx: Math.PI / 2}), rubber);
+      STATIC.add(place(new THREE.TorusGeometry(.19, .014, 6, tireSeg), RX, y + .37, RKZ + dz + .075), steel);
+      if (detail) STATIC.add(place(new THREE.TorusGeometry(.3, .006, 4, tireSeg), RX, y + .37, RKZ + dz + .16), ledRed);
+    }
+  }
+  tube(STATIC, [[RX - .54, .18, RKZ - .54], [RX + .54, 2.3, RKZ - .54]], .012, steel, 4);
+  tube(STATIC, [[RX + .54, .18, RKZ - .54], [RX - .54, 2.3, RKZ - .54]], .012, steel, 4);
+
+  // --------------------------------------------------------------- macaco
+  // Encostado perto da parede lateral, fora da linha das câmeras em +X.
+  const JX = -4.7, JZ = 2.9;
+  box(STATIC, .54, .1, .55, JX, .12, JZ, charcoal, {r: .02});
+  for (const z of [JZ - .29, JZ + .29]) cyl(STATIC, .09, .09, .06, JX, .1, z, rubber, {rx: Math.PI / 2, seg: 14});
+  box(STATIC, .12, .055, .38, JX + .23, .24, JZ, steel, {r: .01});
+  box(STATIC, .1, .045, .22, JX + .27, .285, JZ, rubber, {r: .01});
+  tube(STATIC, [[JX - .2, .16, JZ], [JX - .42, .42, JZ], [JX - .72, 1.12, JZ]], .024, steel, 8);
+  box(STATIC, .09, .045, .38, JX - .72, 1.14, JZ, redPaint, {r: .01});
+
+  // ------------------------------------------------------------ montagem
+  const statics = new THREE.Group(); statics.name = 'Box · estático';
+  const rearWall = new THREE.Group(); rearWall.name = 'Box · parede traseira';
+  const sideWall = new THREE.Group(); sideWall.name = 'Box · parede lateral';
+  const roof = new THREE.Group(); roof.name = 'Box · teto';
+  const entrance = new THREE.Group(); entrance.name = 'Box · portal';
+  root.add(statics, rearWall, sideWall, roof, entrance);
+  build(STATIC, statics, true);
+  build(REAR, rearWall, false);
+  build(SIDE, sideWall, false);
+  build(ROOF, roof, false);
+  build(ENTRANCE, entrance, true);
+
+  function build(B, group, cast) {
+    for (const [mat, list] of B.map) {
+      const indexed = list.every(g => g.index);
+      const prepared = list.map(g => {
+        for (const key of Object.keys(g.attributes)) if (key !== 'position' && key !== 'normal' && key !== 'uv') g.deleteAttribute(key);
+        g.clearGroups();
+        return indexed || !g.index ? g : g.toNonIndexed();
+      });
+      const merged = mergeGeometries(prepared, false);
+      for (const g of new Set([...list, ...prepared])) g.dispose();
+      merged.computeBoundingSphere();
+      const mesh = new THREE.Mesh(merged, mat);
+      mesh.name = `${group.name} · ${mat.type}`;
+      mesh.castShadow = cast && !mat.userData.noShadow;
+      mesh.receiveShadow = !mat.isMeshBasicMaterial;
+      mesh.matrixAutoUpdate = false;
+      group.add(mesh);
+    }
+  }
+
+  // ----------------------------------------------------------------- telas
+  const screenGain = 1.5;
+  function makeScreen(parent, w, h, x, y, z, ry, cw, ch) {
+    const canvas = document.createElement('canvas');
+    canvas.width = cw; canvas.height = ch;
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = maxAniso;
+    textures.add(texture);
+    const material = new THREE.MeshBasicMaterial({map: texture, color: new THREE.Color(screenGain, screenGain, screenGain)});
+    material.userData.base = material.color.clone();
+    materials.add(material);
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), material);
+    mesh.position.set(x, y, z); mesh.rotation.y = ry;
+    parent.add(mesh);
+    return {canvas, ctx: canvas.getContext('2d'), texture, material, mesh};
+  }
+  const [cw, ch] = mobile ? [768, 432] : [1024, 576];
+  const notebookScreens = [...MON_Z].reverse().map(z => makeScreen(statics, MON.w, MON.h, MON.x + .004, MON.y, z, Math.PI / 2, cw, ch));
+  const rearScreens = rearScreenX.map(x => makeScreen(rearWall, 1.5, .84, x, 1.74, RZ + .102, 0, mobile ? 512 : 1024, mobile ? 288 : 576));
+
+  const brandCanvas = document.createElement('canvas');
+  [brandCanvas.width, brandCanvas.height] = mobile ? [1024, 200] : [2048, 400];
+  const brandTexture = new THREE.CanvasTexture(brandCanvas);
+  brandTexture.colorSpace = THREE.SRGBColorSpace;
+  brandTexture.anisotropy = maxAniso;
+  textures.add(brandTexture);
+  const brandMaterial = new THREE.MeshBasicMaterial({map: brandTexture, transparent: true, depthWrite: false, color: new THREE.Color(.95, .95, .95)});
+  materials.add(brandMaterial);
+  const brand = new THREE.Mesh(new THREE.PlaneGeometry(2.5, 2.5 * brandCanvas.height / brandCanvas.width), brandMaterial);
+  brand.name = 'INTEIA · marca';
+  brand.position.set(-2.2, 3.02, RZ + .03);
+  rearWall.add(brand);
+
+  // ------------------------------------------------------------------ luzes
+  // Sem sombra: a luz-chave com sombra é da cena principal.
+  const lights = new THREE.Group(); lights.name = 'Box · luzes práticas';
+  root.add(lights);
+  const overhead = new THREE.SpotLight('#cddbeb', 34, 9, .9, 1, 2);
+  overhead.position.set(0, 3.2, .2); overhead.target.position.set(0, 0, -.2);
+  const benchLamp = new THREE.SpotLight('#ff9a48', 24, 4.5, .95, .85, 2);
+  benchLamp.position.set(LAMP.x + .35, 1.53, LAMP.z + .42); benchLamp.target.position.set(LAMP.x + .7, 1.0, LAMP.z - .3);
+  // Luz de fundo dos monitores: lava o painel acústico em azul e recorta as telas.
+  const monitorGlow = new THREE.PointLight('#4f8ff0', 5, 3.4, 2);
+  monitorGlow.position.set(-5.08, 1.5, -1.35);
+  lights.add(overhead, overhead.target, benchLamp, benchLamp.target, monitorGlow);
+  let deskLamp = null;
+  if (!mobile) {
+    deskLamp = new THREE.PointLight('#ff9848', 2.2, 2.4, 2);
+    deskLamp.position.set(DESK_LAMP.x + .37, 1.17, DESK_LAMP.z + .14);
+    lights.add(deskLamp);
+  }
+  const lightBase = new Map([overhead, benchLamp, monitorGlow, deskLamp].filter(Boolean).map(l => [l, l.intensity]));
+
+  // --------------------------------------------------------- cena de ambiente
+  const envScene = buildEnvScene();
+  let envTarget = null;
+  if (renderer) {
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    envTarget = pmrem.fromScene(envScene, .025, .1, 60);
+    pmrem.dispose();
+  }
+  for (const m of materials) {
+    if (m.isMeshStandardMaterial) { m.envMap = envTarget?.texture || null; m.envMapIntensity = m.userData.env; }
+    clip.patch(m);
+  }
+
+  // --------------------------------------------------------------- desenho
+  let lastValues = {}, lastFields = [];
+  function setNotebook(values = {}, fields = []) {
+    lastValues = values || {};
+    lastFields = Array.isArray(fields) ? fields : [];
+    const labels = {...FALLBACK_LABELS};
+    for (const entry of lastFields) if (Array.isArray(entry) && entry[0]) labels[entry[0]] = entry[1] || labels[entry[0]] || entry[0];
+    notebookScreens.forEach((screen, i) => drawNotebookScreen(screen, NOTEBOOK_SCREENS[i], i, lastValues, labels));
+  }
+  function drawRear() {
+    rearScreens.forEach((screen, i) => drawStageScreen(screen, i));
+    drawBrand(brandCanvas.getContext('2d'), brandCanvas.width, brandCanvas.height, {light: true});
+    brandTexture.needsUpdate = true;
+  }
+  drawRear();
+  setNotebook({}, []);
+  if (typeof document !== 'undefined' && document.fonts?.load) {
+    Promise.all([document.fonts.load(`80px ${DISPLAY}`), document.fonts.load(`40px ${BODY}`)])
+      .then(() => { if (!disposed) { drawRear(); setNotebook(lastValues, lastFields); } })
+      .catch(() => {});
+  }
+
+  // ----------------------------------------------------------------- humor
+  const moodTargets = [...materials].filter(m => m.isMeshStandardMaterial);
+  function setMood({debrief = 0} = {}) {
+    const d = THREE.MathUtils.clamp(debrief, 0, 1);
+    ledCool.color.copy(ledCool.userData.base).multiplyScalar(1 - .88 * d);
+    overhead.intensity = lightBase.get(overhead) * (1 - .9 * d);
+    benchLamp.intensity = lightBase.get(benchLamp) * (1 - .55 * d);
+    if (deskLamp) deskLamp.intensity = lightBase.get(deskLamp) * (1 - .3 * d);
+    monitorGlow.intensity = lightBase.get(monitorGlow) * (1 + 1.8 * d);
+    for (const s of [...notebookScreens, ...rearScreens]) s.material.color.copy(s.material.userData.base).multiplyScalar(1 + .35 * d);
+    for (const m of moodTargets) m.envMapIntensity = m.userData.env * (1 - .65 * d);
+    floorUniforms.uLedGain.value = 1 - .88 * d;
+    floorUniforms.uScreenGain.value = 1 + .35 * d;
+  }
+
+  // -------------------------------------------------------- oclusão por câmera
+  const local = new THREE.Vector3();
+  function update(dt, camera) {
+    if (!camera) return;
+    root.updateWorldMatrix(true, false);
+    root.worldToLocal(local.copy(camera.getWorldPosition(local)));
+    rearWall.visible = local.z > RZ + .14;
+    sideWall.visible = local.x > SX + .14;
+    // A laje só aparece enquanto as duas paredes que a sustentam estão visíveis.
+    roof.visible = local.y < 3.1 && rearWall.visible && sideWall.visible;
+    entrance.visible = local.z < 5.3;
+    floorUniforms.uFloorCam.value.copy(local);
+    floorUniforms.uRoofOn.value = roof.visible ? 1 : 0;
+    floorUniforms.uRearOn.value = rearWall.visible ? 1 : 0;
+  }
+
+  function dispose() {
+    disposed = true;
+    root.removeFromParent();
+    root.traverse(o => { if (o.isMesh) o.geometry.dispose(); });
+    for (const m of materials) m.dispose();
+    for (const t of textures) t.dispose();
+    envTarget?.dispose();
+    envScene.traverse(o => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
+  }
+
+  scene?.add(root);
+  return {
+    root,
+    clip,
+    envScene,
+    anchors: {
+      monitors: new THREE.Vector3(MON.x, MON.y, MON_Z[1]),
+      rearScreens: new THREE.Vector3(rearScreenX[1], 1.74, RZ + .1),
+      brand: brand.position.clone(),
+    },
+    setNotebook,
+    setMood,
+    update,
+    dispose,
+  };
+
+  // ------------------------------------------------------------ utilitários
+  function buildEnvScene() {
+    // Sala escura com as fontes de luz do box, deslocada para o centro do carro.
+    const env = new THREE.Scene();
+    env.background = new THREE.Color('#0b1014');
+    const g = new THREE.Group(); g.position.y = -.55; env.add(g); g.updateMatrixWorld();
+    const room = new THREE.Mesh(new THREE.BoxGeometry(11.2, 3.8, 13.4), new THREE.MeshBasicMaterial({color: '#1a2731', side: THREE.BackSide}));
+    room.position.set(0, 1.9, -.1); g.add(room);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshBasicMaterial({color: '#12181c'}));
+    floor.rotation.x = -Math.PI / 2; floor.position.y = .01; g.add(floor);
+    const panel = (w, h, pos, look, color, power) => {
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({color: new THREE.Color(color).multiplyScalar(power), side: THREE.DoubleSide}));
+      mesh.position.set(...pos); mesh.lookAt(look[0], look[1] + g.position.y, look[2]);
+      g.add(mesh);
+    };
+    for (const z of [-4.2, -1.8, .6, 3]) panel(4.4, .26, [0, 3.2, z], [0, 0, z], '#eaf2ff', 6);
+    panel(7.2, .07, [-.7, 2.42, -6.3], [-.7, 2.42, 0], '#eaf2ff', 5);
+    panel(7.2, 1.2, [-.7, 1.8, -6.44], [-.7, 1.8, 0], '#35546c', .7);
+    for (const x of rearScreenX) panel(1.5, .84, [x, 1.74, -6.38], [x, 1.74, 0], '#2a4760', 1.5);
+    for (const z of MON_Z) panel(1.14, .64, [-4.7, 1.52, z], [0, 1.52, z], '#2c4b66', 1.7);
+    panel(12, 2.2, [7.5, 1.5, 0], [0, 1.5, 0], '#5d7688', .75);
+    panel(3.2, 1.6, [6, 6, 3], [0, .5, 0], '#ffc690', 2.4);
+    panel(.4, .3, [LAMP.x + .35, 1.5, LAMP.z + .42], [LAMP.x + .35, 0, LAMP.z + .42], '#ffa24f', 10);
+    return env;
+  }
+
+  function drawNotebookScreen(screen, spec, index, values, labels) {
+    const {ctx, canvas, texture} = screen;
+    const W = canvas.width, H = canvas.height, s = W / 1024;
+    paintScreenBase(ctx, W, H);
+    const m = 52 * s;
+    ctx.fillStyle = RED;
+    ctx.fillRect(m, 46 * s, 12 * s, 70 * s);
+    ctx.fillStyle = '#f3f6f8';
+    ctx.font = `${96 * s}px ${DISPLAY}`;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(spec.title.toUpperCase(), m + 30 * s, 114 * s);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = '#7f98a8';
+    ctx.font = `${24 * s}px ${BODY}`;
+    setSpacing(ctx, 3 * s);
+    ctx.fillText(`CADERNO · ${String(index + 1).padStart(2, '0')}/03`, W - m, 78 * s);
+    setSpacing(ctx, 0);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(210,228,240,.16)';
+    ctx.fillRect(m, 140 * s, W - 2 * m, 2 * s);
+
+    const raw = typeof values[spec.main] === 'string' ? values[spec.main].trim() : '';
+    if (!raw) {
+      ctx.fillStyle = '#6f8898';
+      ctx.font = `${58 * s}px ${BODY}`;
+      ctx.fillText(EMPTY, m, 222 * s);
+    } else if (spec.main === 'decision' && DECISIONS[raw]) {
+      ctx.fillStyle = '#f3f6f8';
+      ctx.font = `${128 * s}px ${DISPLAY}`;
+      ctx.fillText(DECISIONS[raw].toUpperCase(), m, 262 * s);
+      ctx.fillStyle = RED;
+      ctx.fillRect(m, 284 * s, 120 * s, 8 * s);
+    } else {
+      ctx.fillStyle = '#eef3f6';
+      ctx.font = `${56 * s}px ${BODY}`;
+      wrap(ctx, raw, W - 2 * m, 3).forEach((line, i) => ctx.fillText(line, m, (218 + i * 64) * s));
+    }
+
+    spec.rows.forEach((key, i) => {
+      const y = (382 + i * 72) * s;
+      const value = typeof values[key] === 'string' ? values[key].trim() : '';
+      ctx.fillStyle = '#7f98a8';
+      ctx.font = `${22 * s}px ${BODY}`;
+      setSpacing(ctx, 2.5 * s);
+      ctx.fillText(String(labels[key] || key).toUpperCase(), m, y);
+      setSpacing(ctx, 0);
+      ctx.fillStyle = value ? '#c9d6dd' : '#5f7684';
+      ctx.font = `${32 * s}px ${BODY}`;
+      ctx.fillText(value ? wrap(ctx, value, W - 2 * m, 1)[0] : EMPTY, m, y + 36 * s);
+    });
+
+    ctx.fillStyle = 'rgba(210,228,240,.12)';
+    ctx.fillRect(m, 510 * s, W - 2 * m, 2 * s);
+    ctx.fillStyle = RED;
+    ctx.beginPath(); ctx.arc(m + 7 * s, 540 * s, 6 * s, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#93a8b5';
+    ctx.font = `${26 * s}px ${BODY}`;
+    ctx.fillText('Registro do aluno · não verificado automaticamente', m + 26 * s, 549 * s);
+    texture.needsUpdate = true;
+  }
+
+  function drawStageScreen(screen, index) {
+    const {ctx, canvas, texture} = screen;
+    const W = canvas.width, H = canvas.height, s = W / 1024;
+    paintScreenBase(ctx, W, H);
+    const m = 52 * s;
+    ctx.fillStyle = '#7f98a8';
+    ctx.font = `${24 * s}px ${BODY}`;
+    setSpacing(ctx, 4 * s);
+    ctx.fillText('LOOP DE ENGENHARIA', m, 70 * s);
+    ctx.textAlign = 'right';
+    ctx.fillText(`${index + 1}/3`, W - m, 70 * s);
+    ctx.textAlign = 'left';
+    setSpacing(ctx, 0);
+    for (let k = 0; k < 2; k++) {
+      const n = index * 2 + k, y = (238 + k * 206) * s;
+      ctx.fillStyle = 'rgba(210,228,240,.14)';
+      ctx.fillRect(m, y - 150 * s, W - 2 * m, 2 * s);
+      ctx.fillStyle = RED;
+      ctx.font = `${150 * s}px ${DISPLAY}`;
+      ctx.fillText(String(n + 1).padStart(2, '0'), m, y + 8 * s);
+      ctx.fillStyle = '#f0f4f6';
+      ctx.font = `${124 * s}px ${DISPLAY}`;
+      ctx.fillText(STAGES[n].toUpperCase(), m + 190 * s, y);
+    }
+    texture.needsUpdate = true;
+  }
+}
+
+function paintScreenBase(ctx, W, H) {
+  const g = ctx.createLinearGradient(0, 0, W * .3, H);
+  g.addColorStop(0, '#10202c');
+  g.addColorStop(1, '#070e14');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(120,170,205,.035)';
+  for (let y = 0; y < H; y += Math.max(2, Math.round(H / 144))) ctx.fillRect(0, y, W, 1);
+}
+
+function setSpacing(ctx, px) {
+  if ('letterSpacing' in ctx) ctx.letterSpacing = `${px}px`;
+}
+
+function wrap(ctx, text, maxWidth, maxLines) {
+  const words = String(text).slice(0, 800).replace(/\s+/g, ' ').trim().split(' ').filter(Boolean);
+  const lines = [];
+  let line = '';
+  for (let word of words) {
+    while (ctx.measureText(word).width > maxWidth && word.length > 1) {
+      let k = word.length - 1;
+      while (k > 1 && ctx.measureText(word.slice(0, k)).width > maxWidth) k--;
+      if (line) { lines.push(line); line = ''; }
+      lines.push(word.slice(0, k));
+      word = word.slice(k);
+    }
+    const candidate = line ? `${line} ${word}` : word;
+    if (ctx.measureText(candidate).width <= maxWidth) line = candidate;
+    else { lines.push(line); line = word; }
+    if (lines.length > maxLines) break;
+  }
+  if (line) lines.push(line);
+  if (lines.length > maxLines) {
+    lines.length = maxLines;
+    let last = lines[maxLines - 1];
+    while (last && ctx.measureText(`${last}…`).width > maxWidth) last = last.slice(0, -1);
+    lines[maxLines - 1] = `${last.trimEnd()}…`;
+  }
+  return lines;
+}
+
+function makeGrain(size) {
+  // Grão fino + manchas largas: o epóxi reflete de forma desigual, como piso usado.
+  const canvas = document.createElement('canvas');
+  canvas.width = canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  const image = ctx.createImageData(size, size);
+  let seed = 7919;
+  const rand = () => (seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296;
+  for (let i = 0; i < image.data.length; i += 4) {
+    const v = 178 + rand() * 50;
+    image.data[i] = image.data[i + 1] = image.data[i + 2] = v;
+    image.data[i + 3] = 255;
+  }
+  ctx.putImageData(image, 0, 0);
+  for (let i = 0; i < 14; i++) {
+    const x = rand() * size, y = rand() * size, r = size * (.12 + rand() * .25);
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    const light = rand() > .5;
+    g.addColorStop(0, light ? 'rgba(255,255,255,.1)' : 'rgba(90,90,90,.1)');
+    g.addColorStop(1, 'rgba(128,128,128,0)');
+    ctx.fillStyle = g;
+    for (const ox of [-size, 0, size]) for (const oy of [-size, 0, size]) { ctx.save(); ctx.translate(ox, oy); ctx.fillRect(x - r, y - r, 2 * r, 2 * r); ctx.restore(); }
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+  texture.anisotropy = 4;
+  return texture;
+}
+
+function patchFloorReflection(material, uniforms, mobile) {
+  material.onBeforeCompile = shader => {
+    Object.assign(shader.uniforms, uniforms);
+    shader.vertexShader = shader.vertexShader
+      .replace('#include <common>', '#include <common>\nvarying vec3 vFloorPos;')
+      .replace('#include <project_vertex>', '#include <project_vertex>\nvFloorPos = transformed;');
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <common>', `#include <common>
+varying vec3 vFloorPos;
+uniform vec3 uFloorCam;
+uniform float uLedGain, uScreenGain, uRoofOn, uRearOn;
+float floorRect(vec2 q, vec2 h, float blur) {
+  vec2 d2 = abs(q) - h;
+  float d = max(d2.x, d2.y);
+  return (1.0 - smoothstep(-blur, blur, d)) * clamp(min(h.x, h.y) / blur, 0.0, 1.0);
+}`)
+      .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
+{
+  vec3 V = vFloorPos - uFloorCam;
+  if (V.y < -1e-4) {
+    V = normalize(V);
+    vec3 R = vec3(V.x, -V.y, V.z);
+    float spread = .075 + roughnessFactor * .06;
+    float breakup = .75 + .5 * (roughnessFactor / max(roughness, 1e-3) - .8);
+    float F = .04 + .96 * pow(1. - clamp(-V.y, 0., 1.), 5.);
+    vec3 glowSum = vec3(0.);
+    float tc = (3.222 - vFloorPos.y) / R.y;
+    vec2 hc = vFloorPos.xz + R.xz * tc;
+    float bc = .015 + tc * spread;
+    float strips = floorRect(hc - vec2(0., -4.2), vec2(2.2, .12), bc) + floorRect(hc - vec2(0., -1.8), vec2(2.2, .12), bc)
+                 + floorRect(hc - vec2(0., .6), vec2(2.2, .12), bc) + floorRect(hc - vec2(0., 3.), vec2(2.2, .12), bc);
+    glowSum += vec3(.93, 1., 1.1) * 3.2 * uLedGain * uRoofOn * strips;
+    if (R.z < -1e-3) {
+      float tr = (-6.33 - vFloorPos.z) / R.z;
+      vec2 hr = vec2(vFloorPos.x + R.x * tr, vFloorPos.y + R.y * tr);
+      float br = .015 + tr * spread;
+      glowSum += vec3(.93, 1., 1.1) * 3.2 * uLedGain * uRearOn * floorRect(hr - vec2(-.7, 2.433), vec2(3.6, .03), br);
+#ifndef FLOOR_MOBILE
+      float rs = floorRect(hr - vec2(-2.35, 1.74), vec2(.75, .42), br) + floorRect(hr - vec2(-.7, 1.74), vec2(.75, .42), br) + floorRect(hr - vec2(.95, 1.74), vec2(.75, .42), br);
+      glowSum += vec3(.05, .12, .22) * uScreenGain * uRearOn * rs;
+#endif
+    }
+    if (R.x < -1e-3 && vFloorPos.x > -4.7) {
+      float tm = (-4.716 - vFloorPos.x) / R.x;
+      vec2 hm = vec2(vFloorPos.z + R.z * tm, vFloorPos.y + R.y * tm);
+      float bm = .015 + tm * spread;
+      float ms = floorRect(hm - vec2(0., 1.52), vec2(.57, .32), bm) + floorRect(hm - vec2(-1.35, 1.52), vec2(.57, .32), bm) + floorRect(hm - vec2(-2.7, 1.52), vec2(.57, .32), bm);
+      glowSum += vec3(.06, .13, .24) * uScreenGain * ms;
+    }
+    // O carro (x ±0,92; z ±2,56) bloqueia o que estaria atrás dele no reflexo.
+    float tk = (.55 - vFloorPos.y) / R.y;
+    vec2 kp = vFloorPos.xz + R.xz * tk;
+    float carBlock = floorRect(kp, vec2(.9, 2.55), .12);
+    totalEmissiveRadiance += glowSum * F * breakup * 1.3 * (1. - carBlock);
+  }
+}`);
+    if (mobile) shader.fragmentShader = '#define FLOOR_MOBILE\n' + shader.fragmentShader;
+  };
+  material.customProgramCacheKey = () => `garage-floor-v1${mobile ? '-m' : ''}`;
+}
