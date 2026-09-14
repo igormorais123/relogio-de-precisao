@@ -1,5 +1,5 @@
 // Surface finish pass for the lesson car (paint depth, rims, brakes, tyre sidewalls).
-// Contract: enhanceCar({model, mechanics, mobile}) -> {update(dt, time, pose), setRim(color, strength, direction), race(speed, brake, time), dispose()}.
+// Contract: enhanceCar({model, mechanics, mobile}) -> {update(dt, time, pose), setRim(color, strength, direction, edge), race(speed, brake, time), dispose()}.
 // Geometry and part names stay untouched: rims and tyres get procedural shading in their
 // own local frame (axle = local X), and each wheel gains one brake disc and one caliper
 // parented to the rim's record root so they follow spin and the exploded view.
@@ -21,7 +21,10 @@ const COAT_DIRECT = .35;
 const RIM_CHUNK = `{
   vec3 rimDir = normalize((viewMatrix * vec4(uRimDir, 0.)).xyz);
   float rimEdge = smoothstep(uRimPower, 1., 1. - saturate(dot(geometryNormal, geometryViewDir)));
-  vec3 rimLight = uRimColor * (uRimStrength * rimEdge * rimEdge * smoothstep(.1, .75, dot(geometryNormal, rimDir)));
+  // Low edges stay out: from the low lateral track take the floor plank's upper face grazes the lens and
+  // read as a gold neon line under the car. World height from the view-space position.
+  float rimHeight = (transpose(mat3(viewMatrix)) * (-vViewPosition) + cameraPosition).y;
+  vec3 rimLight = uRimColor * (uRimStrength * rimEdge * rimEdge * smoothstep(.1, .75, dot(geometryNormal, rimDir)) * smoothstep(.16, .34, rimHeight));
 #ifdef USE_CLEARCOAT
   clearcoatSpecularDirect += rimLight;
 #else
@@ -306,11 +309,13 @@ export function enhanceCar({model, mechanics, mobile}) {
       if (first) { first = false; for (const mesh of added) mesh.castShadow = false; }
       for (const h of holders) h.holder.rotation.x = h.angle - h.wheel.spinPivot.rotation.x;
     },
-    // Rim edge: colour, strength (0 = off) and world direction towards the light.
-    setRim(color, strength, direction) {
+    // Rim edge: colour, strength (0 = off), world direction towards the light and edge threshold
+    // (1 − N·V where the line starts: lower is a wider band).
+    setRim(color, strength, direction, edge = .72) {
       rimUniforms.uRimColor.value.copy(color);
       rimUniforms.uRimStrength.value = Math.max(0, strength);
       rimUniforms.uRimDir.value.copy(direction).normalize();
+      rimUniforms.uRimPower.value = edge;
     },
     // Pista: speed 0..1 (pose.speed) e brake 0..1 (desaceleração). A luz de chuva pisca a 4 Hz com
     // o carro andando e fica acesa e mais forte na frenagem; os discos ganham brasa. Sem alocação.

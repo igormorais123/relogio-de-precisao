@@ -99,7 +99,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   // Warm kicker from above and behind draws the hot edge along engine cover and halo (R10).
   const kicker = new THREE.DirectionalLight('#ffab66', 1.4);
   kicker.position.set(1.2, 6.5, -8);
-  const rimEdge = new THREE.Vector3(-.2, .75, -.63).normalize();
+  const rimEdge = new THREE.Vector3(-.2, .75, -.63).normalize(), rimBack = new THREE.Vector3();
   scene.add(key, key.target, rim, front, hemi, kicker);
 
   const loader = new GLTFLoader();
@@ -310,7 +310,9 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     // Corrigir (≈3.9–4.75) gets its own light: fill down, blacks back to black, car the brightest thing.
     const fix = smooth((p - 3.9) / .2) * (1 - smooth((p - 4.6) / .25));
     // The box floor stays near black from Corrigir through Encerrar (4.4–5.0), with no lift between the two moods.
-    garage.setMood({debrief: d, evaluate: v, fix: Math.max(fix, smooth((p - 4.3) / .15)), focus: pose.highlight || 0});
+    // Rear-wing close (≈0.72): a grazing warm backlight draws wing and engine cover, the bay line calms down.
+    const rearClose = smooth((p - .56) / .1) * (1 - smooth((p - .84) / .08));
+    garage.setMood({debrief: d, evaluate: v, fix: Math.max(fix, smooth((p - 4.3) / .15)), focus: Math.max(pose.highlight || 0, .55 * rearClose), monitor: pose.monitorScene || 0});
     garage.setLessonProgress(p, pose.monitorReading);
     garage?.update(dt, camera, time);
     tunnel?.update(dt, camera, time);
@@ -335,7 +337,9 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     }
     // The edge line is drawn in the car shaders from behind and above (car-look setRim): it outlines
     // engine cover and halo without landing on the floor; cyan and fainter in the tunnel.
-    carLook.setRim(rim.color, mix((2.4 - 1.6 * t) * (1 + .25 * d), 1.2, r) * e, rimEdge);
+    // In the close the edge light comes from beyond the subject (camera forward, lifted), wider and stronger.
+    if (rearClose > 0) rimBack.subVectors(target, camera.position).normalize().setY(.9).normalize().lerp(rimEdge, 1 - rearClose);
+    carLook.setRim(rim.color, mix((2.4 - 1.6 * t) * (1 + .25 * d) * (1 + 3.5 * rearClose), 1.2, r) * e, rearClose > 0 ? rimBack : rimEdge, mix(.72, .32, rearClose));
     // Out early in the wipe: at half weight the cyan point light still lit the floor edge on the track.
     for (let i = 0; i < tunnelLights.length; i++) tunnelLights[i].intensity = tunnelLightBase[i] * (1 - smooth(r / .3));
     const g = t > 0 ? [0, 1].map(k => gradeGarage[k].map((v, i) => mix(v, gradeTunnel[k][i], t))) : gradeGarage.map((row, k) => row.map((v, i) => mix(v, gradeDebrief[k][i], d)));
