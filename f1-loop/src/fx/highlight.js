@@ -14,10 +14,12 @@ export function createHighlight(records, color) {
     fragmentShader: /* glsl */`
       uniform float uAmount;uniform float uTime;uniform vec3 uColor;varying vec3 vNormal;varying vec3 vView;varying vec3 vWorld;
       void main(){
-        float rim=pow(1.-abs(dot(normalize(vNormal),normalize(vView))),2.4);
-        float scan=smoothstep(.92,1.,fract(vWorld.z*1.6-uTime*.45));
-        float a=uAmount*(.005+rim*.4+scan*.035);
-        gl_FragColor=vec4(uColor*a*1.8,1.);
+        // A thin scan line crossing the part carries the emphasis; the rim stays a faint trace because thin floor plates
+        // have normals that make the whole surface read as rim, which looked like an editor selection.
+        float rim=pow(1.-abs(dot(normalize(vNormal),normalize(vView))),4.5);
+        float scan=smoothstep(.955,1.,fract(vWorld.z*1.2-uTime*.35));
+        float a=uAmount*(rim*.07+scan*.16);
+        gl_FragColor=vec4(uColor*a*1.6,1.);
       }`,
   });
   const overlays = [];
