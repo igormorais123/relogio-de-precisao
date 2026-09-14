@@ -220,3 +220,5 @@ _Questions this graph is uniquely positioned to answer:_
 Final map snapshot 2026-09-14T07:02:13.307244+00:00: 634 nodes, 1121 edges/links. Engine-tool supplement restored locally. Source changed concurrently in f1-loop/src/fx/speed.js, f1-loop/src/lab/track-lab.js, f1-loop/src/world/track.js; freshness not verified for those files. The diagram describes the verified continuous world integration, not external proposals or hardware performance.
 
 Final stable source snapshot 2026-09-14T07:06:51.651833+00:00 at c3a73c8267b8da5149f794a759b7b825223fce85: 651 nodes, 1124 edges=links. No source hashes changed during refresh. Local AST refreshed the F1 source plus motor scripts while preserving clock corpus after root update refused shrink. No runtime/FPS inference.
+
+R4 isolated integrated candidate, not published: 2026-09-14T07:37:46.229859+00:00 at de1ce2787dfd16b8594f884c35f8284c3bce34eb. 652 nodes, 1126 edges=links; before/after hashes stable. Garage imports CLAIMS from learning/model.js and draws session screens; source/runtime distinction preserved.

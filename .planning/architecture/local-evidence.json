@@ -1,12 +1,15 @@
 {
-  "snapshot_observed_at_utc": "2026-09-14T07:06:51.651833+00:00",
-  "graph_nodes": 651,
-  "graph_edges": 1124,
+  "snapshot_observed_at_utc": "2026-09-14T07:37:46.229859+00:00",
+  "graph_nodes": 652,
+  "graph_edges": 1126,
   "components": 12,
-  "visual_review": "Updated continuous track diagram inspected in Chromium --disable-gpu at 1440x1100; labels and edges readable, no overlap; screenshot outside repository.",
+  "visual_review": "R4 HTML inspected with Chromium --disable-gpu at 1440x1100; new learning-to-world connection visible, labels readable, no node overlap.",
   "validation_profile": "standard",
   "engine": "main.js lazy imports engine/viewer.js; power-unit-v1.glb via Meshopt; body engine-open pauses aula, engine:closed resumes.",
   "hook_status": "graphify hook install completed; post-commit and post-checkout installed; merge driver registered (verified by graphify hook status).",
   "future_edits": "Stable before/after source hashes at recorded commit; subsequent edits not covered. Architecture topology unchanged since visual inspection.",
-  "track": "scene.js creates and updates world/track.js; post.js uses fx/speed.js SpeedEffect. Same renderer/world wipe; engine remains lazy standalone inspection with pause/resume."
+  "track": "scene.js creates and updates world/track.js; post.js uses fx/speed.js SpeedEffect. Same renderer/world wipe; engine remains lazy standalone inspection with pause/resume.",
+  "release_state": "R4 integrated candidate, not published; isolated review/f1-r4-integrated worktree",
+  "learning_garage": "garage.js imports CLAIMS from learning/model.js; verdict styling derives from shared data; drawSessionScreen presents session fields.",
+  "graph_query_limit": "CLAIMS query resolves learning/model.js:L8. drawSessionScreen is nested inside createGarage and absent from Graphify extraction; its existence/calls verified directly at garage.js:L701/L438, not claimed as a graph node."
 }

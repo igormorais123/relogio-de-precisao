@@ -3,7 +3,7 @@
   "diagram_type": "architecture",
   "meta": {
     "title": "Relógio de Precisão + F1 Loop",
-    "subtitle": "Fluxo contínuo: box → túnel → pista · inspeção do motor pausa e retoma a aula",
+    "subtitle": "R4 integrado · candidato não publicado · box, túnel, pista e motor",
     "quality_profile": "standard",
     "animation": "none",
     "viewBox": [
@@ -223,6 +223,12 @@
     {
       "from": "engine-asset",
       "to": "engine-inspect"
+    },
+    {
+      "from": "f1-learning",
+      "to": "f1-world",
+      "fromSide": "right",
+      "toSide": "bottom"
     }
   ],
   "boundaries": [

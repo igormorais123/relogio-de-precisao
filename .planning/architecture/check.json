@@ -27,7 +27,10 @@
     {
       "name": "relationship_crossings",
       "ok": true,
-      "details": []
+      "details": [
+        "[composition/proper-crossing] standard relationship \"f1-main\" -> \"f1-notes\" crosses relationship \"f1-learning\" -> \"f1-world\" at [325, 550]",
+        "[composition/proper-crossing] standard relationship \"f1-main\" -> \"engine-inspect\" crosses relationship \"f1-learning\" -> \"f1-world\" at [314, 603]"
+      ]
     },
     {
       "name": "relationship_corridors",
@@ -56,16 +59,16 @@
     "status": "pass",
     "summary": {
       "errors": 0,
-      "warnings": 0
+      "warnings": 2
     },
     "metrics": {
-      "properCrossings": 0,
+      "properCrossings": 2,
       "ambiguousCorridors": 0,
       "containerBorderRuns": 0,
       "labelRouteClearanceIssues": 0,
       "minLabelRouteClearance": null,
       "maxBends": 4,
-      "routesOverSuggestedBends": 2,
+      "routesOverSuggestedBends": 3,
       "maxStretch": 1.416,
       "routesOverSuggestedStretch": 1,
       "minSegmentPx": 16,
@@ -81,6 +84,51 @@
       "segmentPx": 16,
       "microSegmentPx": 8
     },
-    "issues": []
+    "issues": [
+      {
+        "severity": "warning",
+        "code": "composition/proper-crossing",
+        "relationship": {
+          "from": "f1-main",
+          "to": "f1-notes",
+          "label": "",
+          "collectionIndex": 7,
+          "artifactIndex": 8
+        },
+        "otherRelationship": {
+          "from": "f1-learning",
+          "to": "f1-world",
+          "label": "",
+          "collectionIndex": 10,
+          "artifactIndex": 11
+        },
+        "point": [
+          325,
+          550
+        ]
+      },
+      {
+        "severity": "warning",
+        "code": "composition/proper-crossing",
+        "relationship": {
+          "from": "f1-main",
+          "to": "engine-inspect",
+          "label": "",
+          "collectionIndex": 8,
+          "artifactIndex": 9
+        },
+        "otherRelationship": {
+          "from": "f1-learning",
+          "to": "f1-world",
+          "label": "",
+          "collectionIndex": 10,
+          "artifactIndex": 11
+        },
+        "point": [
+          314,
+          603
+        ]
+      }
+    ]
   }
 }

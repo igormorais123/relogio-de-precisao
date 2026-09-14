@@ -3252,7 +3252,7 @@
       "label": "preload()",
       "file_type": "code",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L108",
+      "source_location": "L111",
       "_origin": "ast",
       "community": 2,
       "community_name": "three",
@@ -3263,7 +3263,7 @@
       "label": "loadScene()",
       "file_type": "code",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L109",
+      "source_location": "L112",
       "_origin": "ast",
       "community": 2,
       "community_name": "three",
@@ -3274,7 +3274,7 @@
       "label": "goto()",
       "file_type": "code",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L111",
+      "source_location": "L114",
       "_origin": "ast",
       "community": 2,
       "community_name": "three",
@@ -3285,7 +3285,7 @@
       "label": "ready()",
       "file_type": "code",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L111",
+      "source_location": "L114",
       "_origin": "ast",
       "community": 2,
       "community_name": "three",
@@ -3296,7 +3296,7 @@
       "label": "inspectEngineButton",
       "file_type": "code",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L118",
+      "source_location": "L121",
       "_origin": "ast",
       "community": 2,
       "community_name": "three",
@@ -3623,17 +3623,6 @@
       "id": "f1_loop_src_world_garage"
     },
     {
-      "label": "STAGES",
-      "file_type": "code",
-      "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L16",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "Watch.js",
-      "norm_label": "stages",
-      "id": "f1_loop_src_world_garage_stages"
-    },
-    {
       "label": "DECISIONS",
       "file_type": "code",
       "source_file": "f1-loop/src/world/garage.js",
@@ -3681,7 +3670,7 @@
       "label": "CASE_CLAIMS",
       "file_type": "code",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L29",
+      "source_location": "L35",
       "_origin": "ast",
       "community": 3,
       "community_name": "Watch.js",
@@ -3692,7 +3681,7 @@
       "label": "STUDENT_FIELDS",
       "file_type": "code",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L35",
+      "source_location": "L41",
       "_origin": "ast",
       "community": 3,
       "community_name": "Watch.js",
@@ -3703,7 +3692,7 @@
       "label": "createGarage()",
       "file_type": "code",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L37",
+      "source_location": "L43",
       "_origin": "ast",
       "community": 3,
       "community_name": "Watch.js",
@@ -3714,7 +3703,7 @@
       "label": "paintScreenBase()",
       "file_type": "code",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L723",
+      "source_location": "L752",
       "_origin": "ast",
       "community": 3,
       "community_name": "Watch.js",
@@ -3725,7 +3714,7 @@
       "label": "setSpacing()",
       "file_type": "code",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L733",
+      "source_location": "L762",
       "_origin": "ast",
       "community": 3,
       "community_name": "Watch.js",
@@ -3736,7 +3725,7 @@
       "label": "wrap()",
       "file_type": "code",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L737",
+      "source_location": "L766",
       "_origin": "ast",
       "community": 3,
       "community_name": "Watch.js",
@@ -3747,7 +3736,7 @@
       "label": "makeGrain()",
       "file_type": "code",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L764",
+      "source_location": "L793",
       "_origin": "ast",
       "community": 3,
       "community_name": "Watch.js",
@@ -3758,7 +3747,7 @@
       "label": "patchFloorReflection()",
       "file_type": "code",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L793",
+      "source_location": "L822",
       "_origin": "ast",
       "community": 3,
       "community_name": "Watch.js",
@@ -6471,7 +6460,7 @@
     {
       "label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_src_engine_viewer_css",
       "file_type": "concept",
-      "community": 22,
+      "community": 47,
       "norm_label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_src_engine_viewer_css",
       "community_name": "viewer.js",
       "id": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_src_engine_viewer_css"
@@ -6787,6 +6776,16 @@
       "id": "f1_loop_tools_optimize_power_unit_names"
     },
     {
+      "label": "CLAIM_STYLE",
+      "file_type": "code",
+      "source_file": "f1-loop/src/world/garage.js",
+      "source_location": "L29",
+      "_origin": "ast",
+      "id": "f1_loop_src_world_garage_claim_style",
+      "community": 3,
+      "norm_label": "claim_style"
+    },
+    {
       "label": "ref_three_addons_utils_buffergeometryutils_js",
       "file_type": "external",
       "source_file": "f1-loop/src/box.js",
@@ -6795,52 +6794,52 @@
       "norm_label": "ref_three_addons_utils_buffergeometryutils_js"
     },
     {
-      "label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_js",
+      "label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_js",
       "file_type": "external",
       "source_file": "f1-loop/src/scene.js",
-      "id": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_js",
+      "id": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_js",
       "community": 0,
-      "norm_label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_js"
+      "norm_label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_js"
     },
     {
-      "label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
+      "label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
       "file_type": "external",
       "source_file": "f1-loop/src/scene.js",
-      "id": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
+      "id": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
       "community": 0,
-      "norm_label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials"
+      "norm_label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials"
     },
     {
-      "label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
+      "label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
       "file_type": "external",
       "source_file": "f1-loop/src/scene.js",
-      "id": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
+      "id": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
       "community": 0,
-      "norm_label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_js"
+      "norm_label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_js"
     },
     {
-      "label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
+      "label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
       "file_type": "external",
       "source_file": "f1-loop/src/scene.js",
-      "id": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
+      "id": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
       "community": 0,
-      "norm_label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics"
+      "norm_label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics"
     },
     {
-      "label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_js",
+      "label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_js",
       "file_type": "external",
       "source_file": "f1-loop/src/scene.js",
-      "id": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_js",
+      "id": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_js",
       "community": 0,
-      "norm_label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_js"
+      "norm_label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_js"
     },
     {
-      "label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
+      "label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
       "file_type": "external",
       "source_file": "f1-loop/src/scene.js",
-      "id": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
+      "id": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
       "community": 0,
-      "norm_label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding"
+      "norm_label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding"
     },
     {
       "label": "f1_loop_src_fx_wipe_clip_wipe_range",
@@ -6849,6 +6848,14 @@
       "id": "f1_loop_src_fx_wipe_clip_wipe_range",
       "community": 0,
       "norm_label": "f1_loop_src_fx_wipe_clip_wipe_range"
+    },
+    {
+      "label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_src_engine_viewer_css",
+      "file_type": "external",
+      "source_file": "f1-loop/src/engine/viewer.js",
+      "id": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_src_engine_viewer_css",
+      "community": 22,
+      "norm_label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_src_engine_viewer_css"
     },
     {
       "label": "f1_loop_src_fx_wipe_clip_wipe_glsl",
@@ -6883,36 +6890,36 @@
       "norm_label": "ref_three_addons_geometries_roundedboxgeometry_js"
     },
     {
-      "label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_js",
+      "label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_js",
       "file_type": "external",
       "source_file": "f1-loop/src/world/garage.js",
-      "id": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_js",
+      "id": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_js",
       "community": 3,
-      "norm_label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_js"
+      "norm_label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_js"
     },
     {
-      "label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_drawbrand",
+      "label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_drawbrand",
       "file_type": "external",
       "source_file": "f1-loop/src/world/garage.js",
-      "id": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_drawbrand",
+      "id": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_drawbrand",
       "community": 3,
-      "norm_label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_drawbrand"
+      "norm_label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_drawbrand"
     },
     {
-      "label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_emblem",
+      "label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_emblem",
       "file_type": "external",
       "source_file": "f1-loop/src/world/track.js",
-      "id": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_emblem",
+      "id": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_emblem",
       "community": 3,
-      "norm_label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_emblem"
+      "norm_label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_emblem"
     },
     {
-      "label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_glyphs",
+      "label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_glyphs",
       "file_type": "external",
       "source_file": "f1-loop/src/world/track.js",
-      "id": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_glyphs",
+      "id": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_glyphs",
       "community": 3,
-      "norm_label": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_glyphs"
+      "norm_label": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_glyphs"
     },
     {
       "label": "f1_loop_src_fx_wipe_clip_wipe_shader_chunk",
@@ -10647,7 +10654,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_engine_viewer",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_src_engine_viewer_css",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_src_engine_viewer_css",
       "confidence_score": 1.0
     },
     {
@@ -11459,7 +11466,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_js",
       "confidence_score": 1.0
     },
     {
@@ -11471,7 +11478,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
       "confidence_score": 1.0
     },
     {
@@ -11483,7 +11490,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
       "confidence_score": 1.0
     },
     {
@@ -11495,7 +11502,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
       "confidence_score": 1.0
     },
     {
@@ -11507,7 +11514,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_js",
       "confidence_score": 1.0
     },
     {
@@ -11519,7 +11526,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
       "confidence_score": 1.0
     },
     {
@@ -12714,7 +12721,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L108",
+      "source_location": "L111",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main",
@@ -12725,7 +12732,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L109",
+      "source_location": "L112",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main",
@@ -12736,7 +12743,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L111",
+      "source_location": "L114",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main",
@@ -12747,7 +12754,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L111",
+      "source_location": "L114",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main",
@@ -12758,7 +12765,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L118",
+      "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main",
@@ -12987,7 +12994,7 @@
       "deferred": true,
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L109",
+      "source_location": "L112",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_loadscene",
@@ -12999,7 +13006,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L109",
+      "source_location": "L112",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_loadscene",
@@ -13011,7 +13018,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L109",
+      "source_location": "L112",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_loadscene",
@@ -13023,7 +13030,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L109",
+      "source_location": "L112",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_loadscene",
@@ -13035,7 +13042,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L111",
+      "source_location": "L114",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_goto",
@@ -13047,7 +13054,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L111",
+      "source_location": "L114",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_goto",
@@ -13123,7 +13130,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_js",
       "confidence_score": 1.0
     },
     {
@@ -13135,7 +13142,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
       "confidence_score": 1.0
     },
     {
@@ -13147,7 +13154,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
       "confidence_score": 1.0
     },
     {
@@ -13159,7 +13166,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
       "confidence_score": 1.0
     },
     {
@@ -13171,7 +13178,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_js",
       "confidence_score": 1.0
     },
     {
@@ -13183,7 +13190,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
       "confidence_score": 1.0
     },
     {
@@ -14190,7 +14197,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_js",
       "confidence_score": 1.0
     },
     {
@@ -14202,7 +14209,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_drawbrand",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_drawbrand",
       "confidence_score": 1.0
     },
     {
@@ -14230,14 +14237,27 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "imports_from",
+      "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L16",
+      "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
-      "target": "f1_loop_src_world_garage_stages",
+      "target": "f1_loop_src_learning_model",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "f1-loop/src/world/garage.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "f1_loop_src_world_garage",
+      "target": "f1_loop_src_learning_model_claims",
       "confidence_score": 1.0
     },
     {
@@ -14292,7 +14312,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
-      "target": "f1_loop_src_world_garage_case_claims",
+      "target": "f1_loop_src_world_garage_claim_style",
       "confidence_score": 1.0
     },
     {
@@ -14303,6 +14323,17 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
+      "target": "f1_loop_src_world_garage_case_claims",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "f1-loop/src/world/garage.js",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "f1_loop_src_world_garage",
       "target": "f1_loop_src_world_garage_student_fields",
       "confidence_score": 1.0
     },
@@ -14310,7 +14341,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L37",
+      "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -14321,7 +14352,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L723",
+      "source_location": "L752",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -14332,7 +14363,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L733",
+      "source_location": "L762",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -14343,7 +14374,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L737",
+      "source_location": "L766",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -14354,7 +14385,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L764",
+      "source_location": "L793",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -14365,7 +14396,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L793",
+      "source_location": "L822",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -14377,7 +14408,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L61",
+      "source_location": "L67",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage_creategarage",
@@ -14389,7 +14420,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L77",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage_creategarage",
@@ -14402,7 +14433,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L40",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage_creategarage",
@@ -14414,7 +14445,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L524",
+      "source_location": "L530",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage_creategarage",
@@ -14453,7 +14484,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_track",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_js",
       "confidence_score": 1.0
     },
     {
@@ -14465,7 +14496,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_track",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_emblem",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_emblem",
       "confidence_score": 1.0
     },
     {
@@ -14477,7 +14508,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_track",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_glyphs",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_glyphs",
       "confidence_score": 1.0
     },
     {
@@ -20049,7 +20080,7 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "c3a73c8267b8da5149f794a759b7b825223fce85",
+  "built_at_commit": "de1ce2787dfd16b8594f884c35f8284c3bce34eb",
   "edges": [
     {
       "relation": "contains",
@@ -23662,7 +23693,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_engine_viewer",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_src_engine_viewer_css",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_src_engine_viewer_css",
       "confidence_score": 1.0
     },
     {
@@ -24474,7 +24505,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_js",
       "confidence_score": 1.0
     },
     {
@@ -24486,7 +24517,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
       "confidence_score": 1.0
     },
     {
@@ -24498,7 +24529,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
       "confidence_score": 1.0
     },
     {
@@ -24510,7 +24541,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
       "confidence_score": 1.0
     },
     {
@@ -24522,7 +24553,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_js",
       "confidence_score": 1.0
     },
     {
@@ -24534,7 +24565,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_lab_track_lab",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
       "confidence_score": 1.0
     },
     {
@@ -25729,7 +25760,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L108",
+      "source_location": "L111",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main",
@@ -25740,7 +25771,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L109",
+      "source_location": "L112",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main",
@@ -25751,7 +25782,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L111",
+      "source_location": "L114",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main",
@@ -25762,7 +25793,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L111",
+      "source_location": "L114",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main",
@@ -25773,7 +25804,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L118",
+      "source_location": "L121",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main",
@@ -26002,7 +26033,7 @@
       "deferred": true,
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L109",
+      "source_location": "L112",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_loadscene",
@@ -26014,7 +26045,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L109",
+      "source_location": "L112",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_loadscene",
@@ -26026,7 +26057,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L109",
+      "source_location": "L112",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_loadscene",
@@ -26038,7 +26069,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L109",
+      "source_location": "L112",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_loadscene",
@@ -26050,7 +26081,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L111",
+      "source_location": "L114",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_goto",
@@ -26062,7 +26093,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/main.js",
-      "source_location": "L111",
+      "source_location": "L114",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_main_goto",
@@ -26138,7 +26169,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_js",
       "confidence_score": 1.0
     },
     {
@@ -26150,7 +26181,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_studio_applycarmaterials",
       "confidence_score": 1.0
     },
     {
@@ -26162,7 +26193,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_js",
       "confidence_score": 1.0
     },
     {
@@ -26174,7 +26205,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_mechanics_createmechanics",
       "confidence_score": 1.0
     },
     {
@@ -26186,7 +26217,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_js",
       "confidence_score": 1.0
     },
     {
@@ -26198,7 +26229,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_scene",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_branding_applyinteiabranding",
       "confidence_score": 1.0
     },
     {
@@ -27205,7 +27236,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_js",
       "confidence_score": 1.0
     },
     {
@@ -27217,7 +27248,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_drawbrand",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_drawbrand",
       "confidence_score": 1.0
     },
     {
@@ -27245,14 +27276,27 @@
       "confidence_score": 1.0
     },
     {
-      "relation": "contains",
+      "relation": "imports_from",
+      "context": "import",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L16",
+      "source_location": "L6",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
-      "target": "f1_loop_src_world_garage_stages",
+      "target": "f1_loop_src_learning_model",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "imports",
+      "context": "import",
+      "confidence": "EXTRACTED",
+      "source_file": "f1-loop/src/world/garage.js",
+      "source_location": "L6",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "f1_loop_src_world_garage",
+      "target": "f1_loop_src_learning_model_claims",
       "confidence_score": 1.0
     },
     {
@@ -27307,7 +27351,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
-      "target": "f1_loop_src_world_garage_case_claims",
+      "target": "f1_loop_src_world_garage_claim_style",
       "confidence_score": 1.0
     },
     {
@@ -27318,6 +27362,17 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
+      "target": "f1_loop_src_world_garage_case_claims",
+      "confidence_score": 1.0
+    },
+    {
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "source_file": "f1-loop/src/world/garage.js",
+      "source_location": "L41",
+      "weight": 1.0,
+      "_origin": "ast",
+      "source": "f1_loop_src_world_garage",
       "target": "f1_loop_src_world_garage_student_fields",
       "confidence_score": 1.0
     },
@@ -27325,7 +27380,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L37",
+      "source_location": "L43",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -27336,7 +27391,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L723",
+      "source_location": "L752",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -27347,7 +27402,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L733",
+      "source_location": "L762",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -27358,7 +27413,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L737",
+      "source_location": "L766",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -27369,7 +27424,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L764",
+      "source_location": "L793",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -27380,7 +27435,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L793",
+      "source_location": "L822",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage",
@@ -27392,7 +27447,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L61",
+      "source_location": "L67",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage_creategarage",
@@ -27404,7 +27459,7 @@
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L77",
+      "source_location": "L83",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage_creategarage",
@@ -27417,7 +27472,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L40",
+      "source_location": "L46",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage_creategarage",
@@ -27429,7 +27484,7 @@
       "confidence": "INFERRED",
       "confidence_score": 0.8,
       "source_file": "f1-loop/src/world/garage.js",
-      "source_location": "L524",
+      "source_location": "L530",
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_garage_creategarage",
@@ -27468,7 +27523,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_track",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_js",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_js",
       "confidence_score": 1.0
     },
     {
@@ -27480,7 +27535,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_track",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_emblem",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_emblem",
       "confidence_score": 1.0
     },
     {
@@ -27492,7 +27547,7 @@
       "weight": 1.0,
       "_origin": "ast",
       "source": "f1_loop_src_world_track",
-      "target": "c_users_igorpc_claude_projects_site_aula_mota_github_relogio_de_precisao_f1_loop_materia_prima_modulos_atualizados_identity_glyphs",
+      "target": "c_users_igorpc_codex_pro_visualizations_2026_09_14_01a09dc5_99c0_7ae3_bba2_7b66b5b11150_r4_integration_f1_loop_materia_prima_modulos_atualizados_identity_glyphs",
       "confidence_score": 1.0
     },
     {
