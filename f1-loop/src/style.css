@@ -94,3 +94,4 @@ dialog{word-spacing:.03em}.lr-lab{line-height:1.6}.small{font-size:12px}
 .enhanced:not(.reading) .monitor-scene-heading h2{font-family:Bebas,'Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.2px;font-size:clamp(28px,3vw,46px);line-height:1}
 .monitor-scene-heading,.monitor-scene-controls{transition:opacity .35s ease}
 .enhanced:not(.reading) .monitor-scene-controls{display:flex;opacity:0;pointer-events:none}.enhanced:not(.reading).monitor-focused .monitor-scene-controls{opacity:1;pointer-events:auto}
+@media print{.monitor-scene-heading,.monitor-scene-controls{opacity:1!important}.monitor-scene-controls{display:none!important}}
