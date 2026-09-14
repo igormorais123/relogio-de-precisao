@@ -79,17 +79,17 @@ function frame(now){
  if(snap||reduced.matches){shownP=targetP;snap=false;}else{shownP+=(targetP-shownP)*(1-Math.exp(-dt*5));if(Math.abs(targetP-shownP)<1e-4)shownP=targetP;}
  paint();
  if(state.reading||!scene)return;
- const monitor=monitorState();document.body.classList.toggle('monitor-focused',monitor.active);
+ const monitor=monitorState();document.body.classList.toggle('monitor-focused',monitor.active&&monitor.weight>.98);
  const label=`${monitor.beat+1} / 3 · ${['Observação','Comparação','Conclusão'][monitor.beat]}`;
  if($('#monitor-page').textContent!==label)$('#monitor-page').textContent=label;
- $('[data-monitor-next]').textContent=monitor.beat===2?'Seguir para Corrigir →':'Próxima →';
+ const nextLabel=monitor.beat===2?'Seguir para Corrigir →':'Próxima →';if($('[data-monitor-next]').textContent!==nextLabel)$('[data-monitor-next]').textContent=nextLabel;
  pose=sampleStory(Math.min(shownP,5));
  const engineLocal=Math.max(0,shownP-6);pose.engineChapter=shownP>=6;pose.engineProgress=engineLocal;pose.enginePaused=enginePaused;
  document.body.classList.toggle('in-engine-chapter',pose.engineChapter);
  if(pose.engineChapter){const beat=engineBeat(engineLocal),lesson=ENGINE_LESSONS[beat],inside=engineLocal>.27;
- $('#title-motor-do-loop').textContent=inside?lesson.title:'Entre no que move o carro';
- $('#engine-chapter-text').textContent=inside?lesson.text:'A carroceria se abre para revelar o conjunto. No loop, examinamos a escolha do modelo e o que torna sua saída útil.';
- $('#engine-part-label').textContent=inside?lesson.part:'DO CARRO AO MECANISMO';
+ $('#title-motor-do-loop').textContent=inside?lesson.title:'Escolha e registre o motor';
+ $('#engine-chapter-text').textContent=inside?lesson.text:'A unidade de potência da F1 de 2026 mantém o V6 turbo de 1,6 litro, e a recuperação de energia segue mapas preparados com antecedência. Na sua tarefa, o motor é a ferramenta, o modelo e a configuração que produzem a resposta.';
+ $('#engine-part-label').textContent=inside?lesson.part:'UNIDADE DE POTÊNCIA';
  $('#engine-lesson-count').textContent=inside?`${beat+1} / 3`:'Motor V6';
  $('[data-engine-chapter="next"]').textContent=engineLocal<.27?'Entrar no motor →':beat<2?'Próxima →':'Voltar ao início ↗';
  }
