@@ -4,7 +4,8 @@ import {sampleStory,assessChoice,exportNotebook} from './story.js';
 
 document.body.classList.add('enhanced');
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
-const learningLab = mountLearning($('#lesson-dialog'), {chapterIndex: 0});
+// "Continue" inside the practice opens the next chapter's dialog; the lab already advanced its own stage.
+const learningLab = mountLearning($('#lesson-dialog'), {chapterIndex: 0, onNavigate: i=>openLesson(i,true)});
 $('#quiz').hidden = true;
 const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),storageKey='inteia-f1-loop-notebook-v1';
@@ -22,18 +23,22 @@ for(const h of $$('.chapter h1, .chapter h2')){
  h.setAttribute('aria-label',lines.join(' '));let i=0;
  h.replaceChildren(...lines.map(line=>{const row=document.createElement('span');row.className='t-line';row.setAttribute('aria-hidden','true');
   line.split(' ').forEach((word,w)=>{const box=document.createElement('span');box.className='t-word';for(const ch of word){const c=document.createElement('span');c.className='t-char';c.textContent=ch;c.style.setProperty('--i',i);c.style.setProperty('--r',((i*7919)%13/12).toFixed(2));i++;box.append(c);}if(w)row.append(' ');row.append(box);});return row;}));
+ h.style.setProperty('--n',i);
 }
 
 function measure(){positions=$$('.chapter').map(s=>s.offsetTop);schedule();}
 function progress(){const y=window.scrollY;let i=0;while(i<positions.length-1&&y>=positions[i+1])i++;return i===5?5:i+Math.max(0,Math.min(1,(y-positions[i])/(positions[i+1]-positions[i])));}
 // Copy reads during the drift and dissolves before the camera travels (R7).
 function paintCopy(){
- const vh=innerHeight;
+ const vh=innerHeight,narrow=innerWidth<761;let shown=0;
  $$('.chapter').forEach((s,i)=>{const r=s.getBoundingClientRect();if(r.bottom<-vh*.5||r.top>vh*1.3)return;
   // An opened "what changes in my work" note holds the copy on screen until it is closed.
-  const raw=-r.top/Math.max(1,r.height-vh),enter=i===0?1:smooth((raw+.34)/.3),leave=i===5||s.querySelector('.lesson[open]')?0:smooth((raw-.74)/.18);
+  // On phones the copy appears only once the chapter is pinned, so it never slides up under the dots and footer.
+  const raw=-r.top/Math.max(1,r.height-vh),enter=i===0?1:narrow?smooth((raw+.03)/.03):smooth((raw+.34)/.3),leave=i===5||s.querySelector('.lesson[open]')?0:smooth((raw-.74)/.18);
   s.style.setProperty('--in',enter.toFixed(3));s.style.setProperty('--out',leave.toFixed(3));
-  s.classList.toggle('dissolving',leave>.001);s.classList.toggle('copy-off',enter*(1-leave)<.04);});
+  s.classList.toggle('dissolving',leave>.001);s.classList.toggle('copy-off',enter*(1-leave)<.04);shown=Math.max(shown,enter*(1-leave));});
+ // Between reading windows the camera travels: the chapter dots recede so they never sit on the hero.
+ document.body.classList.toggle('travel',shown<.15);
 }
 function paint(){
  const p=targetP,index=Math.min(5,Math.floor(p)),local=p-index;
@@ -47,7 +52,10 @@ function placeHotspot(){
  const i=pose.index,a=scene.anchor(i),inWindow=i===5?(shownP>4.995?1:0):smooth((pose.local-.07)/.08)*(1-smooth((pose.local-.36)/.08));
  const vis=a.ok&&!activeDialog?inWindow:0;
  if(hs.dataset.index!==String(i)){hs.dataset.index=String(i);$('#hotspot-label').textContent=HOTSPOTS[i];}
- hs.style.transform=`translate3d(${a.x.toFixed(1)}px,${a.y.toFixed(1)}px,0) scale(${(.86+.14*vis).toFixed(3)})`;hs.style.opacity=vis.toFixed(3);hs.classList.toggle('off',vis<.05);
+ // The disc floats in free air beside the part (up-left unless that enters the text column), tied to it by a leader line.
+ const dx=a.x-120<innerWidth*.46?120:-120,dy=a.y-110<90?90:-90;
+ hs.style.setProperty('--len',(Math.hypot(dx,dy)-46).toFixed(1)+'px');hs.style.setProperty('--ang',Math.atan2(-dy,-dx).toFixed(3)+'rad');
+ hs.style.transform=`translate3d(${(a.x+dx).toFixed(1)}px,${(a.y+dy).toFixed(1)}px,0) scale(${(.86+.14*vis).toFixed(3)})`;hs.style.opacity=vis.toFixed(3);hs.classList.toggle('off',vis<.05);
 }
 function schedule(){if(frameId===null&&!document.hidden)frameId=requestAnimationFrame(frame);}
 function frame(now){
@@ -68,16 +76,16 @@ function setReading(on){state.reading=on;document.body.classList.toggle('reading
 $('#reading').addEventListener('click',()=>{const id=CHAPTERS[state.chapter].id;setReading(!state.reading);document.getElementById(id).scrollIntoView();measure();snap=true;paint();});
 $('#preload-read').addEventListener('click',()=>{if(loading)loadAbort?.abort();setReading(true);document.body.classList.add('scene-ready');const h=$('#title-preparar');h.tabIndex=-1;h.focus({preventScroll:true});});
 reduced.addEventListener('change',e=>setReading(e.matches));
-function openDialog(dialog){opener=document.activeElement;activeDialog=dialog;document.body.classList.add('modal-open');dialog.showModal();}
+function openDialog(dialog){if(dialog.open)return;opener=document.activeElement;activeDialog=dialog;document.body.classList.add('modal-open');dialog.showModal();}
 function closeDialog(dialog){dialog.close();}
 $$('dialog').forEach(d=>{d.addEventListener('close',()=>{document.body.classList.remove('modal-open');activeDialog=null;opener?.focus({preventScroll:true});measure();});d.querySelector('[data-close]').onclick=()=>closeDialog(d);});
-function openLesson(index){learningLab.updateChapter(index);currentLesson=index;const c=CHAPTERS[index];$('#dialog-step').textContent=`0${index+1} / ${c.name}`;$('#dialog-title').textContent=c.title.replaceAll('\n',' ');$('#dialog-body').textContent=c.body;$('#dialog-f1').textContent=c.lesson;$('#dialog-source').textContent=c.sourceName+' ↗';$('#dialog-source').href=c.source;$('#question').textContent=c.question;$('#quick-label').textContent=c.prompt;$('#dialog-example').hidden=!c.example;$('#dialog-example').textContent=c.example||'';$('#quick-note').value=state.values[c.field]||'';$('#feedback').textContent='';$('#choices').replaceChildren();
+function openLesson(index,fromLab){if(fromLab)document.getElementById(CHAPTERS[index].id).scrollIntoView();else learningLab.updateChapter(index);currentLesson=index;const c=CHAPTERS[index];$('#dialog-step').textContent=`0${index+1} / ${c.name}`;$('#dialog-title').textContent=c.title.replaceAll('\n',' ');$('#dialog-body').textContent=c.body;$('#dialog-f1').textContent=c.lesson;$('#dialog-source').textContent=c.sourceName+' ↗';$('#dialog-source').href=c.source;$('#question').textContent=c.question;$('#quick-label').textContent=c.prompt;$('#dialog-example').hidden=!c.example;$('#dialog-example').textContent=c.example||'';$('#quick-note').value=state.values[c.field]||'';$('#feedback').textContent='';$('#choices').replaceChildren();
  const choose=i=>{state.answers[c.id]=i;$$('#choices button').forEach((el,n)=>el.setAttribute('aria-pressed',String(n===i)));const result=assessChoice(c,i);$('#feedback').textContent=result.correct?'Isso. '+result.message:`Reveja a decisão. A alternativa mais sustentada é “${c.choices[c.correct]}”. ${result.message}`;};
  c.choices.forEach((choice,i)=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.setAttribute('aria-pressed','false');b.onclick=()=>choose(i);$('#choices').append(b);});
  if(state.answers[c.id]!==undefined)choose(state.answers[c.id]);
  // Task, source and decision are asked inside the path, not only in the notebook.
  $('#extra-fields').replaceChildren(...(c.extra||[]).map(key=>{const label=document.createElement('label'),span=document.createElement('span');label.className='field';label.htmlFor='extra-'+key;
-  let input;if(key==='decision'){span.textContent='Minha decisão com base na evidência';input=$('#decision').cloneNode(true);input.removeAttribute('name');input.value=state.values.decision||'';input.onchange=()=>{state.values.decision=input.value;save();};}
+  let input;if(key==='decision'){span.textContent='Decisão na minha tarefa real';input=$('#decision').cloneNode(true);input.removeAttribute('name');input.value=state.values.decision||'';input.onchange=()=>{state.values.decision=input.value;save();};}
   else{const [,text,hint]=FIELDS.find(f=>f[0]===key);span.textContent=text;input=document.createElement('textarea');input.rows=2;input.maxLength=10000;input.placeholder=hint;input.value=state.values[key]||'';input.oninput=()=>{state.values[key]=input.value;save();};}
   input.id='extra-'+key;label.append(span,input);return label;}));
  openDialog($('#lesson-dialog'));}

@@ -49,6 +49,17 @@ Pedido do Igor (14/09/2026): todas as IAs melhoram o MESMO sistema, somando esfo
 
 Próximo passo da rodada (01:30): captura completa feita em `shots/r2` (sem pageerror), pares cegos em `shots/r2/cego`; juízes de cinema, técnico e aprendizagem avaliando. Depois: corrigir BLOQUEADORES e GRAVES e repetir até 3 rodadas.
 
+## Donos por arquivo — rodada 3 (14/09/2026, a partir de 01:55)
+
+Julgamento da rodada 2: cinema 1 bloqueador, 5 graves, 8 médios e 4 menores, placar real 3/12; aprendizagem 0 bloqueadores, 4 graves, 6 médios e 8 menores. Técnico ainda medindo. Frentes de câmera e luz em worktrees isoladas, sem GPU até o técnico terminar.
+
+| Arquivo | Dono |
+|---|---|
+| `src/story.js`, `src/fx/choreo.js`, `tests/cinema.test.mjs`, `src/world/tunnel.js`, `scene.js` (mundos, fundo, névoa) | Claude · câmera e transições (worktree): limbo do túnel, closes reais, ponto alto de Avaliar |
+| `src/fx/car-look.js`, `src/world/garage.js`, `scene.js` (bloco de luzes) | Claude · luz e acabamento (worktree): pintura vermelha, recorte âmbar, preto nos capítulos 5 e 6, monitores com conteúdo real |
+| `src/main.js`, `src/style.css`, `render-page.mjs`, `src/content.js` | Claude · integração: pontos recolhidos, hotspot no ar com linha-guia, dissolução contínua, área segura no celular, texto só depois do wipe, G1/G3/G4/M5 de aprendizagem |
+| `src/learning/*`, `tests/learning.test.mjs` | Codex: G2, M1 a M4, documentos recolhidos, `onNavigate` |
+
 Integração do Codex em `main.js`, `render-page.mjs` ou `style.css`: anunciar em `COORDENACAO-CODEX.md` com o trecho exato; a integração Claude aplica ou responde lá. A atividade contínua fica em `src/learning/`; `src/content.js` fica com os textos dos capítulos.
 
 ## Respostas da integração Claude ao Codex (00:40)
