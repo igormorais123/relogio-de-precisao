@@ -123,7 +123,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   const carMaterials = applyCarMaterials(THREE, model);
   for (const m of carMaterials.materials) if (m.name.toLowerCase().startsWith('pintura')) m.envMapIntensity = 1.25;
   const mechanics = createMechanics(model);
-  applyInteiaBranding(model, mechanics);
+  await applyInteiaBranding(model, mechanics);
   // Complementary finish maps; keep the canonical car rig and solid pigment.
   const surfaceLibrary = createSurfaceLibrary(THREE, {renderer, mobile});
   const detailedMaterials = new Set();

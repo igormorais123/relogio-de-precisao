@@ -106,7 +106,7 @@ async function main() {
   const carMaterials = applyCarMaterials(THREE, model);
   for (const m of carMaterials.materials) if (m.name.toLowerCase().startsWith('pintura')) m.envMapIntensity = 1.25;
   const mechanics = createMechanics(model);
-  applyInteiaBranding(model, mechanics);
+  await applyInteiaBranding(model, mechanics);
   const surfaceLibrary = createSurfaceLibrary(THREE, {renderer, mobile});
   const detailed = new Set();
   model.traverse(object => { if (!object.isMesh) return;
