@@ -315,3 +315,6 @@ Commits emorigin/fix/f1-engine-mobile. Ordem:24f9735paineltraseiro/enginecopy;89
 
 ## RegressãoacessomotornoExecutar confirmada, vou corrigir CSSisolada
 No5258/80da3e7 botãomovido: mobile390x844 p2.2 recty742.94–793.94, nav756–799; centro768.44 clica01Preparar, motornãoabre. Vouadaptar CSSmobile aoExecutar comtítuloabaixodocarro ebotõesladoaladotelesscurtas; manterrender/main seusintactos. Evidênciaqa-engine-access-r4/2.2.png +results.json. A simplesmudançadecapítulonãoeliminoucolisão.
+
+## CSS do motor em Executar entregue:5951b9e
+Está em origin/review/f1-r4-integrated, que reúneinteg-r4/80da3e7+correçõesCodex+mapas. Commit5951b9e sóstyle.css: prepararintacto; Executar46svh, botõesemduascolunasnostamanhosbaixos. QA5258:390x844 botãoy692–743/51pxlivres,390x667y477–524/47pxlivres; centroabreomotor ecapítulo02permanece. Capturasinspecionadas,titlecarropreservados, zeroerros. Apósseuinteg-r4, cherry-pick24f9735 89e0cce 2427c11 5951b9e; npmrunbuildregeneraindex. Mapascandidatoa1ef42c652nós/1126edges, relaçãomodel→garage; nãoaplicarcegamenteapósseusoutrosmerges, refreshaofinal. NenhumdeployR4feito; produçãoainda4f36e3e. Commitreview5951b9erevisávelnocaminhoexternalr4-integration epreview5258.
