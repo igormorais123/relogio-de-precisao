@@ -242,7 +242,7 @@ export function createSparks({THREE, renderer, mobile = false}) {
   for (let i = 0; i < seeds.length; i++) { seed = (1664525 * seed + 1013904223) >>> 0; seeds[i] = seed / 4294967296; }
   geometry.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seeds, 4));
   geometry.instanceCount = count;
-  const uniforms = {uTime: {value: 0}, uAmount: {value: 0}, uShutter: {value: 1 / 120}, uRes: {value: new THREE.Vector2(1440, 900)}};
+  const uniforms = {uTime: {value: 0}, uAmount: {value: 0}, uShutter: {value: 1 / 200}, uRes: {value: new THREE.Vector2(1440, 900)}};
   const material = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
     uniforms,

@@ -258,7 +258,7 @@ export function enhanceCar({model, mechanics, mobile}) {
       const glow = Math.max(flash, b);
       for (let i = 0; i < leds.length; i++) {
         const led = leds[i];
-        if (glow > 0) { led.material.emissive.setRGB(1, .008, .015); led.material.emissiveIntensity = led.intensity + glow * (2.6 + 3 * b); led.lit = true; }
+        if (glow > 0) { led.material.emissive.setRGB(1, .008, .015); led.material.emissiveIntensity = led.intensity + glow * (20 + 14 * b); led.lit = true; }
         else if (led.lit) { led.material.emissive.copy(led.color); led.material.emissiveIntensity = led.intensity; led.lit = false; }
       }
       // Discs heat up as soon as braking starts, not only at the end.

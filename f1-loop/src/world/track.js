@@ -196,6 +196,8 @@ vec3 trReflect(vec3 P, vec3 nW, float rough){
   }
   // Arquibancada iluminada (face em x ≈ −30, degraus de 2 a 13 m): brilho quente e manchado que
   // os trechos úmidos esticam; é ela que o carro recorta no reflexo da tomada lateral.
+  // Fonte larga: no asfalto seco ela só borra, não some (energia de área, não de ponto).
+  vec3 wide = vec3(0.);
   if (R.x < -.002 && R.y > .002) {
     float t5 = (-30. - P.x) / R.x; vec3 H5 = P + R * t5; float w5 = spread * t5 + .5;
     float a5 = mod(H5.z + uTravel, 320.) - 160.;
@@ -203,7 +205,7 @@ vec3 trReflect(vec3 P, vec3 nW, float rough){
     float inY5 = smoothstep(2. - w5, 3. + w5, H5.y) * (1. - smoothstep(11. - w5, 13. + w5, H5.y));
     float mottle = .55 + .45 * trNoise(vec2(H5.y * .6, a5 * .3), 64.);
     float wash = .6 + .4 * cos((a5 + 40.) * .0785398);
-    sum += vec3(.62, .46, .32) * .55 * inZ5 * inY5 * mottle * wash / (1. + w5 * .25);
+    wide += vec3(.62, .46, .32) * inZ5 * inY5 * mottle * wash / (1. + w5 * .25);
   }
   vec3 safe = R + vec3(1e-5) * step(abs(R), vec3(1e-5));
   vec3 t0 = (vec3(-.95, 0., -2.6) - P) / safe, t1 = (vec3(.95, 1.05, 2.6) - P) / safe;
@@ -215,7 +217,8 @@ vec3 trReflect(vec3 P, vec3 nW, float rough){
   float yHit = P.y + R.y * max(enter, 0.);
   vec3 carSeen = mix(vec3(.002, .002, .0025), vec3(.022, .003, .004), smoothstep(.25, .5, yHit));
   sum = mix(sum, carSeen, hit);
-  return sum * F * gloss * uReflGain;
+  wide *= 1. - hit;
+  return (sum * gloss + wide / (1. + rough * rough * 4.)) * F * uReflGain;
 }`;
 
 // Luz das luminárias da reta no chão (as duas mais próximas em z) e sombra de contato do carro
@@ -1091,7 +1094,7 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
       pos[i * 3 + 1] = 1 + r() * r() * 22;
       pos[i * 3 + 2] = r() * TRACK_LOOP;
       // Abaixo de luminância 1: acima disso a cauda de luz do SpeedEffect riscava cada ponto num palito.
-      const warm = r() < .6, k = .3 + r() * .55;
+      const warm = r() < .6, k = .18 + r() * .4;
       color.set(warm ? [1 * k, .56 * k, .24 * k] : [.7 * k, .82 * k, 1 * k], i * 3);
       size[i] = .5 + r() * 1.1;
     }
@@ -1146,10 +1149,12 @@ reflectedLight.indirectSpecular += trReflect(vTrackW, trNW, trRough) * (trTrack 
     for (let i = 0; i < count; i++) {
       const left = r() < .55;
       pos[i * 3] = left ? -38 - r() * 52 : 40 + r() * 55;
-      pos[i * 3 + 1] = 6 + r() * 24;
+      // Baixo, atrás das coberturas e do horizonte: alto no céu vazio, cada disco lia como uma lua.
+      pos[i * 3 + 1] = 6 + r() * 14;
       pos[i * 3 + 2] = r() * TRACK_LOOP;
-      const warm = r() < .75, k = (mobile ? .3 : .22) + r() * .3;
-      color.set(warm ? [k, .68 * k, .4 * k] : [.7 * k, .82 * k, k], i * 3);
+      // Só tons quentes: os frios, depois do AgX, liam como discos cinza no céu.
+      const warm = r() < .5, k = (mobile ? .2 : .16) + r() * (mobile ? .18 : .24);
+      color.set(warm ? [k, .68 * k, .4 * k] : [k, .78 * k, .55 * k], i * 3);
       size[i] = 2.5 + r() * 3.5;
     }
     const geometry = new THREE.BufferGeometry();
