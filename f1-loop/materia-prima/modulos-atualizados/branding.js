@@ -6,11 +6,14 @@ import {DecalGeometry} from 'three/addons/geometries/DecalGeometry.js';
 export function applyInteiaBranding(model, mechanics) {
   const canvas=document.createElement('canvas');canvas.width=1536;canvas.height=320;
   const ctx=canvas.getContext('2d');ctx.scale(3.6,3.6);ctx.translate(29,12);
-  ctx.transform(1,0,-Math.tan(12*Math.PI/180),1,0,0);ctx.fillStyle='#f5f5f2';
-  for(const [,path] of glyphs)ctx.fill(new Path2D(path),'evenodd');
+  ctx.transform(1,0,-Math.tan(12*Math.PI/180),1,0,0);
+  for(const [,path,accent] of glyphs){
+    ctx.fillStyle=accent?'#ffd447':'#f5f5f2';
+    ctx.fill(new Path2D(path),'evenodd');
+  }
   const aspect=canvas.width/canvas.height;
   const map=new THREE.CanvasTexture(canvas);map.colorSpace=THREE.SRGBColorSpace;map.anisotropy=8;
-  const material=new THREE.MeshStandardMaterial({name:'INTEIA | assinatura branca',map,roughness:.35,metalness:0,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4});
+  const material=new THREE.MeshStandardMaterial({name:'INTEIA | branco e amarelo',map,roughness:.35,metalness:0,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-4});
   const decals=[];model.updateMatrixWorld(true);
   const offset=model.position;
   function project(source,origin,direction,rotation,width,depth){
