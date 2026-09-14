@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import * as THREE from 'three';
-import { sampleStory } from '../src/story.js';
+import { sampleStory, portraitFrame } from '../src/story.js';
 import { carExtent, speedProfile } from '../tools/camera-metrics.mjs';
 import { createChoreo, partTurn } from '../src/fx/choreo.js';
 
@@ -227,6 +227,68 @@ test('exploded parts tumble, and an assembled car returns exactly to its origina
     assert.ok(r.root.position.equals(r.base), `${r.category} position drifted`);
   }
   choreo.dispose();
+});
+
+// Round 3: the footer read the wrong world at 2.90–2.98. pose.world names the world that owns most
+// of the frame and flips exactly once per wipe, at its midpoint, so labels never flicker.
+test('pose.world flips once per wipe and is the box when the box owns the return from the track', () => {
+  let changes = 0;
+  for (let i = 1; i < samples.length; i++) if (samples[i].world !== samples[i - 1].world) changes++;
+  assert.equal(changes, 3, `world label changes ${changes} times`);
+  for (const [p, world] of [[.5, 'garage'], [1.95, 'tunnel'], [2.3, 'tunnel'], [2.6, 'track'], [2.74, 'track'], [2.9, 'garage'], [2.94, 'garage'], [2.98, 'garage'], [3.5, 'garage']]) {
+    assert.equal(sampleStory(p).world, world, `world at ${p}`);
+  }
+});
+
+// Phones (390×844): with no copy the car is the subject, centred and big; the lens widens before the
+// camera backs off, so it never leaves the set or sinks into the fog. On the track it fills ≥45%.
+const phone = new THREE.PerspectiveCamera(30, 390 / 844, .05, 80);
+function phoneExtent(pose) {
+  const f = portraitFrame(pose, 390 / 844), v = new THREE.Vector3();
+  phone.setViewOffset(390, 844, 0, 844 * f.offsetY, 390, 844);
+  phone.fov = f.fov; phone.updateProjectionMatrix(); phone.position.fromArray(f.camera); phone.lookAt(v.fromArray(f.target)); phone.updateMatrixWorld();
+  let x0 = Infinity, x1 = -Infinity;
+  for (const [category, box, dir] of HULL) {
+    const t = ease(pose.explode, DELAY[category], 1);
+    for (let i = 0; i < 8; i++) {
+      v.set(box[i & 1 ? 3 : 0] + dir[0] * t, box[i & 2 ? 4 : 1] + dir[1] * t, box[i & 4 ? 5 : 2] + dir[2] * t).project(phone);
+      x0 = Math.min(x0, (v.x + 1) / 2); x1 = Math.max(x1, (v.x + 1) / 2);
+    }
+  }
+  return {x0, x1, frame: f};
+}
+test('portrait travels keep the car whole and big, and the track run fills at least 45% of the width', () => {
+  for (let p = 2.58; p <= 2.9001; p += .02) {
+    const {x0, x1} = phoneExtent(sampleStory(p));
+    assert.ok(x1 - x0 >= .45 && x0 >= 0 && x1 <= 1, `p=${p.toFixed(2)} car spans ${(x0 * 100).toFixed(0)}%–${(x1 * 100).toFixed(0)}% on the phone`);
+  }
+  for (const p of [.72, .8, 2.2 + .5, 4.66]) {
+    const pose = sampleStory(p), {x0, x1, frame} = phoneExtent(pose);
+    assert.ok(x0 >= 0 && x1 <= 1 && x1 - x0 >= .45, `p=${p} car spans ${(x0 * 100).toFixed(0)}%–${(x1 * 100).toFixed(0)}% on the phone`);
+    assert.equal(frame.offsetY, 0, `text-free frame lifted at ${p}`);
+    const d = Math.hypot(...frame.camera.map((x, k) => x - [0, .5, 0][k])), len = Math.hypot(...pose.camera.map((x, k) => x - [0, .5, 0][k]));
+    assert.ok(d <= len * 1.5 + 1e-6 && frame.fov <= 72 + 1e-6, `portrait camera backs off to ${d.toFixed(1)} m (pose ${len.toFixed(1)} m) at ${p}`);
+  }
+});
+
+// Round 3 N1: the INTEIA sign on the rear wall (garage.js brand, y≈3.02 at z −6.47) was cut by the top edge
+// at 4.25 and 5.00. The tilt keeps its lower edge above the frame.
+test('the rear-wall sign stays out of the top of the desktop frame in the Corrigir and closing frames', () => {
+  const sign = new THREE.Vector3();
+  for (const p of [0, 4.25, 5]) {
+    const camera = shoot(sampleStory(p));
+    for (const x of [-3, -2.2, -1.4]) {
+      sign.set(x, 2.8, -6.47).project(camera);
+      assert.ok((1 - sign.y) / 2 < 0 || Math.abs(sign.x) > 1, `sign visible at ${p} (y ${((1 - sign.y) / 2 * 100).toFixed(0)}%)`);
+    }
+  }
+});
+
+// Round 3 M6: the descending crane of Corrigir lands on the nose with shallow but readable depth.
+test('the Corrigir crane focuses on the nose with bokeh at most 0.25', () => {
+  const pose = sampleStory(4.66);
+  assert.ok(pose.bokeh <= .25, `bokeh ${pose.bokeh.toFixed(2)}`);
+  assert.ok(Math.hypot(...pose.focus.map((v, k) => v - [0, .3, 2.2][k])) < .3, `focus ${pose.focus.map(v => v.toFixed(2))} is not on the nose`);
 });
 
 test('the car works in the tunnel and settles back exactly when it leaves', () => {
