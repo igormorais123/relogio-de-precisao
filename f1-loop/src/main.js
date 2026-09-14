@@ -1,15 +1,18 @@
+import {mountLearning} from './learning/index.js';
 import {CHAPTERS,FIELDS} from './content.js';
 import {sampleStory,assessChoice,exportNotebook} from './story.js';
 
 document.body.classList.add('enhanced');
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const learningLab = mountLearning($('#lesson-dialog'), {chapterIndex: 0});
+$('#quiz').hidden = true;
 const smooth=t=>{t=Math.max(0,Math.min(1,t));return t*t*(3-2*t);};
 const reduced=matchMedia('(prefers-reduced-motion: reduce)'),storageKey='inteia-f1-loop-notebook-v1';
 const state={values:{},answers:{},chapter:-1,reading:reduced.matches};
 const SCENE_LABELS=['BOX · REFERÊNCIA','BANCADA · UMA MUDANÇA POR VEZ','TÚNEL · VISUALIZAÇÃO DIDÁTICA, NÃO É CFD','ESTAÇÃO · REGISTRO DO ALUNO','BOX · PEÇA REVISADA (ILUSTRAÇÃO)','DEBRIEF · PRÓXIMA DECISÃO'];
 const HOTSPOTS=['DEFINIR O PRONTO','UMA MUDANÇA','GUARDAR A VERSÃO','CONFERIR A PROVA','PEÇA REVISADA','REGISTRAR A DECISÃO'];
 let frameId=null,loading=null,scene=null,positions=[],activeDialog=null,opener=null,currentLesson=0;
-let targetP=0,shownP=0,lastTime=performance.now(),snap=true,pose=sampleStory(0);
+let targetP=0,shownP=0,lastTime=performance.now(),lastInput=0,snap=true,pose=sampleStory(0);
 try{const saved=JSON.parse(localStorage.getItem(storageKey)||'{}');for(const [key] of FIELDS)if(typeof saved[key]==='string')state.values[key]=saved[key].slice(0,10000);if(['','aceitar','reverter','revisar','inconclusivo','decisao-necessaria'].includes(saved.decision))state.values.decision=saved.decision;}catch{/* Empty notebook is usable even when browser storage is unavailable. */}
 function save(){scene?.setNotebook(state.values,FIELDS);try{localStorage.setItem(storageKey,JSON.stringify(state.values));$('#storage-state').textContent='Anotações salvas somente neste navegador.';return true;}catch{$('#storage-state').textContent='Este navegador não permitiu salvar. Baixe uma cópia para preservar suas anotações.';if(activeDialog?.id==='lesson-dialog')$('#feedback').textContent='Não foi possível salvar neste navegador. A nota continua nesta sessão: abra Meu registro e baixe uma cópia antes de sair.';return false;}}
 
@@ -48,8 +51,11 @@ function placeHotspot(){
 }
 function schedule(){if(frameId===null&&!document.hidden)frameId=requestAnimationFrame(frame);}
 function frame(now){
- frameId=null;const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));lastTime=now;
+ frameId=null;
  targetP=progress();
+ // At rest (camera settled, no pointer for 1.5 s) the ambient motion runs at ~30 fps to spare the GPU.
+ if(scene&&!state.reading&&shownP===targetP&&!snap&&now-lastInput>1500&&now-lastTime<32){schedule();return;}
+ const dt=Math.min(.05,Math.max(0,(now-lastTime)/1000));lastTime=now;
  // The camera trails the scroll with a damped follow: inertia without hijacking the page.
  if(snap||reduced.matches){shownP=targetP;snap=false;}else{shownP+=(targetP-shownP)*(1-Math.exp(-dt*5));if(Math.abs(targetP-shownP)<1e-4)shownP=targetP;}
  paint();
@@ -64,7 +70,7 @@ reduced.addEventListener('change',e=>setReading(e.matches));
 function openDialog(dialog){opener=document.activeElement;activeDialog=dialog;document.body.classList.add('modal-open');dialog.showModal();}
 function closeDialog(dialog){dialog.close();}
 $$('dialog').forEach(d=>{d.addEventListener('close',()=>{document.body.classList.remove('modal-open');activeDialog=null;opener?.focus({preventScroll:true});measure();});d.querySelector('[data-close]').onclick=()=>closeDialog(d);});
-function openLesson(index){currentLesson=index;const c=CHAPTERS[index];$('#dialog-step').textContent=`0${index+1} / ${c.name}`;$('#dialog-title').textContent=c.title.replaceAll('\n',' ');$('#dialog-body').textContent=c.body;$('#dialog-f1').textContent=c.lesson;$('#dialog-source').textContent=c.sourceName+' ↗';$('#dialog-source').href=c.source;$('#question').textContent=c.question;$('#quick-label').textContent=c.prompt;$('#quick-note').value=state.values[c.field]||'';$('#feedback').textContent='';$('#choices').replaceChildren();
+function openLesson(index){learningLab.updateChapter(index);currentLesson=index;const c=CHAPTERS[index];$('#dialog-step').textContent=`0${index+1} / ${c.name}`;$('#dialog-title').textContent=c.title.replaceAll('\n',' ');$('#dialog-body').textContent=c.body;$('#dialog-f1').textContent=c.lesson;$('#dialog-source').textContent=c.sourceName+' ↗';$('#dialog-source').href=c.source;$('#question').textContent=c.question;$('#quick-label').textContent=c.prompt;$('#quick-note').value=state.values[c.field]||'';$('#feedback').textContent='';$('#choices').replaceChildren();
  const choose=i=>{state.answers[c.id]=i;$$('#choices button').forEach((el,n)=>el.setAttribute('aria-pressed',String(n===i)));const result=assessChoice(c,i);$('#feedback').textContent=result.correct?'Isso. '+result.message:`Reveja a decisão. A alternativa mais sustentada é “${c.choices[c.correct]}”. ${result.message}`;};
  c.choices.forEach((choice,i)=>{const b=document.createElement('button');b.type='button';b.textContent=choice;b.setAttribute('aria-pressed','false');b.onclick=()=>choose(i);$('#choices').append(b);});
  if(state.answers[c.id]!==undefined)choose(state.answers[c.id]);
@@ -75,7 +81,7 @@ function openLesson(index){currentLesson=index;const c=CHAPTERS[index];$('#dialo
   input.id='extra-'+key;label.append(span,input);return label;}));
  openDialog($('#lesson-dialog'));}
 $$('[data-open]').forEach(b=>b.onclick=()=>openLesson(Number(b.dataset.open)));
-$('#hotspot').onclick=()=>openLesson(Number($('#hotspot').dataset.index||0));
+$('#hotspot').onclick=()=>{const index=Number($('#hotspot').dataset.index||0);if(index===3){$('#notebook').click();$('#field-evidence').focus();$('#field-evidence').scrollIntoView({block:'center'});}else openLesson(index);};
 $('#quick-note').addEventListener('input',e=>{state.values[CHAPTERS[currentLesson].field]=e.target.value;save();});
 $('#save-note').onclick=()=>{state.values[CHAPTERS[currentLesson].field]=$('#quick-note').value;if(save())closeDialog($('#lesson-dialog'));};
 $('#notebook').onclick=()=>{for(const [key] of FIELDS)$('#field-'+key).value=state.values[key]||'';$('#decision').value=state.values.decision||'';openDialog($('#notebook-dialog'));};
@@ -87,7 +93,7 @@ window.addEventListener('scroll',()=>{schedule();},{passive:true});
 window.addEventListener('resize',()=>{measure();scene?.resize();snap=true;schedule();});
 window.addEventListener('hashchange',()=>{measure();snap=true;schedule();});
 window.addEventListener('pageshow',()=>{measure();schedule();});
-window.addEventListener('pointermove',e=>{scene?.setPointer(e.clientX/innerWidth*2-1,e.clientY/innerHeight*2-1);},{passive:true});
+window.addEventListener('pointermove',e=>{lastInput=performance.now();scene?.setPointer(e.clientX/innerWidth*2-1,e.clientY/innerHeight*2-1);},{passive:true});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){lastTime=performance.now();schedule();}});
 function preload(fraction,text){$('#preloader').style.setProperty('--f',fraction.toFixed(3));$('#preload-pct').textContent=String(Math.round(fraction*100)).padStart(2,'0');if(text)$('#preload-text').textContent=text;}
 async function loadScene(){if(scene||state.reading||loading)return;loading=true;$('#load-state').textContent='Carregando o carro 3D…';try{const {createScene}=await import('./scene.js');scene=await createScene($('#stage'),{onProgress:(f,text)=>{preload(f,text);$('#load-state').textContent=text+'…';},onError:()=>{setReading(true);$('#load-state').textContent='3D indisponível · aula em modo leitura';}});scene.setNotebook(state.values,FIELDS);snap=true;schedule();$('#load-state').textContent=state.reading?'Leitura · movimento pausado':'97 peças · modelo didático';requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('scene-ready')));}catch(e){console.error('F1 Loop: falha na cena',e);setReading(true);document.body.classList.add('scene-ready');$('#load-state').textContent='3D indisponível · aula em modo leitura';}finally{loading=false;}}

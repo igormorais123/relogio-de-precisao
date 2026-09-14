@@ -1,22 +1,111 @@
-// Fonte de conteúdo da aula. Fontes F1 conferidas no complemento de pesquisa
-// e, para Ferrari/Monza e o debrief McLaren, nas páginas públicas em 13/09/2026.
+// Fonte de conteúdo da aula. Fatos de F1 reconferidos nas páginas primárias em 14/09/2026:
+// Mercedes (simulador; dados), F1/Rob Smedley (correlação, flow-vis, aero rakes, 21/02/2020),
+// F1/Hughes e Piola (Ferrari Monza, 05/09/2024) e McLaren (debrief, 19/05/2026).
 // Os casos históricos sustentam a lição; o carro animado é uma ilustração.
+// `example`: usa o MESMO caso fictício da prática em src/learning/model.js (comunicado interno
+// sobre o teste de um formulário de atendimento: medianas de 12 e 9 minutos, 50 pedidos por
+// versão, formulário e equipe mudaram juntos, sem data nem autorização de adoção).
+// `question`/`choices`/`feedbacks`: quiz opcional, hoje oculto pela integração; são situações
+// avulsas de gestão pública, uma explicação por alternativa, na ordem de `choices`.
 export const CHAPTERS = [
-  {id:'preparar',name:'Preparar',place:'01 / BOX INTEIA',title:'ANTES DE MUDAR,\nDEFINA O PRONTO.',lead:'Uma volta começa com um critério. Sem ele, você só está dando voltas.',principle:'Referência → critério → limite',body:'Escolha uma tarefa real. Guarde a versão inicial, escreva o resultado esperado e diga o que não pode piorar. Antes de pedir à IA que melhore, defina como você vai conferir.',action:'Definir meu critério',field:'criterion',extra:['task','reference'],prompt:'Qual resultado observável fará você aceitar esta tarefa? Registre também o que deve permanecer correto.',lesson:'Na F1, a preparação no simulador ajuda a estabelecer uma configuração inicial. Na sua tarefa, uma versão de referência permite comparar a mudança.',source:'https://www.mercedesamgf1.com/news/feature-explaining-the-role-of-an-f1-sim-driver',sourceName:'Mercedes · O trabalho no simulador',question:'Você pede à IA para melhorar um resumo. Qual critério permite conferir o resultado?',choices:['Ficar mais profissional.','Preservar todas as datas e sustentar cada afirmação na fonte.','Receber uma nota alta de outra IA.'],correct:1,feedback:'Um critério precisa ser observável. A aparência e uma nota isolada não demonstram fidelidade à fonte.'},
-  {id:'hipotese',name:'Hipótese',place:'02 / BANCADA DE ENGENHARIA',title:'UMA IDEIA.\nUM TESTE.',lead:'Explique o que a mudança deve causar — e o que provaria que você está errado.',principle:'Mudança delimitada → previsão',body:'Escolha uma alteração por vez quando quiser entender sua causa. Escreva a previsão antes de ver a resposta. Assim você evita inventar uma justificativa depois que o resultado chega.',action:'Escrever minha hipótese',field:'hypothesis',prompt:'Se eu mudar ___, espero observar ___, porque ___. Vou rejeitar essa hipótese se ___.',lesson:'Simulador e pista precisam ser comparados. A previsão é uma hipótese de trabalho; a evidência da pista pode contrariá-la.',source:'https://www.formula1.com/en/latest/article/testing-explained-rob-smedley-on-correlation-aero-rakes-and-flow-vis-paint.5UTaH1q9iuQcXVjZXui3Fz',sourceName:'Formula 1 · Correlação, aero rakes e flow-vis',question:'Você mudou o prompt, o modelo e a fonte ao mesmo tempo. O resultado melhorou. O que você pode concluir?',choices:['O novo prompt causou a melhora.','O modelo novo é sempre melhor.','O resultado mudou; ainda não foi isolada a causa.'],correct:2,feedback:'Mudar várias condições pode ser útil para explorar. Para atribuir a melhora a uma delas, é preciso uma comparação que isole essa mudança.'},
-  {id:'executar',name:'Executar',place:'03 / TÚNEL DE ENSAIO',title:'MUDE POUCO.\nGUARDE A VERSÃO.',lead:'Produza uma candidata que possa ser comparada, criticada e desfeita.',principle:'Produzir → preservar → observar',body:'Dê à IA a fonte, o escopo e o critério. Guarde a candidata e a referência separadamente. Rodar um teste produz uma observação; ainda falta interpretar o que ela permite afirmar.',action:'Preparar meu teste',field:'test',prompt:'Que ação vou executar, em qual versão e com qual entrada? Como vou guardar a saída para outra pessoa conferir?',lesson:'Aero rakes e flow-vis ajudam a investigar o comportamento do ar. Neste site, os traços são uma ilustração visual: não medem o escoamento deste carro.',source:'https://www.formula1.com/en/latest/article/testing-explained-rob-smedley-on-correlation-aero-rakes-and-flow-vis-paint.5UTaH1q9iuQcXVjZXui3Fz',sourceName:'Formula 1 · Como os testes investigam o carro',question:'A IA escreveu “verificado”. O que fecha a verificação?',choices:['Ler a fonte ou executar o teste e conferir sua saída.','Pedir para escrever “verificado” duas vezes.','A resposta estar bem apresentada.'],correct:0,feedback:'Uma declaração de verificação não é a evidência. Guarde a fonte consultada, a versão avaliada e o resultado observado.'},
-  {id:'avaliar',name:'Avaliar',place:'04 / ESTAÇÃO DE ENGENHARIA',title:'PARECE BOM.\nMAS PASSOU?',lead:'O crítico precisa de provas, de um critério e de espaço para discordar.',principle:'Criticar → conferir → decidir',body:'Dê ao revisor a candidata, os critérios e as fontes necessárias. Peça falhas concretas e confira os achados. Outro agente pode ajudar, mas também pode repetir erros. Uma revisão pode não encontrar falhas: nesse caso, deve dizer o que verificou e quais são seus limites.',action:'Registrar minha evidência',field:'evidence',prompt:'O que foi observado, em qual versão e onde isso pode ser conferido? O critério passou, falhou ou continua sem evidência suficiente?',lesson:'A Mercedes destaca a seleção de dados relevantes para a análise. No seu loop, escolha a evidência que responde ao critério; quantidade de dados sozinha não decide se o trabalho atende.',source:'https://www.mercedesamgf1.com/news/feature-data-and-electronics-in-f1-explained',sourceName:'Mercedes · Dados e eletrônica na F1',question:'Dois agentes aprovaram o texto, mas nenhum abriu a fonte. Qual é o estado?',choices:['Aprovado por consenso.','Inconclusivo: falta conferir a evidência.','Reprovado automaticamente.'],correct:1,feedback:'Concordância pode orientar a revisão, mas não substitui evidência. Sem a conferência exigida, a conclusão continua inconclusiva.'},
-  {id:'corrigir',name:'Corrigir',place:'05 / VOLTA AO BOX',title:'CORRIJA O ERRO.\nCONFIRA DE NOVO.',lead:'Melhorar uma parte não compensa estragar outra que já funcionava.',principle:'Revisar → verificar regressões',body:'Corrija a falha demonstrada e confira de novo o que mudou e o que precisava permanecer correto. Se houve regressão, compare com a referência e preserve o trabalho ao restaurá-la. Só mude um critério com fundamento registrado. Se a candidata já atende, não invente uma correção.',action:'Planejar minha correção',field:'correction',prompt:'Qual falha foi demonstrada? Qual a menor correção útil? O que vou conferir novamente? Se não há correção necessária, qual evidência permite aceitar?',lesson:'O piso da Ferrari para Monza 2024 buscava controlar as oscilações surgidas com a atualização de Barcelona. A vitória em Monza não prova que essa mudança causou o resultado. Aqui, a peça animada ilustra uma revisão; não demonstra ganho aerodinâmico.',source:'https://www.formula1.com/en/latest/article/tech-weekly-how-ferraris-monza-upgrades-helped-the-team-to-address-a-key.5UpzTp0C4wEAuH8HalwblV',sourceName:'Formula 1 · Ferrari em Monza: trecho público da análise técnica',question:'A nova versão ficou mais clara, mas removeu uma informação obrigatória. O que fazer?',choices:['Aceitar porque ficou bonita.','Apagar o critério que falhou.','Corrigir ou reverter; testar fidelidade e clareza novamente.'],correct:2,feedback:'Uma regressão precisa entrar na decisão. Não torne o teste mais permissivo apenas para aceitar a candidata.'},
-  {id:'encerrar',name:'Encerrar',place:'06 / DEBRIEF',title:'DECIDA. REGISTRE.\nRECOMECE MELHOR.',lead:'O fim da volta é uma decisão sustentada. O registro é a largada da próxima.',principle:'Decisão → evidência → próximo passo',body:'Aceite quando os critérios estiverem conferidos. Se faltar prova ou o orçamento acabar, registre “inconclusivo”. Se surgir uma consequência fora do escopo combinado, registre a decisão necessária. Guarde o resultado, os limites e a próxima pergunta antes de continuar.',action:'Concluir meu registro',field:'next',extra:['decision'],prompt:'Que decisão a evidência permite? O que ainda falta ou precisa ser decidido? Qual entrada você deixará para a próxima volta?',lesson:'A McLaren descreve o debrief como uma conversa estruturada entre engenharia e pilotos que orienta os ajustes da sessão seguinte. No seu loop, o registro conecta o resultado à próxima decisão. O carro montado não comprova que a tarefa foi concluída.',source:'https://www.mclaren.com/racing/formula-1/2026/what-do-formula-1-drivers-do-between-sessions/',sourceName:'McLaren · Debrief e preparação da próxima sessão',question:'O limite de tempo terminou e faltou um teste obrigatório. Como encerrar?',choices:['Marcar sucesso para concluir a entrega.','Registrar inconclusivo, a lacuna e o próximo passo.','Repetir indefinidamente sem mudar o plano.'],correct:1,feedback:'Parar por limite é uma decisão válida. Ela não equivale a sucesso: a evidência faltante deve acompanhar o registro.'}
+  {id:'preparar',name:'Preparar',place:'01 / BOX INTEIA',title:'ANTES DE PEDIR,\nDEFINA O PRONTO.',
+   lead:'Sem critério escrito, qualquer resposta da IA parece boa. Decida antes como vai conferir.',
+   principle:'Fonte · critério · o que não pode piorar',
+   body:'Escolha uma tarefa real e pequena: um comunicado, um resumo de processo, uma resposta a ofício. Separe a fonte. Escreva o que conta como pronto de um jeito que outra pessoa consiga conferir na fonte, e o que não pode piorar. Só então peça à IA.',
+   action:'Definir meu critério',field:'criterion',extra:['task','reference'],
+   prompt:'Complete: “Está pronto quando ___” (algo que outra pessoa confere na fonte) e “Não pode piorar: ___”. Evite palavras como claro, melhor ou profissional.',
+   example:'Tarefa: revisar o comunicado interno sobre o teste do novo formulário antes de circular. Fonte: o registro do teste de 14 de maio. Pronto quando: cada frase do comunicado tem apoio numa frase do registro. Não pode piorar: a data, as medianas de 12 e 9 minutos e os grupos de 50 pedidos.',
+   lesson:'Na F1, o trabalho antes do evento busca uma configuração de partida sobre a qual os pilotos evoluem nos treinos. Na sua tarefa, a fonte e o critério escrito são esse ponto de partida: sem eles, não há com o que comparar a mudança.',
+   source:'https://www.mercedesamgf1.com/news/feature-explaining-the-role-of-an-f1-sim-driver',sourceName:'Mercedes · O trabalho no simulador',
+   question:'Você vai pedir à IA um resumo do processo para o despacho da chefia. Qual critério de pronto permite conferir o resultado?',
+   choices:['Resumo claro, objetivo e em linguagem formal, em até uma página.','Cada valor, data e fundamento do resumo indica a folha do processo que o sustenta.','O resumo é aprovado por um segundo assistente de IA que o compara com o processo.'],
+   correct:1,
+   feedback:'Critério de pronto é algo que outra pessoa confere na fonte. Estilo e aprovação de terceiros não mostram fidelidade ao processo.',
+   feedbacks:['Uma página é conferível; “claro” e “objetivo” não são. E nada nesse critério impede um valor errado, que é a falha mais cara num despacho.','Isso. Qualquer pessoa pode abrir a folha e confirmar ou negar cada fato. O critério diz o que conferir e onde.','Outra IA pode ajudar a revisar, mas isso é um jeito de conferir, não o que conta como pronto. Ela também pode errar ou deixar passar um valor.']},
+
+  {id:'hipotese',name:'Hipótese',place:'02 / BANCADA DE ENGENHARIA',title:'UMA MUDANÇA.\nUMA PREVISÃO.',
+   lead:'Diga o que espera ver antes de ver. E o que provaria que você errou.',
+   principle:'Uma mudança · efeito esperado · como refutar',
+   body:'Mude uma coisa por vez quando quiser saber o que funcionou. Escreva a previsão antes de conferir: o que deve mudar, por quê e que resultado faria você desistir da ideia. Previsão escrita depois do resultado vira justificativa.',
+   action:'Escrever minha hipótese',field:'hypothesis',
+   prompt:'Se eu mudar ___, espero ver ___, porque ___. Desisto da ideia se ___.',
+   example:'Se eu retirar do comunicado a causa e a data que o registro não sustenta, mantendo os números, espero que toda frase tenha apoio na fonte. Desisto se a nova versão perder algum dado ou ainda afirmar algo que o registro não diz.',
+   lesson:'Correlação, explica Rob Smedley, é comparar o que se mede no carro com o que o simulador previa. Quando os dois não batem, a equipe gasta seu talento de engenharia para entender de onde vem a diferença. Na cena, só o assoalho se destaca: uma peça, uma previsão.',
+   source:'https://www.formula1.com/en/latest/article/testing-explained-rob-smedley-on-correlation-aero-rakes-and-flow-vis-paint.5UTaH1q9iuQcXVjZXui3Fz',sourceName:'Formula 1 · Correlação, aero rakes e flow-vis',
+   question:'Na segunda versão, você trocou o prompt, anexou o processo completo e usou outro modelo de IA. O resumo melhorou. O que você pode afirmar?',
+   choices:['O novo prompt foi decisivo, porque foi a mudança mais trabalhosa.','Anexar o processo completo causou a melhora, porque a IA passou a ter a fonte.','O conjunto melhorou o resultado; para saber o que pesou, é preciso testar uma mudança por vez.'],
+   correct:2,
+   feedback:'Três mudanças juntas podem melhorar o resultado, mas não mostram qual delas causou a melhora.',
+   feedbacks:['O esforço gasto numa mudança não indica o efeito dela. As outras duas mudanças podem explicar a melhora sozinhas.','É uma boa hipótese, mas continua sendo hipótese: o modelo também mudou. Teste só o anexo e compare.','Isso. Mudar tudo junto serve para explorar. Para atribuir a causa, compare versões que diferem em uma só coisa.']},
+
+  {id:'executar',name:'Executar',place:'03 / TÚNEL DE ENSAIO',title:'RODE O TESTE.\nGUARDE A BASE.',
+   lead:'A resposta da IA só vale ao lado da fonte. Guarde as duas antes de mexer.',
+   principle:'Pedido registrado · fonte · resposta intacta',
+   body:'Dê à IA a fonte, o escopo e o critério. Registre o pedido exato e salve a resposta intacta, com outro nome, ao lado da fonte e da versão anterior. Não corrija enquanto lê. Rodar produz uma observação; ainda não diz se passou.',
+   action:'Preparar meu teste',field:'test',
+   prompt:'Qual pedido vou usar, com qual fonte e em que ferramenta? Onde fica a resposta intacta? Qual é meu limite de tentativas ou de tempo?',
+   example:'Pedido: “Resuma o registro do teste em um comunicado de três frases, sem acrescentar nada”. Ferramenta: assistente de IA autorizado pelo órgão. A resposta ficou salva, sem edição, como “comunicado_candidata”, ao lado do registro. Limite: duas tentativas.',
+   lesson:'Na F1, a tinta de flow-vis mostra onde o ar se descola da carroceria, e as aero rakes, conjuntos de tubos de Pitot, medem o escoamento fora dela. Nesta aula, a fumaça do túnel é visualização didática: não mede o ar deste carro e não é CFD, a simulação computacional de escoamento.',
+   source:'https://www.formula1.com/en/latest/article/testing-explained-rob-smedley-on-correlation-aero-rakes-and-flow-vis-paint.5UTaH1q9iuQcXVjZXui3Fz',sourceName:'Formula 1 · Como os testes investigam o carro',
+   question:'A IA entregou a nova nota com a frase “todas as informações foram conferidas nos autos”. O que você guarda deste teste?',
+   choices:['A nova nota ao lado da anterior, com o pedido usado; a frase da IA não conta como conferência.','A nova nota com a frase da IA, que já registra a conferência feita.','Só a nova nota, no lugar da anterior, para não circularem duas versões.'],
+   correct:0,
+   feedback:'Guarde a versão anterior, a nova e o pedido. Uma declaração de conferência escrita pela IA não é evidência.',
+   feedbacks:['Isso. Com as duas versões e o pedido, outra pessoa consegue comparar e repetir o teste. A conferência ainda está por fazer.','A IA pode escrever que conferiu sem ter conferido. A frase é parte do texto a avaliar, não prova de nada.','Evitar confusão é legítimo, mas substituir apaga a base. Se a nova versão tiver erro, você não terá para onde voltar nem com o que comparar.']},
+
+  {id:'avaliar',name:'Avaliar',place:'04 / ESTAÇÃO DE ENGENHARIA',title:'PARECE BOM.\nMAS PASSOU?',
+   lead:'Texto bem escrito não é evidência. Confira cada frase na fonte.',
+   principle:'Sustentada · não sustentada · não verificada',
+   body:'Leia a resposta frase por frase e procure na fonte o trecho que decide cada uma. Marque sustentada, não sustentada ou não verificada, e diga onde conferiu. Resultado observado não é causa demonstrada. Outra IA ou um colega ajudam a achar falhas, mas a concordância deles não substitui abrir a fonte.',
+   action:'Registrar minha evidência',field:'evidence',
+   prompt:'Para cada frase ou critério: sustentada, não sustentada ou não verificada? Qual trecho da fonte decide? O que ficou sem conferir?',
+   example:'Frase 1 (medianas de 12 e 9 minutos, 50 pedidos): sustentada pela frase 2 do registro. Frase 2 (o formulário causou a redução): não sustentada; a frase 3 diz que formulário e equipe mudaram juntos. Frase 3 (adoção em 20 de maio): não sustentada; a frase 4 não traz data. Critério: não passou.',
+   lesson:'A Mercedes descreve mais de 250 sensores possíveis no carro durante um fim de semana e aponta o desafio de priorizar a informação e revisar os dados certos. Quantidade não decide; decide a evidência que responde ao critério. Os monitores desta cena mostram o seu registro, não uma verificação feita pelo site.',
+   source:'https://www.mercedesamgf1.com/news/feature-data-and-electronics-in-f1-explained',sourceName:'Mercedes · Dados e eletrônica na F1',
+   question:'Dois colegas e uma IA revisora aprovaram a nota. Nenhum abriu as folhas citadas. Qual é o estado do critério “cada fato com a folha que o sustenta”?',
+   choices:['Atende: três revisões independentes chegaram à mesma conclusão.','Não atende: sem conferência, a nota deve ser reprovada.','Não verificado: falta abrir as folhas citadas.'],
+   correct:2,
+   feedback:'Concordância orienta a revisão, mas não é evidência. Sem abrir a fonte, o critério continua não verificado.',
+   feedbacks:['Três leituras que não abriram a fonte podem repetir o mesmo erro. Consenso sem conferência não mostra que o valor está certo.','Faltar conferência não prova que há erro. Reprovar sem evidência é tão infundado quanto aprovar sem evidência.','Isso. O estado honesto é “não verificado” até alguém abrir as folhas. Registre o que falta conferir e quem vai fazer.']},
+
+  {id:'corrigir',name:'Corrigir',place:'05 / VOLTA AO BOX',title:'CORRIJA O ERRO.\nNÃO O CRITÉRIO.',
+   lead:'Conserte a falha demonstrada e confira de novo o que já estava certo.',
+   principle:'Falha demonstrada · menor correção · reconferir',
+   body:'Corrija só o que a avaliação demonstrou, com a menor mudança útil. Depois confira de novo esse ponto e tudo o que já estava certo: um texto mais curto ou mais elegante não compensa perder um dado. Mudar um critério exige motivo registrado. Tom profissional ou aprovação de outra IA não são motivo. Se nada falhou, não invente correção.',
+   action:'Planejar minha correção',field:'correction',
+   prompt:'Qual falha foi demonstrada e em qual trecho da fonte? Qual a menor correção? O que vou conferir de novo, incluindo o que já estava certo?',
+   example:'Retirei a causa atribuída ao formulário e a data de 20 de maio, e escrevi que a causa não foi isolada. Mantive a data do teste, as medianas e os grupos de 50 pedidos. Conferi de novo cada frase contra o registro: todas têm apoio.',
+   lesson:'O novo assoalho da Ferrari em Monza, em 2024, buscava controlar o quicar do carro introduzido pela atualização de Barcelona. A própria análise da F1 alerta para não confundir coincidência com causa: a vitória não prova o efeito da peça. Na cena, o assoalho revisado é ilustração, sem ganho aerodinâmico demonstrado.',
+   source:'https://www.formula1.com/en/latest/article/tech-weekly-how-ferraris-monza-upgrades-helped-the-team-to-address-a-key.5UpzTp0C4wEAuH8HalwblV',sourceName:'Formula 1 · Ferrari em Monza: trecho público da análise técnica',
+   question:'A versão corrigida ficou mais clara, mas perdeu o prazo de vigência do contrato, que a anterior trazia. O que fazer?',
+   choices:['Recolocar o prazo a partir da versão anterior e conferir de novo a clareza e o que já atendia.','Aceitar: a clareza era o objetivo desta volta, e o prazo está nos autos.','Retirar a vigência dos critérios, já que o despacho pode ser feito sem ela.'],
+   correct:0,
+   feedback:'Uma perda no que já estava certo entra na decisão. Não afrouxe o critério para aceitar a nova versão.',
+   feedbacks:['Isso. A correção mira a perda, aproveita a base guardada e confere de novo o ganho e o que não podia piorar.','A vigência estava em “não pode piorar”. Aceitar a perda troca uma falha visível por outra escondida no despacho.','Mudar o critério para a versão passar é o erro que dá nome ao capítulo. Só mude um critério com motivo registrado, e não por causa desta versão.']},
+
+  {id:'encerrar',name:'Encerrar',place:'06 / DEBRIEF',title:'DECIDA COM PROVA.\nREGISTRE A VOLTA.',
+   lead:'A decisão é sua, não da IA. Diga o que a evidência permite e o que ainda não permite.',
+   principle:'Decisão · evidência · próxima volta',
+   body:'Aceite o que foi conferido, e só no alcance do que foi conferido. Registre “decisão necessária” quando surgir uma consequência fora do combinado, e “inconclusivo” quando faltar prova ou acabar o limite. Anote a decisão, a evidência, o que ficou pendente e a próxima pergunta. Quem retomar não deve refazer o que você já descartou.',
+   action:'Concluir meu registro',field:'next',extra:['decision'],
+   prompt:'Que decisão a evidência permite, e o que ela não permite? O que ficou pendente? O que a próxima pessoa precisa saber para continuar?',
+   example:'Decisão: comunicar só o resultado observado e seus limites. Não autoriza adoção definitiva nem afirma que o formulário causou a redução. Pendente: quem decide a adoção. Próxima volta: comparar os formulários com a mesma equipe, para isolar o efeito.',
+   lesson:'Na McLaren, o debrief entre sessões é estruturado: primeiro as mudanças de acerto que a equipe precisa conhecer, depois os relatos dos engenheiros e as impressões dos pilotos. Daí sai onde colocar o carro na sessão seguinte. Seu registro cumpre esse papel. O carro remontado na cena não comprova que sua tarefa terminou.',
+   source:'https://www.mclaren.com/racing/formula-1/2026/what-do-formula-1-drivers-do-between-sessions/',sourceName:'McLaren · Debrief e preparação da próxima sessão',
+   question:'O prazo do despacho acaba hoje e duas afirmações continuam sem folha localizada. Como encerrar?',
+   choices:['Enviar a nota como concluída, com a ressalva genérica “sujeito a conferência”.','Registrar inconclusivo para as duas afirmações, informar a lacuna à chefia e anotar o próximo passo.','Rodar o mesmo pedido na IA mais algumas vezes até as folhas aparecerem.'],
+   correct:1,
+   feedback:'Parar pelo limite é uma decisão válida, mas não equivale a sucesso: o que falta precisa acompanhar o registro.',
+   feedbacks:['A ressalva genérica esconde quais afirmações faltam. Quem assina o despacho não sabe o que está sem prova.','Isso. A chefia decide sabendo o que foi conferido e o que não foi, e a próxima volta começa da lacuna registrada.','Repetir o mesmo pedido sem mudar nada tende a repetir o resultado e consome o prazo. Se tentar de novo, mude algo e registre a hipótese.']}
 ];
 
 export const FIELDS = [
- ['task','Minha tarefa real','Descreva uma tarefa pequena que você já precisa realizar.'],
- ['reference','Fonte e versão de referência','Indique o documento, arquivo ou endereço e a versão inicial.'],
- ['criterion','Critério e o que não pode piorar','Escreva um resultado observável e o que precisa ser preservado.'],
- ['hypothesis','Hipótese','Se eu mudar…, espero…, e rejeitarei se…'],
- ['test','Teste e limite','Registre ação, entrada e limite de tempo, custo ou tentativas.'],
- ['evidence','Evidência observada','Registre a saída real e onde pode ser conferida.'],
- ['correction','Correção e regressões','O que mudou e o que foi conferido novamente?'],
- ['next','Pendência e próxima volta','O que outra pessoa precisa saber para continuar?']
+ ['task','Minha tarefa real','Ex.: revisar um comunicado ou resumir um processo. Uma tarefa pequena que você já precisa fazer.'],
+ ['reference','Fonte e versão de partida','Documento, pasta ou processo de origem, e a versão atual que servirá de comparação.'],
+ ['criterion','Critério de pronto e o que não pode piorar','Algo que outra pessoa confere na fonte, e o que precisa continuar certo.'],
+ ['hypothesis','Hipótese','Se eu mudar…, espero ver…, porque… Desisto se…'],
+ ['test','Teste e limite','Pedido usado, ferramenta, onde salvei a resposta intacta e o limite de tentativas ou tempo.'],
+ ['evidence','Evidência por frase ou critério','Sustentada, não sustentada ou não verificada, e o trecho da fonte que decide.'],
+ ['correction','Correção e reconferência','Falha corrigida, o que mudou e o que conferi de novo.'],
+ ['next','Pendência e próxima volta','O que ficou em aberto e o que a próxima pessoa precisa saber.']
 ];

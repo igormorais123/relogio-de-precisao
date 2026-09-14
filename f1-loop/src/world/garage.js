@@ -61,7 +61,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   // a distância e a rugosidade, e a silhueta do carro bloqueia o reflexo.
   const floorUniforms = {
     uFloorCam: {value: new THREE.Vector3(5, 1.5, 5)},
-    uLedGain: {value: 1}, uScreenGain: {value: 1}, uMonitorGain: {value: 1}, uBand: {value: 0},
+    uLedGain: {value: 1}, uScreenGain: {value: 1}, uMonitorGain: {value: 1}, uBand: {value: 0}, uDirectSpec: {value: 1},
     uRoofOn: {value: 1}, uRearOn: {value: 1},
   };
   for (const m of [epoxy, bay]) patchFloorReflection(m, floorUniforms, mobile);
@@ -417,7 +417,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   function setMood({debrief = 0, evaluate = 0} = {}) {
     const d = THREE.MathUtils.clamp(debrief, 0, 1), e = THREE.MathUtils.clamp(evaluate, 0, 1);
     mood.debrief = d; mood.evaluate = e;
-    const ceilingGain = (1 - .85 * e) * (1 - .96 * d);
+    const ceilingGain = (1 - .94 * e) * (1 - .96 * d);
     ledCool.color.copy(ledCool.userData.base).multiplyScalar(ceilingGain);
     ledSlat.color.copy(ledSlat.userData.base).multiplyScalar((1 - .94 * e) * (1 - .9 * d));
     overhead.intensity = lightBase.get(overhead) * (1 - .85 * e) * (1 - .95 * d);
@@ -439,6 +439,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     floorUniforms.uScreenGain.value = rearGain;
     floorUniforms.uMonitorGain.value = 1 + 2.2 * e + .3 * d;
     floorUniforms.uBand.value = d;
+    floorUniforms.uDirectSpec.value = (1 - .8 * e) * (1 - .85 * d);
   }
 
   // -------------------------------------------------------- oclusão por câmera
@@ -678,12 +679,16 @@ function patchFloorReflection(material, uniforms, mobile) {
       .replace('#include <common>', `#include <common>
 varying vec3 vFloorPos;
 uniform vec3 uFloorCam;
-uniform float uLedGain, uScreenGain, uMonitorGain, uBand, uRoofOn, uRearOn;
+uniform float uLedGain, uScreenGain, uMonitorGain, uBand, uDirectSpec, uRoofOn, uRearOn;
 float floorRect(vec2 q, vec2 h, float blur) {
   vec2 d2 = abs(q) - h;
   float d = max(d2.x, d2.y);
   return (1.0 - smoothstep(-blur, blur, d)) * clamp(min(h.x, h.y) / blur, 0.0, 1.0);
 }`)
+      // Nos capítulos escuros o epóxi deixa de devolver o brilho das luzes diretas
+      // da cena (rim/key): sobra só o reflexo das fontes do próprio box.
+      .replace('#include <lights_fragment_end>', `#include <lights_fragment_end>
+reflectedLight.directSpecular *= uDirectSpec;`)
       .replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>
 {
   vec3 V = vFloorPos - uFloorCam;

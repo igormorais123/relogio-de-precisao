@@ -8,6 +8,8 @@ import * as THREE from 'three';
 export const wipeUniforms = {
   uWipePos: {value: -9},
   uWipeRes: {value: new THREE.Vector2(1, 1)},
+  // Screen point (0..1, y up) the diagonal crosses mid-sweep; phones raise it into the 3D band above the text.
+  uWipeCenter: {value: new THREE.Vector2(.5, .5)},
 };
 
 // Signed distance to the wipe line, in screen heights. Negative is lower-right
@@ -15,10 +17,11 @@ export const wipeUniforms = {
 export const WIPE_GLSL = /* glsl */`
 uniform float uWipePos;
 uniform vec2 uWipeRes;
+uniform vec2 uWipeCenter;
 float wipeHash(float n){return fract(sin(n)*43758.5453123);}
 float wipeNoise(float x){float i=floor(x),f=fract(x);f=f*f*(3.-2.*f);return mix(wipeHash(i),wipeHash(i+1.),f);}
 float wipeSigned(vec2 fragCoord){
-  vec2 p=(fragCoord-.5*uWipeRes)/uWipeRes.y;
+  vec2 p=(fragCoord-uWipeCenter*uWipeRes)/uWipeRes.y;
   vec2 n=vec2(-.3535,.9354);
   float along=dot(p,vec2(.9354,.3535));
   float rough=(wipeNoise(along*9.)-.5)*.022+(wipeNoise(along*41.)-.5)*.006;

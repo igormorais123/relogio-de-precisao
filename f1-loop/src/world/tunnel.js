@@ -469,7 +469,7 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
     ...FOG_UNIFORMS(),
     uPath: {value: pathTexture}, uRes: {value: new THREE.Vector2(1440, 900)},
     uTime: {value: 0}, uRate: {value: .12}, uFlow: {value: 0}, uSamples: {value: SAMPLES},
-    uThin: {value: .028}, uPuff: {value: .22}, uStreak: {value: .16}, uGain: {value: .05 * Math.sqrt(1200 / perLane)},
+    uThin: {value: .028}, uPuff: {value: .22}, uStreak: {value: .16}, uGain: {value: .036 * Math.sqrt(1200 / perLane)},
   };
   const smokeMaterial = new THREE.ShaderMaterial({
     fog: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
@@ -518,6 +518,9 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
         float puff=.5+.5*sin(t*53.+lane*2.3+sin(t*17.+lane)*1.7);
         float pulse=.35+.65*puff;
         vAlpha=uFlow*uGain*fade*pulse*mix(1.,.22,wake)*clamp(10./thick,.2,1.)*smoothstep(1.2,1.9,-mv.z);
+        // Thin the foreground over the car while retaining depth behind it.
+        float bodyCrossing=(1.-smoothstep(2.1,3.2,abs(W.z)))*smoothstep(.05,.85,W.x);
+        vAlpha*=mix(1.,.32,bodyCrossing);
         vLight=smoothstep(.1,1.2,W.y);
         vWake=wake; vSeed=position.z;
       #ifdef USE_FOG

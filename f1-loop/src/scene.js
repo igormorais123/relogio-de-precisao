@@ -9,6 +9,7 @@ import {wipeUniforms, WIPE_RANGE} from './fx/wipe-clip.js';
 import {createDust} from './fx/dust.js';
 import {createHighlight} from './fx/highlight.js';
 import {enhanceCar} from './fx/car-look.js';
+import {createSurfaceLibrary} from './fx/surface-library.js';
 import {createChoreo} from './fx/choreo.js';
 import {createGarage} from './world/garage.js';
 import {createTunnel} from './world/tunnel.js';
@@ -114,7 +115,21 @@ export async function createScene(stage, {onProgress, onError}) {
   for (const m of carMaterials.materials) if (m.name.toLowerCase().startsWith('pintura')) m.envMapIntensity = 1.25;
   const mechanics = createMechanics(model);
   applyInteiaBranding(model, mechanics);
+  // Complementary finish maps; keep the canonical car rig and solid pigment.
+  const surfaceLibrary = createSurfaceLibrary(THREE, {renderer, mobile});
+  const detailedMaterials = new Set();
+  model.traverse(object => { if (!object.isMesh) return;
+    for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
+      if (detailedMaterials.has(material)) continue;
+      const name = material.name.toLowerCase();
+      const kind = name.startsWith('pintura') ? 'paint' : name.includes('carbon') ? 'carbon' : ['pneus','borracha'].includes(name) ? 'rubber' : name === 'aço' ? 'aluminum' : null;
+      if (kind) { surfaceLibrary.applyTo(material, kind, {uvSpanMeters: name === 'pneus' ? .65 : 1}); detailedMaterials.add(material); }
+    }
+  });
+  stage.dataset.surfaceDetails = String(detailedMaterials.size);
+  // Wheel machining and artwork authored by the other execution refine these base maps.
   const carLook = enhanceCar({model, mechanics, mobile});
+  // The finish pass runs last so its art direction is the final word on the car materials.
   let triangles = 0;
   const offsetScale = new THREE.Vector3();
   // Parts smaller than a few centimetres add shadow-pass draw calls but no readable shadow.
@@ -171,6 +186,7 @@ export async function createScene(stage, {onProgress, onError}) {
     camera.setViewOffset(width, height, mobile ? 0 : -width * .15, mobile ? height * .2 : -height * .03, width, height);
     camera.updateProjectionMatrix();
     wipeUniforms.uWipeRes.value.copy(renderer.getDrawingBufferSize(buffer));
+    wipeUniforms.uWipeCenter.value.set(.5, mobile ? .7 : .5);
   }
 
   const partPoint = (record, extra) => record
@@ -205,7 +221,7 @@ export async function createScene(stage, {onProgress, onError}) {
     mechanics.setAmount(pose.explode);
     mechanics.setSpin(t > .01);
     mechanics.update(dt * (1 + 20 * t), time * 1000, true);
-    floor.set(pose.highlight, time);
+    floor.set(pose.highlight, time, pose.index);
     carLook.update(dt, time, pose);
     choreo.update(dt, time, pose);
     blobMaterial.opacity = .85 * (1 - smooth(pose.explode * 4));
@@ -248,13 +264,15 @@ export async function createScene(stage, {onProgress, onError}) {
   const debug = params.has('debug') ? (window.__scene = {scene, key, rim, front, hemi, garage, tunnel, post, mechanics}) : null;
 
   // Frame-time guard: long frames lower the render resolution once, never the story.
-  let samples = params.get('quality') === 'high' ? -1 : 0, accumulated = 0;
+  // Rolling 2-second windows keep watching, so a scene that only gets heavy later (the tunnel) is still caught.
+  const adaptive = params.get('quality') !== 'high';
+  let samples = 0, accumulated = 0;
   function adapt(dt) {
-    if (samples < 0) return;
+    if (!adaptive || dt > .25) return;
     accumulated += dt; samples++;
-    if (samples < 120) return;
-    if (accumulated / samples > .03 && pixelRatio > .9) { pixelRatio = Math.max(.85, pixelRatio - .3); resize(); samples = 0; accumulated = 0; stage.dataset.quality = String(pixelRatio); }
-    else samples = -1;
+    if (accumulated < 2) return;
+    if (accumulated / samples > .03 && pixelRatio > .9) { pixelRatio = Math.max(.85, pixelRatio - .2); resize(); stage.dataset.quality = String(pixelRatio); }
+    samples = 0; accumulated = 0;
   }
 
   stage.dataset.parts = String(mechanics.records.length);
@@ -282,6 +300,6 @@ export async function createScene(stage, {onProgress, onError}) {
       if (!stage.dataset.loaded) { stage.dataset.loaded = 'true'; stage.classList.add('loaded'); }
       adapt(dt);
     },
-    dispose() { post.dispose(); dust.dispose(); floor.dispose(); carLook.dispose(); carMaterials.dispose(); garage?.dispose(); tunnel?.dispose(); envGarage.dispose(); envTunnel.dispose(); renderer.dispose(); },
+    dispose() { post.dispose(); dust.dispose(); floor.dispose(); carLook.dispose(); surfaceLibrary.dispose(); carMaterials.dispose(); garage?.dispose(); tunnel?.dispose(); envGarage.dispose(); envTunnel.dispose(); renderer.dispose(); },
   };
 }

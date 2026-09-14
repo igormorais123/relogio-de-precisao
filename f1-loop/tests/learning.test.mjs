@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createLearningState, applyLearningAction, checkClaims, checkCorrection, CORRECTIONS } from './model.js';
-import { renderLearningMarkup } from './index.js';
+import { createLearningState, applyLearningAction, checkClaims, checkCorrection, CORRECTIONS } from '../src/learning/model.js';
+import { renderLearningMarkup } from '../src/learning/index.js';
 const validAnswers = [{verdict:'sustentada',source:'2'},{verdict:'nao-sustentada',source:'3'},{verdict:'nao-sustentada',source:'4'}];
 test('navigation, skipped stages and incomplete criteria do not produce progress',()=>{
  const s=createLearningState();
@@ -27,10 +27,11 @@ test('complete human action sequence records correction and bounded decision wit
  assert.equal(applyLearningAction(s,{stage:5,decision:'producao',responsibility:true}).passed,false);
  assert.equal(s.completed.length,5);
  const result=applyLearningAction(s,{stage:5,decision:'comunicar',responsibility:true});assert.equal(result.passed,true);
- assert.equal(result.state.history.length,6);assert.match(result.message,/não autoriza produção/);
+ assert.equal(result.state.history.length,6);assert.match(result.message,/não autoriza adoção definitiva/);
  assert.equal(applyLearningAction(result.state,{stage:5,decision:'comunicar',responsibility:true}).passed,false);
 });
 test('static markup contains fictional source, candidate and all six stages without global dialog',()=>{
- const html=renderLearningMarkup();assert.match(html,/INTEIRAMENTE FICTÍCIO/);assert.match(html,/120 ms/);assert.match(html,/20 de maio/);
+ const html=renderLearningMarkup();assert.match(html,/INTEIRAMENTE FICTÍCIO/);assert.match(html,/12 minutos/);assert.match(html,/20 de maio/);
  assert.equal((html.match(/data-lr-stage=/g)||[]).length,6);assert.doesNotMatch(html,/<dialog|<script/);assert.match(html,/<noscript>/);
 });
+

@@ -33,6 +33,25 @@ Definição central: **engenharia de loop é organizar tentativas com referênci
 
 O ciclo operacional é produzir → criticar → revisar → verificar. Preparação, orçamento e registro mantêm esse ciclo útil. A crítica pode levar diretamente à aceitação se não houver correção necessária; a narrativa não exige inventar um erro para completar uma volta.
 
+## Textos finais em `src/content.js` (14/09/2026)
+
+Público: doutorandos em gestão pública; o objeto de trabalho é documento, pasta e processo. Os títulos abaixo substituem os das seções seguintes quando divergirem; `src/content.js` é a fonte viva.
+
+| Capítulo | Título | Lead | Princípio |
+|---|---|---|---|
+| Preparar | ANTES DE PEDIR, / DEFINA O PRONTO. | Sem critério escrito, qualquer resposta da IA parece boa. Decida antes como vai conferir. | Fonte · critério · o que não pode piorar |
+| Hipótese | UMA MUDANÇA. / UMA PREVISÃO. | Diga o que espera ver antes de ver. E o que provaria que você errou. | Uma mudança · efeito esperado · como refutar |
+| Executar | RODE O TESTE. / GUARDE A BASE. | A resposta da IA só vale ao lado da fonte. Guarde as duas antes de mexer. | Pedido registrado · fonte · resposta intacta |
+| Avaliar | PARECE BOM. / MAS PASSOU? | Texto bem escrito não é evidência. Confira cada frase na fonte. | Sustentada · não sustentada · não verificada |
+| Corrigir | CORRIJA O ERRO. / NÃO O CRITÉRIO. | Conserte a falha demonstrada e confira de novo o que já estava certo. | Falha demonstrada · menor correção · reconferir |
+| Encerrar | DECIDA COM PROVA. / REGISTRE A VOLTA. | A decisão é sua, não da IA. Diga o que a evidência permite e o que ainda não permite. | Decisão · evidência · próxima volta |
+
+**Caso contínuo (fictício).** Os exemplos resolvidos (`example`) usam o mesmo caso da prática de `src/learning/model.js`: um comunicado interno sobre o teste de um formulário de atendimento. O registro diz que 50 pedidos por versão tiveram medianas de 12 e 9 minutos, que formulário e equipe mudaram juntos e que não há data nem autorização de adoção. A candidata atribui a causa ao formulário e inventa a data de adoção. Em cada capítulo, o exemplo mostra como fica bem escrito o campo do registro: critério (Preparar), hipótese, teste, evidência por frase, correção e decisão com pendência.
+
+**Quiz.** `question`, `choices`, `correct`, `feedback` e `feedbacks` (uma explicação por alternativa) continuam no conteúdo como situações avulsas de gestão pública com IA (resumo de processo para despacho). A integração de 14/09 oculta o quiz e usa a prática contínua no lugar.
+
+**Fatos de F1.** Reconferidos nas fontes primárias em 14/09/2026, sem fato novo: configuração de partida no simulador (Mercedes); correlação, flow-vis e aero rakes (Rob Smedley, F1, 21/02/2020); mais de 250 sensores e priorização dos dados (Mercedes); piso da Ferrari em Monza contra o quicar da atualização de Barcelona, com a ressalva de não confundir coincidência com causa (Hughes e Piola, F1, 05/09/2024); debrief estruturado entre sessões (McLaren, 19/05/2026).
+
 ## Arco
 
 **Abertura:** um detalhe do carro vermelho no box revela gradualmente o conjunto. No painel, os campos “Referência”, “Critério” e “Decisão” estão vazios. A primeira tarefa não é acelerar: é preencher o que permitirá avaliar uma mudança.

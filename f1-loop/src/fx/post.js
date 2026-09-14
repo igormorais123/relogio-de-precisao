@@ -39,7 +39,7 @@ class CinemaEffect extends Effect {
       uniforms: new Map([
         ['uBand', new Uniform(0)], ['uTime', new Uniform(0)], ['uGrade', new Uniform(1)],
         ['uShadow', new Uniform(new Vector3(.9, 1.0, 1.06))], ['uHigh', new Uniform(new Vector3(1.05, 1.0, .94))],
-        ['uWipePos', wipeUniforms.uWipePos], ['uWipeRes', wipeUniforms.uWipeRes],
+        ['uWipePos', wipeUniforms.uWipePos], ['uWipeRes', wipeUniforms.uWipeRes], ['uWipeCenter', wipeUniforms.uWipeCenter],
       ]),
     });
   }
@@ -71,11 +71,24 @@ class MotionBlurEffect extends Effect {
   }
 }
 
+// A single NaN texel from any material is smeared by bloom and DOF blurs into a black frame.
+// Replace invalid or runaway values before any blur reads the image.
+const sanitizeFragment = /* glsl */`
+void mainImage(const in vec4 inputColor,const in vec2 uv,out vec4 outputColor){
+  vec4 c=inputColor;
+  if(any(isnan(c))||any(isinf(c))||!(c.r+c.g+c.b+c.a<1e5)) c=vec4(0.,0.,0.,1.);
+  outputColor=vec4(clamp(c.rgb,0.,64.),clamp(c.a,0.,1.));
+}`;
+
+class SanitizeEffect extends Effect {
+  constructor() { super('SanitizeEffect', sanitizeFragment, {blendFunction: BlendFunction.SET}); }
+}
+
 export function createPost(renderer, scene, camera, {mobile}) {
   const composer = new EffectComposer(renderer, {multisampling: 0, frameBufferType: HalfFloatType});
   composer.addPass(new RenderPass(scene, camera));
   const motion = mobile ? null : new MotionBlurEffect();
-  if (motion) composer.addPass(new EffectPass(camera, motion));
+  composer.addPass(new EffectPass(camera, ...(motion ? [motion] : []), new SanitizeEffect()));
   const viewProj = new Matrix4(), previous = new Matrix4();
   let fresh = true;
   const dof =mobile ? null : new DepthOfFieldEffect(camera, {focusDistance: 7, focusRange: 2.4, bokehScale: 3, resolutionScale: .6});

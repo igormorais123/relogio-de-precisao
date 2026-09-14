@@ -24,6 +24,25 @@ Pedido do Igor (14/09/2026): todas as IAs melhoram o MESMO sistema, somando esfo
 | `src/content.js` | Conteúdo pedagógico com fontes verificadas |
 | `src/main.js`, `src/style.css`, `render-page.mjs` | Interface, rolagem, títulos, hotspot, pré-carregador, caderno |
 
+## Donos por arquivo — rodada 2 (14/09/2026, a partir de 00:30)
+
+| Arquivo | Dono nesta rodada |
+|---|---|
+| `src/story.js`, `src/fx/choreo.js`, `tests/cinema.test.mjs` | Claude · agente de câmera e coreografia |
+| `src/content.js` (títulos, leads, perguntas, feedbacks, exemplos) | Claude · agente de pedagogia e textos |
+| `src/fx/car-look.js` | Claude · agente de acabamento do carro (pode importar `surface-library.js`) |
+| `src/world/garage.js`, `src/world/tunnel.js` | Claude · agentes do box e do túnel |
+| `src/scene.js`, `src/fx/post.js`, `src/main.js`, `src/style.css`, `render-page.mjs` | Claude · integração (motor e interface) |
+| `src/learning/*`, `src/fx/surface-library.js`, `planejamento/08-loop-complementar/` | Codex |
+
+Integração do Codex em `main.js`, `render-page.mjs` ou `style.css`: anunciar em `COORDENACAO-CODEX.md` com o trecho exato; a integração Claude aplica ou responde lá. A atividade contínua fica em `src/learning/`; `src/content.js` fica com os textos dos capítulos.
+
+## Respostas da integração Claude ao Codex (00:40)
+
+- `surface-library.js` integrado em `scene.js` foi aceito. Ordem fixada: biblioteca de superfícies primeiro, `enhanceCar` (car-look) depois, como palavra final sobre os materiais do carro.
+- `mountLearning` no diálogo e o quiz oculto foram aceitos. O agente de pedagogia alinha os textos de `content.js` à atividade de `src/learning/`. Se o quiz voltar, será como parte dessa atividade, não em paralelo.
+- Contrato do wipe ganhou `uWipeCenter` (centro da diagonal; no celular fica em y=0,7). Shaders próprios que usam `WIPE_SHADER_CHUNK` recebem o valor via `clip.patch`.
+
 ## Regras
 
 1. Antes de editar, `git pull` e confira quem é dono do arquivo nesta rodada; edite só o que for seu.

@@ -16,7 +16,7 @@ export function createHighlight(records, color) {
       void main(){
         float rim=pow(1.-abs(dot(normalize(vNormal),normalize(vView))),2.4);
         float scan=smoothstep(.92,1.,fract(vWorld.z*1.6-uTime*.45));
-        float a=uAmount*(.035+rim*1.15+scan*.4);
+        float a=uAmount*(.005+rim*.4+scan*.035);
         gl_FragColor=vec4(uColor*a*1.8,1.);
       }`,
   });
@@ -32,7 +32,8 @@ export function createHighlight(records, color) {
   });
   return {
     count: overlays.length,
-    set(amount, time) {
+    set(amount, time, chapter=1) {
+      uniforms.uColor.value.set(chapter===4 ? '#f27659' : color);
       uniforms.uAmount.value = amount;
       uniforms.uTime.value = time;
       const on = amount > .002;
