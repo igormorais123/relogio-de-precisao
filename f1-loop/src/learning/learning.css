@@ -2,3 +2,7 @@ dialog:has([data-learning-root]){width:min(1050px,calc(100vw - 28px))}.lr-lab{--
 
 .lr-static-reading{max-width:1050px;margin:0 auto;padding:80px 24px 120px}.lr-static-reading button{display:none}
 
+
+.lr-field textarea{width:100%;min-height:100px;padding:.85rem;background:#182327;color:#f4f1e9;border:1px solid #899ba2;border-radius:0;font:inherit;resize:vertical}.lr-field textarea:focus-visible{outline:3px solid #ffbb9f;outline-offset:3px}.lr-field textarea[readonly]{border-style:dashed;color:#d5dfdf}.lr-request{margin:1rem 0;padding:1rem;border-left:2px solid #e85245;background:#182327}.lr-record [data-lr-criterion],.lr-record [data-lr-decision]{white-space:pre-wrap;overflow-wrap:anywhere}@media(max-width:640px){.lr-field textarea{font-size:16px}}
+
+.lr-self-review{display:grid;grid-template-columns:1fr 1fr;gap:1rem;border-top:1px solid #ffffff30;padding-top:1rem;margin-top:1.5rem}.lr-self-review[hidden]{display:none}.lr-self-review>h4,.lr-self-review>.lr-check,.lr-self-review>p:last-child{grid-column:1/-1}.lr-self-review>p{margin:0}.lr-lab>[data-lr-documents]>summary{cursor:pointer;padding:1rem 0;min-height:44px;color:inherit}@media(max-width:760px){.lr-self-review{grid-template-columns:1fr}}
