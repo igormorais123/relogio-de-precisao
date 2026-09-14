@@ -75,7 +75,8 @@ export async function createScene(stage, {onProgress, onError, signal}) {
 
   // Warm key against a cold world (R10); the environment map supplies the softboxes.
   const warmKey = new THREE.Color('#ffcf9e'), coldKey = new THREE.Color('#dcecff');
-  const warmRim = new THREE.Color('#8fb6ff'), coldRim = new THREE.Color('#4fd6ff');
+  // Hot subject, cold world: the box rim is amber and only the tunnel turns it cyan.
+  const warmRim = new THREE.Color('#ffa24a'), coldRim = new THREE.Color('#4fd6ff');
   const key = new THREE.DirectionalLight(warmKey, 3);
   key.position.set(4.5, 7, -2.5);
   key.castShadow = true;
@@ -250,13 +251,16 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     tunnel?.update(dt, camera, time);
 
     key.color.lerpColors(warmKey, coldKey, t);
-    key.intensity = (3.1 - .8 * t) * (1 - .6 * d) * (1 - .65 * v) * e;
+    // Corrigir (≈3.9–4.75) gets its own light: fill down, blacks back to black, car the brightest thing.
+    const fix = smooth((pose.index + pose.local - 3.9) / .2) * (1 - smooth((pose.index + pose.local - 4.6) / .25));
+    key.intensity = (3.1 - .8 * t) * (1 - .6 * d) * (1 - .65 * v) * (1 - .2 * fix) * e;
     rim.color.lerpColors(warmRim, coldRim, t);
-    rim.intensity = (1.7 + 1.8 * t + 1.2 * d) * e;
-    front.intensity = .3 * (1 - .8 * d) * (1 - .7 * v) * e;
-    hemi.intensity = .28 * (1 - .5 * v) * e;
+    // Steep amber rim also lands on the floor: kept low in the box, the edge line comes from the coat.
+    rim.intensity = (1.1 + 2.4 * t + .4 * d) * (1 - .4 * fix) * e;
+    front.intensity = .3 * (1 - .8 * d) * (1 - .7 * v) * (1 - .6 * fix) * e;
+    hemi.intensity = .28 * (1 - .5 * v) * (1 - .6 * fix) * (1 - .5 * d) * e;
     kicker.intensity = 1.4 * (1 - t) * (1 + .6 * d) * e;
-    scene.environmentIntensity = (.9 + .15 * t) * (1 - .35 * d) * (1 - .4 * v) * e;
+    scene.environmentIntensity = (.9 + .15 * t) * (1 - .35 * d) * (1 - .4 * v) * (1 - .3 * fix) * e;
     const g = t > 0 ? [0, 1].map(k => gradeGarage[k].map((v, i) => mix(v, gradeTunnel[k][i], t))) : gradeGarage.map((row, k) => row.map((v, i) => mix(v, gradeDebrief[k][i], d)));
     post.setGrade(g[0], g[1], 1);
     post.setBloom(.5 + .35 * t + .3 * d);
