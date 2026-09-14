@@ -356,7 +356,8 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     const g = t > 0 ? [0, 1].map(k => gradeGarage[k].map((v, i) => mix(v, gradeTunnel[k][i], t))) : gradeGarage.map((row, k) => row.map((v, i) => mix(v, gradeDebrief[k][i], d)));
     if (r > 0) for (let k = 0; k < 2; k++) for (let i = 0; i < 3; i++) g[k][i] = mix(g[k][i], gradeTrack[k][i], r);
     post.setGrade(g[0], g[1], 1);
-    post.setBloom(mix(mix(.5 + .35 * t + .3 * d, .62, r),.12,dedicated));
+    // Chapter 07: the work light mirrors on the piston crowns and bloom turned them into white halos; the bay needs none.
+    post.setBloom(mix(mix(mix(.5 + .35 * t + .3 * d, .62, r),.12,dedicated),.18,engineZoom));
     post.setSpeed(run, run * .7);
     post.setBand(pose.incoming ? pose.wipe : 0, time);
     focus.fromArray(pose.focus);
