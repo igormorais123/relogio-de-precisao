@@ -239,6 +239,12 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       target.y = mix(target.y, .4, mobileBay);
       target.z = mix(target.z, 0, mobileBay);
     }
+    // In portrait the car stays framed until the track gives way to the station.
+    if (mobile && pose.track > 0) {
+      target.x = mix(target.x, 0, pose.track);
+      target.y = mix(target.y, .55, pose.track);
+      target.z = mix(target.z, 0, pose.track);
+    }
     // Handheld breathing and pointer parallax stay small so the take remains legible.
     const follow = 1 - Math.exp(-dt * 3);
     pointer.sx += (pointer.x - pointer.sx) * follow; pointer.sy += (pointer.y - pointer.sy) * follow;
