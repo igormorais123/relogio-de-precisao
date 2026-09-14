@@ -34,7 +34,7 @@ function paintCopy(){
  $$('.chapter').forEach((s,i)=>{const r=s.getBoundingClientRect();if(r.bottom<-vh*.5||r.top>vh*1.3)return;
   // An opened "what changes in my work" note holds the copy on screen until it is closed.
   // On phones the copy appears only once the chapter is pinned, so it never slides up under the dots and footer.
-  const raw=-r.top/Math.max(1,r.height-vh),enter=i===0?1:narrow?smooth((raw+.03)/.03):smooth((raw+.34)/.3),leave=i===5||s.querySelector('.lesson[open]')?0:smooth((raw-.74)/.18);
+  const raw=-r.top/Math.max(1,r.height-vh),enter=i===0?1:(i===2||i===3)?(narrow?smooth((raw-.03)/.06):smooth((raw-.03)/.25)):narrow?smooth((raw+.03)/.03):smooth((raw+.34)/.3),leave=i===5||s.querySelector('.lesson[open]')?0:smooth((raw-.74)/.18);
   s.style.setProperty('--in',enter.toFixed(3));s.style.setProperty('--out',leave.toFixed(3));
   s.classList.toggle('dissolving',leave>.001);s.classList.toggle('copy-off',enter*(1-leave)<.04);shown=Math.max(shown,enter*(1-leave));});
  // Between reading windows the camera travels: the chapter dots recede so they never sit on the hero.
