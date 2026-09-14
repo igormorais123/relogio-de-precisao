@@ -402,6 +402,27 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     try { await renderer.compileAsync(scene, camera); } catch { renderer.compile(scene, camera); }
   }
   renderer.setRenderTarget(null);
+  // First tunnel entry: programs are compiled above, but the tunnel textures (the disc maps are redrawn
+  // once the stencil font loads) and the wipe band only upload when first drawn. Upload them and draw one
+  // frame of the box → tunnel wipe halfway through, behind the preloader.
+  await tunnel.ready;
+  const warmTextures = new Set();
+  tunnel.root.traverse(o => {
+    for (const m of [].concat(o.material || [])) {
+      for (const value of Object.values(m)) if (value?.isTexture) warmTextures.add(value);
+      for (const u of Object.values(m.uniforms || {})) if (u?.value?.isTexture) warmTextures.add(u.value);
+    }
+  });
+  for (const texture of warmTextures) renderer.initTexture(texture);
+  garage.root.visible = tunnel.root.visible = true; track.root.visible = false;
+  garage.clip.side = -1; tunnel.clip.side = 1; wipeUniforms.uWipePos.value = 0;
+  scene.environment = envTunnel.texture;
+  camera.position.set(4.6, 1.5, 5.8); camera.lookAt(0, .5, 0); camera.updateMatrixWorld();
+  tunnel.setFlow(1); tunnel.update(.1, camera, 0);
+  post.setBand(.5, 0); post.render(0); post.setBand(0, 0);
+  garage.clip.side = tunnel.clip.side = 0; wipeUniforms.uWipePos.value = -9; tunnel.setFlow(0);
+  // Back to the last compiled pair (box + track) for the speed frame below.
+  tunnel.root.visible = false; track.root.visible = true; scene.environment = envGarage.texture;
   // One frame at full speed behind the preloader, so the first run does not stall on the speed pass.
   post.setSpeed(1, 1); post.render(0); post.setSpeed(0, 0); post.resetMotion();
   track.root.visible = false; wheelBlur.update(0); sparks.update(0, 0);

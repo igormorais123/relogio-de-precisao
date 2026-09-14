@@ -739,7 +739,8 @@ export function createTunnel({renderer, scene, mobile = false} = {}) {
       const base = import.meta.env?.BASE_URL ?? '/';
       const face = new FontFace(FONT, `url(${base}fonts/BebasNeue-Regular.woff2)`);
       document.fonts.add(face);
-      ready = face.load().then(() => { diskMap.userData.redraw(); diskEmissive.userData.redraw(); }).catch(() => {});
+      // Upload the redrawn 2048 px disc maps now: deferred, they landed on the first tunnel frame.
+      ready = face.load().then(() => { diskMap.userData.redraw(); diskEmissive.userData.redraw(); renderer?.initTexture?.(diskMap); renderer?.initTexture?.(diskEmissive); }).catch(() => {});
     }
   } catch { /* fonte opcional: o estêncil já foi desenhado com a pilha de reserva */ }
 
