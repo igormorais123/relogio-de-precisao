@@ -187,7 +187,11 @@ test('each text-free close centres one part at 45–65%, locks a short focus on 
   for (const [p, indices, name] of closes) {
     const pose = sampleStory(p), [lo, hi] = partBox(indices, pose.explode), s = screenBox(pose, lo, hi), e = carExtent(pose);
     assert.ok(s.centre >= .45 && s.centre <= .65, `${name} centred at ${(s.centre * 100).toFixed(0)}% at ${p}`);
-    assert.ok(e && e.max <= .88, `${name} close lets the car reach ${(e?.max * 100).toFixed(0)}% at ${p}`);
+    // Camera r6 (cinema r5 G4), explicit exception for the floor close only (1.58–1.70, no copy on screen): a long
+    // lens from the rear quarter makes the floor the frame, so the flown wheels and wings run past both edges and the
+    // ≤88% rule cannot hold. There the part itself must be big (≥35% of the width); the lock and bokeh checks stay.
+    if (p >= 1.58 && p <= 1.70) assert.ok(e && s.width >= .35, `${name} close only ${(s.width * 100).toFixed(0)}% wide at ${p} (car ${(e?.min * 100).toFixed(0)}%–${(e?.max * 100).toFixed(0)}%)`);
+    else assert.ok(e && e.max <= .88, `${name} close lets the car reach ${(e?.max * 100).toFixed(0)}% at ${p}`);
     const eye = new THREE.Vector3().fromArray(pose.camera), centre = new THREE.Vector3(...lo.map((v, k) => (v + hi[k]) / 2));
     assert.ok(Math.abs(eye.distanceTo(new THREE.Vector3().fromArray(pose.focus)) - eye.distanceTo(centre)) < .5, `${name} is not the focal plane at ${p}`);
     assert.ok(pose.focusRange <= 1.6 && pose.bokeh >= .45, `${name} close keeps a deep focus (range ${pose.focusRange.toFixed(2)}, bokeh ${pose.bokeh.toFixed(2)})`);
@@ -289,6 +293,56 @@ test('the Corrigir crane focuses on the nose with bokeh at most 0.25', () => {
   const pose = sampleStory(4.66);
   assert.ok(pose.bokeh <= .25, `bokeh ${pose.bokeh.toFixed(2)}`);
   assert.ok(Math.hypot(...pose.focus.map((v, k) => v - [0, .3, 2.2][k])) < .3, `focus ${pose.focus.map(v => v.toFixed(2))} is not on the nose`);
+});
+
+// Camera r6 (cinema r5 M2): leaving the island the crane pans onto the car, which is whole across and clear of the
+// copy column from 3.86 on (desktop 42–92%), and in frame on the phone. Looking down its length, the nose and the
+// rear wing may touch the top and bottom edges (≥80% of the hull in frame).
+test('the exit from Avaliar has the car in frame and clear of the copy column from 3.86 to 3.96', () => {
+  for (let p = 3.86; p <= 3.9601; p += .01) {
+    const pose = sampleStory(p), e = carExtent(pose), {x0, x1} = phoneExtent(pose);
+    assert.ok(e && e.min >= .42 && e.max <= .92 && e.visible >= .8, `p=${p.toFixed(2)} desktop car ${e ? `${(e.min * 100).toFixed(0)}%–${(e.max * 100).toFixed(0)}%, ${(e.visible * 100).toFixed(0)}% visible` : 'off screen'}`);
+    assert.ok(x0 >= 0 && x1 <= 1 && x1 - x0 >= .45, `p=${p.toFixed(2)} phone car ${(x0 * 100).toFixed(0)}%–${(x1 * 100).toFixed(0)}%`);
+  }
+});
+
+// Camera r6 (cinema r5 M1, M6): on the track the car is the frame. Hull boxes carry wheel and wing corners, so they
+// read ≈1.2× the visible silhouette: 0.72 of the desktop width ≈ 60% visible, 0.8 of the phone width ≈ 65%.
+// The desktop track frame is centred (scene.js view offset × (1 − center)); the phone frame is not lifted.
+const trackFrame = new THREE.PerspectiveCamera(30, 1440 / 900, .05, 80);
+function hullSpan(camera, pose) {
+  const v = new THREE.Vector3();
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const [category, box, dir] of HULL) {
+    const t = ease(pose.explode, DELAY[category], 1);
+    for (let i = 0; i < 8; i++) {
+      v.set(box[i & 1 ? 3 : 0] + dir[0] * t, box[i & 2 ? 4 : 1] + dir[1] * t, box[i & 4 ? 5 : 2] + dir[2] * t).project(camera);
+      x0 = Math.min(x0, (v.x + 1) / 2); x1 = Math.max(x1, (v.x + 1) / 2); y0 = Math.min(y0, (1 - v.y) / 2); y1 = Math.max(y1, (1 - v.y) / 2);
+    }
+  }
+  return {x0, x1, y0, y1};
+}
+test('on the track the car fills ≥60% of the desktop width at 2.72–2.84 and ≥65% of the phone width, low in the phone frame', () => {
+  for (let p = 2.72; p <= 2.8401; p += .02) {
+    const pose = sampleStory(p);
+    assert.equal(pose.center, 1, `track frame not centred at ${p}`);
+    // scene.js adds the speed camera's FOV kick (speed.js: 8° × smoothstep(speed)) scaled by shake.
+    const kick = 8 * pose.speed * pose.speed * (3 - 2 * pose.speed) * pose.shake;
+    trackFrame.fov = pose.fov + kick; trackFrame.updateProjectionMatrix(); trackFrame.position.fromArray(pose.camera);
+    trackFrame.lookAt(new THREE.Vector3().fromArray(pose.target)); trackFrame.updateMatrixWorld();
+    const d = hullSpan(trackFrame, pose);
+    assert.ok(d.x1 - d.x0 >= .72 && d.x0 >= .01 && d.x1 <= .99, `p=${p.toFixed(2)} desktop car ${(d.x0 * 100).toFixed(0)}%–${(d.x1 * 100).toFixed(0)}%`);
+  }
+  for (let p = 2.62; p <= 2.8801; p += .02) {
+    const pose = sampleStory(p), f = portraitFrame(pose, 390 / 844);
+    phone.setViewOffset(390, 844, 0, 844 * f.offsetY, 390, 844);
+    phone.fov = f.fov; phone.updateProjectionMatrix(); phone.position.fromArray(f.camera); phone.lookAt(new THREE.Vector3().fromArray(f.target)); phone.updateMatrixWorld();
+    const m = hullSpan(phone, pose);
+    assert.ok(m.x1 - m.x0 >= .8 && m.x0 >= 0 && m.x1 <= 1, `p=${p.toFixed(2)} phone car ${(m.x0 * 100).toFixed(0)}%–${(m.x1 * 100).toFixed(0)}%`);
+    // Horizon lower: the car sits in the lower half, with the lit stands above it instead of dark asphalt below,
+    // and stays above the chapter dots (≈90% of the height).
+    assert.ok((m.y0 + m.y1) / 2 >= .5 && m.y1 <= .88, `p=${p.toFixed(2)} phone car at ${(m.y0 * 100).toFixed(0)}%–${(m.y1 * 100).toFixed(0)}% of the height`);
+  }
 });
 
 test('the car works in the tunnel and settles back exactly when it leaves', () => {

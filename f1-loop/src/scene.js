@@ -17,7 +17,7 @@ import {createGarage} from './world/garage.js';
 import {createTunnel} from './world/tunnel.js';
 import {createTrack} from './world/track.js';
 import {speedCamera, createWheelBlur, createSparks} from './fx/speed.js';
-import {portraitFrame} from './story.js';
+import {portraitFrame, monitorShot} from './story.js';
 
 const FOG = '#0b1014';
 const mix = (a, b, t) => a + (b - a) * t;
@@ -229,6 +229,8 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     partPoint(steering, new THREE.Vector3(0, .62, -.7)),
   ];
 
+  // Monitor reading shot state (camera r6): weight and reading arrive straight from the scroll, so they are damped.
+  const shot = {weight: 0, reading: 0, lens: null};
   function apply(dt, time) {
     const t = pose.tunnel, d = pose.debrief, e = pose.exposure, v = pose.evaluate;
     const p = pose.index + pose.local;
@@ -239,12 +241,18 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     const portrait = mobile ? portraitFrame(pose, width / height) : null;
     camera.position.fromArray(portrait ? portrait.camera : pose.camera);
     target.fromArray(portrait ? portrait.target : pose.target);
-    // Dedicated monitor reading (monitor-scene.js): the lens settles on the lesson screen, held still.
-    const dedicated=pose.monitorScene||0;
-    if(dedicated>0){
-      target.lerp(garage.anchors.monitors,dedicated);
-      offset.copy(garage.anchors.monitors);offset.x+=mobile?4.8:2.2;offset.y+=.035;offset.z+=.025;
-      camera.position.lerp(offset,dedicated);
+    // Dedicated monitor reading (monitor-scene.js; story.js monitorShot): a drifting shot with a rack focus,
+    // blended over the held island pose. Damped like main.js damps the story, so a wheel step never jumps the
+    // lens; the reading snaps while the shot is out of frame (arriving from elsewhere does not replay pages).
+    const lag = 1 - Math.exp(-Math.min(dt, .1) * 5), wantReading = pose.monitorReading ?? shot.reading;
+    shot.weight += ((pose.monitorScene || 0) - shot.weight) * lag;
+    if (shot.weight < 1e-3) { if (!pose.monitorScene) shot.weight = 0; shot.reading = wantReading; }
+    else shot.reading += (wantReading - shot.reading) * lag;
+    const dedicated = shot.weight < 1e-3 ? 0 : shot.weight;
+    shot.lens = dedicated > 0 ? monitorShot(shot.reading, width / height) : null;
+    if (shot.lens) {
+      target.lerp(offset.fromArray(shot.lens.target), dedicated);
+      camera.position.lerp(offset.fromArray(shot.lens.camera), dedicated);
     }
     if(engineZoom>0){
       target.lerp(inCarEngine.center,engineZoom);
@@ -264,7 +272,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     speedCamera(time, run, shake, pose.fov);
     const s = pose.shake || 0;
     camera.fov = portrait ? portrait.fov + shake.fovKick * s * 1.32 : pose.fov + shake.fovKick * s;
-    camera.fov = mix(camera.fov, mobile ? 34 : 26, dedicated);
+    if (shot.lens) camera.fov = mix(camera.fov, shot.lens.fov, dedicated);
     camera.fov = mix(camera.fov,mobile?39:33,engineZoom);
     camera.far = r > 0 ? track.cameraFar : 80;
     camera.updateProjectionMatrix();
@@ -350,9 +358,11 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     post.setBand(pose.incoming ? pose.wipe : 0, time);
     focus.fromArray(pose.focus);
     // Focus range and bokeh scale come from the story pose.
-    focus.lerp(garage.anchors.monitors,dedicated);
+    // Monitor reading: the rack from the card label to its number (story.js monitorShot).
+    let range = pose.focusRange, bokehScale = pose.bokehScale;
+    if (shot.lens) { focus.lerp(offset.fromArray(shot.lens.focus), dedicated); range = mix(range, shot.lens.focusRange, dedicated); bokehScale = mix(bokehScale, shot.lens.bokehScale, dedicated); }
     focus.lerp(inCarEngine.center,engineZoom);
-    post.focus(camera.position.distanceTo(focus), mix(pose.focusRange,4,Math.max(dedicated,engineZoom)), mix(pose.bokehScale,.1,Math.max(dedicated,engineZoom)));
+    post.focus(camera.position.distanceTo(focus), mix(range,4,engineZoom), mix(bokehScale,.1,engineZoom));
     // Seams (story haze): the far box floor and the tunnel shell sink into dark haze with no horizon,
     // and the dust thins so the empty background never reads as a starry sky.
     const h = pose.haze || 0;

@@ -109,7 +109,9 @@ export function createChoreo({model, mechanics, mobile = false, scene} = {}) {
     }
 
     if (lines) {
-      const fade = (pose?.engineChapter ? 0 : 1) * smoothstep(amount, .3, .62) * (.3 + .04 * Math.sin(time * 1.3));
+      // Camera r6 (cinema r5 G4): the constellation steps back during the floor close (1.58–1.70), so the part reads.
+      const p = (pose?.index || 0) + (pose?.local || 0), close = smoothstep(p, 1.5, 1.58) * (1 - smoothstep(p, 1.7, 1.78));
+      const fade = (pose?.engineChapter ? 0 : 1) * smoothstep(amount, .3, .62) * (.3 + .04 * Math.sin(time * 1.3)) * (1 - .9 * close);
       lines.visible = nodes.visible = fade > .005;
       if (lines.visible) {
         lineMaterial.opacity = fade; nodeMaterial.opacity = Math.min(1, fade * 2.2);
