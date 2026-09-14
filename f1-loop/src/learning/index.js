@@ -44,9 +44,9 @@ export function mountLearning(container, { chapterIndex = 0, onNavigate } = {}) 
     root.classList.add('lr-mounted');
     root.querySelectorAll('[data-lr-stage]').forEach(el => { el.hidden = Number(el.dataset.lrStage) !== current; });
     const pending = state.completed.length;
-    $('[data-lr-progress]').textContent = pending === 6 ? 'Percurso registrado: fonte, candidata, achados, correção e decisão.' : `${STAGES[current]} · Próxima ação: ${STAGES[pending]}.`;
+    $('[data-lr-progress]').textContent = pending === 6 ? 'Percurso registrado: fonte, candidata, achados, correção e decisão.' : current === pending ? `Próxima ação: ${STAGES[pending]}.` : `${STAGES[current]} · Próxima ação: ${STAGES[pending]}.`;
     root.querySelectorAll('[data-lr-submit]').forEach(button => { button.disabled = Number(button.dataset.lrSubmit) !== pending; });
-    $('[data-lr-resume]').hidden = pending === 6 || current === pending;
+    $('[data-lr-resume]').hidden = pending === 6 || current === pending || state.completed.includes(current);
     $('[data-lr-next]').hidden = pending === 6 || !state.completed.includes(current);
     $('[data-lr-history]').innerHTML = state.history.length ? state.history.map(h=>`<li><strong>${esc(h.stage)}:</strong> ${esc(h.action)}</li>`).join('') : '<li>Nenhuma ação registrada.</li>';
     $('[data-lr-corrected]').textContent = state.correctedText ? `Versão que você conferiu: ${state.correctedText}` : '';
@@ -94,7 +94,7 @@ export function mountLearning(container, { chapterIndex = 0, onNavigate } = {}) 
       $(`[data-lr-summary="${f.index}"]`).textContent = `Frase ${f.index+1}${f.passed ? ' · Conferido' : ' · Rever'}`;
     });
     const result = applyLearningAction(state, action); state = result.state;
-    draw(); feedback.textContent = result.message;
+    draw(); feedback.textContent = result.message; feedback.dataset.ok = String(result.passed);
     root.dispatchEvent(new CustomEvent('learning-action', { bubbles:true, detail:{passed:result.passed, stage:action.stage, completed:state.completed.length} }));
     if (result.passed) {
       if (state.completed.length === 6) $('[data-lr-record]').open = true;
