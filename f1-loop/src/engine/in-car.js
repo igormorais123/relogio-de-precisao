@@ -31,7 +31,7 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
  const root=new THREE.Group();root.name='Motor no compartimento';root.position.copy(ENGINE_AT);root.visible=false;scene.add(root);
 
  let state='idle',ready=false,disposed=false,split=false,reveal=0,abort=null,mixer=null;
- const groups=[],engineGeometries=new Set(),engineMaterials=new Set(),engineTextures=new Set(),cutMaterials=new Map();
+ const groups=[],engineGeometries=new Set(),engineMaterials=new Set(),engineTextures=new Set(),cutMaterials=new Map(),satinMaterials=new Map();
  // Section plane: keeps x < constant; swept from outside the engine to the crank centreline.
  const cutPlane=new THREE.Plane(new THREE.Vector3(-1,0,0),.7);
 
@@ -102,25 +102,33 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
    groups.push({object:o,cut:!/rotating|turbo/.test(o.name),hiddenWhenCut:/head_right|exhaust_right|electric/.test(o.name)});
   });
   const sectioned=m=>{if(!cutMaterials.has(m)){const c=m.clone();c.clippingPlanes=[cutPlane];c.side=THREE.DoubleSide;cutMaterials.set(m,c);}return cutMaterials.get(m);};
-  for(const g of groups)if(g.cut)g.object.traverse(o=>{if(o.isMesh)o.material=Array.isArray(o.material)?o.material.map(sectioned):sectioned(o.material);});
+  // Moving parts in polished metal (roughness 0.22–0.39) flare white under the close work light: a satin copy
+  // keeps the pistons, rods and crank readable in the section.
+  const satin=m=>{if(!satinMaterials.has(m)){const c=m.clone();c.roughness=Math.max(c.roughness,.46);c.envMapIntensity=.8;satinMaterials.set(m,c);}return satinMaterials.get(m);};
+  for(const g of groups){const swap=g.cut?sectioned:/rotating/.test(g.object.name)?satin:null;if(swap)g.object.traverse(o=>{if(o.isMesh)o.material=Array.isArray(o.material)?o.material.map(swap):swap(o.material);});}
   mixer=new THREE.AnimationMixer(unit);for(const clip of gltf.animations)mixer.clipAction(clip).play();
  }
  // First entry without a stall: programs for the open bay and the work light are compiled against the
  // composer buffer (programs are keyed by the target) without touching the frame on screen (compile walks
- // hidden objects; the light is attached only for the synchronous part). Other worlds are left out.
+ // hidden objects; the light is attached only while compiling). Other worlds are left out. One compile of the
+ // whole scene took 415 ms on a 4× slowed phone, so it runs one material at a time within a small budget per frame.
  async function precompile(){
-  const proxies=new THREE.Group();for(const m of bodyMeshes)proxies.add(new THREE.Mesh(m.geometry,restMaterials.get(original.get(m))));
-  const away=offstage().filter(o=>o?.parent).map(o=>{const parent=o.parent,index=parent.children.indexOf(o);parent.children.splice(index,1);return [o,parent,index];});
-  const previous=renderer.getRenderTarget();
-  let jobs=[];
-  try{
-   scene.add(light);renderer.setRenderTarget(target());
-   jobs=[renderer.compileAsync(scene,camera),renderer.compileAsync(proxies,camera,scene)];
-  }finally{
-   renderer.setRenderTarget(previous);light.removeFromParent();
-   for(const [o,parent,index] of away.reverse())parent.children.splice(index,0,o);
+  const skip=new Set(offstage().filter(Boolean)),seen=new Set(),queue=[];
+  const add=mesh=>{const fresh=[].concat(mesh.material).some(m=>!seen.has(m));if(!fresh)return;[].concat(mesh.material).forEach(m=>seen.add(m));queue.push(mesh);};
+  (function walk(o){if(skip.has(o))return;if(o.isMesh||o.isPoints||o.isLine||o.isSprite)add(o);for(const c of o.children)walk(c);})(scene);
+  for(const m of bodyMeshes)add(new THREE.Mesh(m.geometry,restMaterials.get(original.get(m))));
+  const budget=mobile?8:12,pending=[];
+  while(queue.length&&!disposed){
+   const start=performance.now(),previous=renderer.getRenderTarget();
+   try{
+    scene.add(light);renderer.setRenderTarget(target());
+    // compileAsync runs the same synchronous compile and resolves once the programs finished linking in parallel.
+    do pending.push(renderer.compileAsync(queue.shift(),camera,scene));while(queue.length&&performance.now()-start<budget);
+   }finally{renderer.setRenderTarget(previous);light.removeFromParent();}
+   await nextFrame();
   }
-  await Promise.all(jobs);
+  // The first render with a program still linking blocks until all of them finish (350 ms on a 4× slowed phone).
+  await Promise.all(pending);
  }
  // Textures and vertex buffers reach the GPU in small batches, one per frame, while the student reads Encerrar.
  async function upload(){
@@ -181,8 +189,8 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
   }
  }
  function releaseEngine(){
-  engineGeometries.forEach(g=>g.dispose());engineMaterials.forEach(m=>m.dispose());cutMaterials.forEach(m=>m.dispose());engineTextures.forEach(t=>t.dispose());
-  engineGeometries.clear();engineMaterials.clear();cutMaterials.clear();engineTextures.clear();
+  engineGeometries.forEach(g=>g.dispose());engineMaterials.forEach(m=>m.dispose());cutMaterials.forEach(m=>m.dispose());satinMaterials.forEach(m=>m.dispose());engineTextures.forEach(t=>t.dispose());
+  engineGeometries.clear();engineMaterials.clear();cutMaterials.clear();satinMaterials.clear();engineTextures.clear();
  }
 
  return {

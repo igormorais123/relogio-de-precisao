@@ -14,6 +14,8 @@ export const ENGINE_PARTS={
 };
 // Reading windows of the three lessons; engineBeat (chapter.js) switches the copy between them.
 export const ENGINE_WINDOWS=[[.30,.45],[.55,.67],[.77,.90]];
+// Portrait aim: the middle of the power unit (block and crank), between the lesson parts.
+const MOBILE_AIM=[0,.45,-.66];
 
 // Camera keys [progress, camera, target]. Readings drift (never a frozen plate); travels between them
 // are short and motivated: rise from the block to the air that enters, orbit to what is coupled at the rear.
@@ -67,11 +69,12 @@ function eased(keys,p){
 /** Chapter 07 shot at progress p (0..1). weight blends it over the closing story pose. */
 export function engineShot(progress,mobile=false){
  const p=clamp(Number.isFinite(progress)?progress:0);
- let camera=spline(1,p);const target=spline(2,p);
+ let camera=spline(1,p),target=spline(2,p);
  let fov=eased(FOV,p);
  // Portrait: the engine sits above the copy (upper half), so the lens pulls back and opens instead of
- // cropping the part under the header.
- if(mobile){camera=camera.map((v,i)=>target[i]+(v-target[i])*1.55);fov+=9;}
+ // cropping the part under the header; the aim leans towards the engine centre so a part at the edge of the
+ // bay (the turbo) does not push the block out of the narrow frame.
+ if(mobile){const aim=target.map((v,i)=>v+(MOBILE_AIM[i]-v)*.4);camera=camera.map((v,i)=>aim[i]+(v-target[i])*1.6);target=aim;fov+=9;}
  return {
   weight:smooth(p/.12),
   camera,target,fov,
