@@ -618,7 +618,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     const cards = [
       {title:'O QUE O TESTE MOSTROU', lines:['12 → 9 min'], detail:['Mediana de atendimento', '50 pedidos em cada versão'], source:'REGISTRO · FRASE 2'},
       {title:'O QUE MUDOU JUNTO', lines:['FORMULÁRIO', '+ EQUIPE'], detail:['Duas mudanças no mesmo teste.'], source:'REGISTRO · FRASE 3'},
-      {title:'O QUE PODEMOS CONCLUIR', lines:['MENOR TEMPO.', 'CAUSA NÃO ISOLADA.'], detail:['Atribuir o ganho ao formulário', 'vai além do que o registro sustenta.'], source:'CONFERIR ANTES DE COMUNICAR'},
+      {title:'O QUE PODEMOS CONCLUIR', lines:['TEMPO MENOR', 'CAUSA NÃO ISOLADA'], detail:['O teste mostra a redução, mas não', 'separa o formulário da equipe.'], source:'REGISTRO · FRASES 2 E 3'},
     ];
     const card = cards[lessonBeat];
     ctx.textAlign='left';ctx.textBaseline='alphabetic';
@@ -670,19 +670,19 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
       texture.needsUpdate = true;
       return;
     }
-    const m = screenHeader(ctx, W, s, 'DECISÃO', 'CRITÉRIO NÃO PASSOU');
+    const m = screenHeader(ctx, W, s, 'DECISÃO', 'AGUARDA CONFERÊNCIA');
     ctx.fillStyle = '#eef3f6';
     ctx.font = `${150 * s}px ${DISPLAY}`;
-    ctx.fillText('CORRIGIR', m, 290 * s);
+    ctx.fillText('PENDENTE', m, 290 * s);
     ctx.fillStyle = RED;
     ctx.fillRect(m, 314 * s, 140 * s, 8 * s);
     ctx.fillStyle = '#dfe7ec';
     ctx.font = `${32 * s}px ${BODY}`;
-    ctx.fillText('Retirar a causa e a data sem apoio.', m, 382 * s);
-    ctx.fillText('Manter data do teste, medianas e grupos.', m, 426 * s);
+    ctx.fillText('Cada frase do comunicado tem apoio?', m, 382 * s);
+    ctx.fillText('A decisão vem depois da conferência.', m, 426 * s);
     ctx.fillStyle = '#8ea6b4';
     ctx.font = `${24 * s}px ${BODY}`;
-    ctx.fillText('Conferir de novo cada frase contra o registro.', m, 540 * s);
+    ctx.fillText('Registro de 14 de maio · 4 frases', m, 540 * s);
     texture.needsUpdate = true;
   }
 

@@ -123,7 +123,7 @@ function openLesson(index,fromLab){if(fromLab)document.getElementById(CHAPTERS[i
 $$('[data-open]').forEach(b=>b.onclick=()=>openLesson(Number(b.dataset.open)));
 // The worked example is a model answer: it appears only after the student completes this chapter's practice step.
 $('#lesson-dialog').addEventListener('learning-action',()=>{$('#dialog-example').hidden=!CHAPTERS[currentLesson].example||!learningLab.getState().completed.includes(currentLesson);});
-$$('.lesson-close').forEach(b=>b.onclick=()=>{b.closest('details').open=false;});
+$$('.lesson-close').forEach(b=>b.onclick=()=>{const d=b.closest('details');d.open=false;d.querySelector('summary').focus();});
 $('#hotspot').onclick=()=>openLesson(Number($('#hotspot').dataset.index||0));
 $('#quick-note').addEventListener('input',e=>{state.values[CHAPTERS[currentLesson].field]=e.target.value;save();});
 $('#save-note').onclick=()=>{state.values[CHAPTERS[currentLesson].field]=$('#quick-note').value;if(save())closeDialog($('#lesson-dialog'));};

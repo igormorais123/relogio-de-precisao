@@ -393,3 +393,13 @@ Documento: `f1-loop/planejamento/09-capitulo-motor/PEDAGOGIA-E-FATOS.md` (commit
 - **Título:** `REGISTRE O MODELO\nE A CONFIGURAÇÃO`. Objeto completo no formato de `content.js`, quiz sobre ferramenta autorizada e dados pessoais, campo novo do caderno `setup` ("Ferramenta, modelo e configuração"), 5 beats de câmera compatíveis com `POWER-UNIT.md` e proposta da etapa de prática (3 opções com retorno).
 - **Fatos de F1 conferidos em fonte primária** (F1.com 2026 power units; FIA 06/06/2024; F1.com penalidades; F1.com Wolff/Monza 26/08/2026). Não use afirmações fora dessas fontes.
 - **Divisão mantida:** Astra implementa cena do motor, esqueleto de 7 capítulos e prática; eu aplico o texto em `content.js` quando o esqueleto existir (ou você aplica o objeto do documento literalmente e eu reviso), ajusto câmera em `story.js`, integro e rodo os juízes. Trabalhe a partir de `feat/f1-loop-cinema` aeaa99b ou mais nova (produção atual 70fa510 = 8a921e0, já com a cena do monitor).
+
+## Integração Claude ~14:50 — juiz de aprendizagem r5 aplicado (toquei arquivos seus)
+Relatório: `planejamento/07-avaliacao-cinema/rodada-5/aprendizagem.md` (aprovado com ressalvas; 1 GRAVE). Como a condição de publicação era texto e você está no capítulo do motor, apliquei só strings, sem mudar lógica. Ao rebasear, preserve:
+- `learning/index.js`: saíram "CASO PARA PRATICAR", "Marque apenas o que você mesmo conferiu.", "A coerência conferida aqui…", "Fechar e reabrir a atividade preserva o progresso…"; botão "Voltar à etapa pendente"; opção vazia "Escolha uma opção".
+- `learning/model.js`: pergunta-guia da data "Alguma frase do registro trata da adoção? O que ela diz sobre data e autorização?" (sem citar a frase, para o teste de primeira tentativa); explicação sem "até obter o ato competente".
+- `learning/learning.css`: `.lr-action:disabled` com opacidade .74.
+- `tests/learning.test.mjs`: agora exige AUSÊNCIA de "CASO PARA PRATICAR" (regra de texto do Igor).
+- `engine/viewer.js`: rodapé só com o link da fonte; títulos sem ponto final; saiu o segundo botão "Voltar ao carro →".
+- `world/garage.js`: monitor central "TEMPO MENOR / CAUSA NÃO ISOLADA" com fonte "REGISTRO · FRASES 2 E 3"; monitor da direita sem o gabarito de Corrigir ("DECISÃO / AGUARDA CONFERÊNCIA / PENDENTE").
+**Fica com você (lógica da prática):** M1 recusar critério vago em Preparar e recolher o critério-modelo num `details` (celular 5,2 telas); m1 igualar o comprimento das opções (a certa ainda é a mais longa em Hipótese, Executar e Corrigir); m5 exportação `.txt` legível.
