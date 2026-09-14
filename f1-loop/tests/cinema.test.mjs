@@ -15,10 +15,12 @@ test('the diagonal wipe only runs while one environment replaces the other', () 
       assert.equal(pose.sweep, 0);
       assert.ok(pose.tunnel === 0 || pose.tunnel === 1, `a settled frame shows one world, got tunnel=${pose.tunnel}`);
     } else {
-      assert.ok(['tunnel', 'garage'].includes(pose.incoming));
+      assert.ok(['tunnel', 'garage', 'track'].includes(pose.incoming) && ['tunnel', 'garage', 'track'].includes(pose.outgoing) && pose.incoming !== pose.outgoing);
       assert.ok(pose.sweep > 0 && pose.sweep < 1);
-      const expected = pose.incoming === 'tunnel' ? pose.sweep : 1 - pose.sweep;
-      assert.ok(Math.abs(pose.tunnel - expected) < 1e-9, 'environment weight must match the swept area');
+      for (const [name, value] of [['tunnel', pose.tunnel], ['track', pose.track]]) {
+        const expected = pose.incoming === name ? pose.sweep : pose.outgoing === name ? 1 - pose.sweep : 0;
+        assert.ok(Math.abs(value - expected) < 1e-9, `${name} weight must match the swept area`);
+      }
     }
   }
 });
@@ -34,11 +36,12 @@ test('the tunnel is the stage of Executar and nowhere else', () => {
 // Round 2 left a limbo at 1.72–2.06: the next chapter's title was legible while the old world
 // was still leaving. The wipe now lives in the text-free travel and is done on the seam, so the
 // copy of 03 and 04 (opened by main.js after the seam) always lands on a single world.
-test('each diagonal wipe runs in the travel before a tunnel seam and is over on the seam', () => {
-  for (const [p, incoming] of [[1.8, 'tunnel'], [1.9, 'tunnel'], [1.98, 'tunnel'], [2.8, 'garage'], [2.9, 'garage'], [2.98, 'garage']]) {
+test('each diagonal wipe runs in a text-free travel and the last one of a chapter is over on the seam', () => {
+  for (const [p, incoming] of [[1.8, 'tunnel'], [1.9, 'tunnel'], [1.98, 'tunnel'], [2.52, 'track'], [2.6, 'track'], [2.82, 'garage'], [2.9, 'garage'], [2.98, 'garage']]) {
     assert.equal(sampleStory(p).incoming, incoming, `wipe at ${p}`);
   }
-  for (const p of [1.7, 2, 2.02, 2.2, 2.7, 3, 3.02, 3.2]) assert.equal(sampleStory(p).incoming, null, `no wipe at ${p}`);
+  for (const p of [1.7, 2, 2.02, 2.2, 2.5, 2.7, 3, 3.02, 3.2]) assert.equal(sampleStory(p).incoming, null, `no wipe at ${p}`);
+  assert.equal(sampleStory(2.72).world, 'track', 'the run settles on the track between its two wipes');
   for (const seam of [2, 3]) {
     let peak = 0, at = 0;
     for (let p = seam - .3; p < seam; p += .001) { const w = sampleStory(p).wipe; if (w > peak) { peak = w; at = p; } }
@@ -69,16 +72,22 @@ test('the part isolated by the hypothesis is the part shown as revised, and only
 
 // Camera speed is measured in scene units per unit of progress. The damped scroll follow
 // in main.js smooths time, not space: a spike here is a visible lurch on screen.
-test('the camera never lurches and never stalls: speed stays within 0.2–1.8× its median', () => {
+// The track run (between the tunnel and the island, while pose.track > 0) is the one place the
+// lesson is meant to move fast: three linked takes of a car at 80 m/s, two of them whips hidden in
+// diagonal wipes, with the scroll damping of main.js on top. There the camera may reach 6× the
+// median, but still never teleports (every 0.005 step stays under 0.6 m) and never stalls.
+// Everywhere else the original 0.2–1.8× rule holds unchanged.
+test('the camera never lurches and never stalls: speed stays within 0.2–1.8× its median outside the track run', () => {
   const profile = speedProfile(.005), speeds = profile.map(s => s.speed).sort((a, b) => a - b);
   const median = speeds[speeds.length >> 1];
-  const peak = profile.reduce((a, b) => b.speed > a.speed ? b : a), slowest = profile.reduce((a, b) => b.speed < a.speed ? b : a);
+  const onTrack = s => sampleStory(s.p).track > 0 || sampleStory(s.p + .005).track > 0;
+  const lesson = profile.filter(s => !onTrack(s)), run = profile.filter(onTrack);
+  assert.ok(run.length > 60, `track run only ${run.length} samples long`);
+  const peak = lesson.reduce((a, b) => b.speed > a.speed ? b : a), slowest = profile.reduce((a, b) => b.speed < a.speed ? b : a);
   assert.ok(peak.speed <= 1.8 * median, `peak ${peak.speed.toFixed(1)} u/p at p=${peak.p.toFixed(3)} is ${(peak.speed / median).toFixed(2)}× the median ${median.toFixed(1)}`);
   assert.ok(slowest.speed >= .2 * median, `camera nearly stops at p=${slowest.p.toFixed(3)} (${slowest.speed.toFixed(1)} u/p)`);
-  // The tunnel exit used to be a 9 m jump hidden behind the wipe; it is now a travel.
-  const at = p => sampleStory(p).camera;
-  const gap = Math.hypot(...at(2.8).map((v, k) => v - at(3.2)[k]));
-  assert.ok(gap <= .4 * 1.8 * median, `2.8→3.2 moves ${gap.toFixed(2)} u`);
+  const runPeak = run.reduce((a, b) => b.speed > a.speed ? b : a);
+  assert.ok(runPeak.speed <= 6 * median && runPeak.speed * .005 < .6, `track take jumps ${(runPeak.speed * .005).toFixed(2)} u in one step at p=${runPeak.p.toFixed(3)} (${(runPeak.speed / median).toFixed(2)}× median)`);
 });
 
 test('the camera keeps moving while each chapter reads (no locked-off frames)', () => {
@@ -144,6 +153,24 @@ test('Avaliar keeps the car sharp through the copy, pushes in to the central mon
 
 // Round 2 "closes" cropped the whole car under the chapter dots. A close is one part, centred,
 // sharp, with the rest of the car soft and never past 88% of the width (the dots column).
+// The track run (src/world/track.js) lives in the Executar travel, between the end of its copy and
+// the Avaliar seam; speed and shake only exist while the circuit is on screen, and the depth of
+// field stays shallow enough not to erase the speed streaks.
+test('the track run sits in the Executar travel, runs only while the circuit is on screen and keeps bokeh low', () => {
+  let first = Infinity, last = -Infinity, full = 0, peak = 0;
+  for (const pose of samples) {
+    const p = pose.index + pose.local;
+    for (const key of ['track', 'speed', 'shake', 'center']) assert.ok(pose[key] >= 0 && pose[key] <= 1, `${key}=${pose[key]} at ${p}`);
+    if (pose.speed > 0 || pose.shake > 0) assert.ok(pose.track > 0, `speed without the circuit at ${p.toFixed(3)}`);
+    if (pose.track > 0) { first = Math.min(first, p); last = Math.max(last, p); }
+    if (pose.track === 1) { full++; assert.ok(pose.bokeh <= .15, `bokeh ${pose.bokeh.toFixed(2)} on the track at ${p.toFixed(3)}`); }
+    peak = Math.max(peak, pose.speed);
+  }
+  assert.ok(first >= 2.5 && last < 3, `track on screen from ${first} to ${last}`);
+  assert.ok(full >= 40 && peak === 1, `the run is a real sequence (${full} full samples, peak speed ${peak})`);
+  for (const p of [2.5, 3, 3.02]) { const pose = sampleStory(p); assert.ok(pose.speed === 0 && pose.center === 0, `run still on at ${p}`); }
+});
+
 const HULL = JSON.parse(readFileSync(new URL('../tools/car-hull.json', import.meta.url), 'utf8')).parts;
 const DELAY = {wheels: 0, aero: .12, suspension: .18, body: .24, cockpit: .3, details: .32};
 const ease = (x, a, b) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -156,7 +183,7 @@ function partBox(indices, explode) {
   return [lo, hi];
 }
 test('each text-free close centres one part at 45–65%, locks a short focus on it and keeps the car off the dots', () => {
-  const closes = [[.72, [0, 1, 2, 3, 4, 5, 6, 7, 8], 'rear wing'], [1.64, [25], 'floor'], [2.7, [67, 69], 'rear wheel']];
+  const closes = [[.72, [0, 1, 2, 3, 4, 5, 6, 7, 8], 'rear wing'], [1.64, [25], 'floor']];
   for (const [p, indices, name] of closes) {
     const pose = sampleStory(p), [lo, hi] = partBox(indices, pose.explode), s = screenBox(pose, lo, hi), e = carExtent(pose);
     assert.ok(s.centre >= .45 && s.centre <= .65, `${name} centred at ${(s.centre * 100).toFixed(0)}% at ${p}`);
