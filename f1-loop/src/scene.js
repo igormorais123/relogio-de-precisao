@@ -53,7 +53,7 @@ function radialTexture(size = 256) {
   return new THREE.CanvasTexture(canvas);
 }
 
-export async function createScene(stage, {onProgress, onError}) {
+export async function createScene(stage, {onProgress, onError, signal}) {
   const mobile = innerWidth < 761;
   const params = new URLSearchParams(location.search);
   let pixelRatio = Math.min(devicePixelRatio, mobile ? 1.25 : 1.5);
@@ -97,6 +97,9 @@ export async function createScene(stage, {onProgress, onError}) {
   const loader = new GLTFLoader();
   loader.setMeshoptDecoder(MeshoptDecoder);
   const abort = new AbortController(), timer = setTimeout(() => abort.abort(), 45000);
+  // Choosing to read without 3D stops the car download instead of finishing it in the background.
+  // The catch below removes the canvas; after the download the build simply finishes.
+  signal?.addEventListener('abort', () => abort.abort(), {once: true});
   let model;
   try {
     const names = mobile ? ['carro-aula-mobile-v2.glb', 'carro-aula-mobile.glb'] : ['carro-aula-v2.glb', 'carro-aula.glb'];
