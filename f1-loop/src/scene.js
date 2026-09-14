@@ -307,7 +307,8 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     tunnel?.setFlow(t);
     // Corrigir (≈3.9–4.75) gets its own light: fill down, blacks back to black, car the brightest thing.
     const fix = smooth((p - 3.9) / .2) * (1 - smooth((p - 4.6) / .25));
-    garage.setMood({debrief: d, evaluate: v, fix, focus: pose.highlight || 0});
+    // The box floor stays near black from Corrigir through Encerrar (4.4–5.0), with no lift between the two moods.
+    garage.setMood({debrief: d, evaluate: v, fix: Math.max(fix, smooth((p - 4.3) / .15)), focus: pose.highlight || 0});
     garage.setLessonProgress(p);
     garage?.update(dt, camera, time);
     tunnel?.update(dt, camera, time);

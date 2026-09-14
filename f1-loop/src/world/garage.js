@@ -442,7 +442,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
 
   // ----------------------------------------------------------------- humor
   const moodTargets = [...materials].filter(m => m.isMeshStandardMaterial);
-  const dimmable = [graphite, charcoal, ice, slat, ceiling, drawer, benchTop, epoxy, bay, black, redPaint, stripeRed];
+  const dimmable = [graphite, charcoal, ice, slat, ceiling, drawer, benchTop, epoxy, bay, black, redPaint, stripeRed, plate];
   for (const m of dimmable) m.userData.albedo = m.color.clone();
   brandMaterial.userData.base = brandMaterial.color.clone();
   const mood = {debrief: 0, evaluate: 0};
@@ -451,7 +451,8 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   // fix: Corrigir (piso quase preto); focus: close de peça na bancada (faixas do box apagadas).
   function setMood({debrief = 0, evaluate = 0, fix = 0, focus = 0} = {}) {
     const d = THREE.MathUtils.clamp(debrief, 0, 1), e = THREE.MathUtils.clamp(evaluate, 0, 1);
-    const f = THREE.MathUtils.clamp(fix, 0, 1), s = THREE.MathUtils.clamp(focus, 0, 1);
+    // focus satura cedo: o close de 1,64 ainda está no fim do destaque.
+    const f = THREE.MathUtils.clamp(fix, 0, 1), s = THREE.MathUtils.clamp(focus * 1.6, 0, 1);
     mood.debrief = d; mood.evaluate = e;
     const ceilingGain = (1 - .94 * e) * (1 - .96 * d);
     ledCool.color.copy(ledCool.userData.base).multiplyScalar(ceilingGain);
@@ -471,7 +472,9 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     const albedo = (1 - .6 * e) * (1 - .72 * d);
     for (const m of dimmable) m.color.copy(m.userData.albedo).multiplyScalar(albedo);
     // No close da bancada as faixas desfocadas viravam barras vermelhas ao lado da peça estudada.
-    redPaint.color.multiplyScalar(1 - .94 * s);
+    redPaint.color.multiplyScalar(1 - .96 * s);
+    // As placas de macaco (metálicas, fora do reflexo analítico) ficavam marrons em Corrigir e Encerrar.
+    plate.color.multiplyScalar(1 - .75 * Math.max(f, d));
     for (const m of moodTargets) m.envMapIntensity = m.userData.env * (1 - .7 * e) * (1 - .7 * d) * (1 - .5 * f);
     redPaint.envMapIntensity *= 1 - .9 * s;
     floorUniforms.uLedGain.value = ceilingGain;

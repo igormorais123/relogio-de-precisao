@@ -237,9 +237,9 @@ export function enhanceCar({model, mechanics, mobile}) {
     }
     o.material = floorCarbon;
   });
-  // The thin nose antenna renders as a stray "/\" glyph on the nose at lesson distances. Moved off the
-  // camera layer: mechanics rewrites record visibility every frame.
-  model.traverse(o => { if (o.isMesh && o.name === 'antennas__04') o.layers.set(31); });
+  // The hairline antennas on the nose render as a stray "/\" glyph and loose ticks at lesson distances.
+  // Moved off the camera layer: mechanics rewrites record visibility every frame.
+  model.traverse(o => { if (o.isMesh && /^antennas__/.test(o.name)) o.layers.set(31); });
 
   // 2 + 3. Wheel-only material copies, shared by the four wheels (no extra draw calls).
   const owned = [], added = [], holders = [];
