@@ -1,5 +1,5 @@
 // Surface finish pass for the lesson car (paint depth, rims, brakes, tyre sidewalls).
-// Contract: enhanceCar({model, mechanics, mobile}) -> {update(dt, time, pose), dispose()}.
+// Contract: enhanceCar({model, mechanics, mobile}) -> {update(dt, time, pose), race(speed, brake, time), dispose()}.
 // Geometry and part names stay untouched: rims and tyres get procedural shading in their
 // own local frame (axle = local X), and each wheel gains one brake disc and one caliper
 // parented to the rim's record root so they follow spin and the exploded view.
@@ -122,6 +122,21 @@ function discTexture(width) {
   return texture;
 }
 
+// Mesmo mapeamento polar do disco: brasa laranja na pista de atrito, apagada no sino.
+function heatTexture() {
+  const width = 256, height = 64, canvas = document.createElement('canvas');
+  canvas.width = width; canvas.height = height;
+  const g = canvas.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, width, height);
+  const ring = g.createLinearGradient(0, height * .4, 0, height);
+  ring.addColorStop(0, 'rgba(0,0,0,1)'); ring.addColorStop(.25, 'rgba(255,190,150,1)'); ring.addColorStop(.7, 'rgba(255,120,60,1)'); ring.addColorStop(1, 'rgba(60,20,8,1)');
+  g.fillStyle = ring; g.fillRect(0, height * .4, width, height * .6);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  return texture;
+}
+
 function discGeometry() {
   const R0 = .045, R1 = .1605, profile = [
     [R0, .058], [.088, .058], [.0885, .0575], [.0885, .016], [.089, .0155], [.16, .0155], [R1, .015], [R1, -.015],
@@ -189,7 +204,11 @@ export function enhanceCar({model, mechanics, mobile}) {
   });
   for (const m of new Set(sources)) delete m.__carLook;
 
-  const discMaterial = new THREE.MeshPhysicalMaterial({name: 'Disco de freio', map: discTexture(mobile ? 512 : 1024), metalness: .4, roughness: .4, side: THREE.DoubleSide, envMapIntensity: 1.5});
+  // Brasa só na pista de atrito (emissiveMap), acesa por race() na frenagem.
+  const discMaterial = new THREE.MeshPhysicalMaterial({name: 'Disco de freio', map: discTexture(mobile ? 512 : 1024), emissiveMap: heatTexture(), emissive: '#ff5a1a', emissiveIntensity: 0, metalness: .4, roughness: .4, side: THREE.DoubleSide, envMapIntensity: 1.5});
+  // Luz de chuva: o emissor do conjunto traseiro (material do GLB).
+  const leds = [];
+  for (const m of materials.values()) if (/rear_led/i.test(m.name) && m.emissive) leds.push({material: m, color: m.emissive.clone(), intensity: m.emissiveIntensity, lit: false});
   const caliperMaterial = new THREE.MeshPhysicalMaterial({name: 'Pinça', color: '#b0aca3', metalness: .9, roughness: .3, clearcoat: .4, clearcoatRoughness: .2, envMapIntensity: 1.4});
   const discGeo = discGeometry(), caliperGeo = caliperGeometry();
   const box = new THREE.Box3(), rimCenter = new THREE.Vector3(), tyreCenter = new THREE.Vector3();
@@ -230,11 +249,24 @@ export function enhanceCar({model, mechanics, mobile}) {
       if (first) { first = false; for (const mesh of added) mesh.castShadow = false; }
       for (const h of holders) h.holder.rotation.x = h.angle - h.wheel.spinPivot.rotation.x;
     },
+    // Pista: speed 0..1 (pose.speed) e brake 0..1 (desaceleração). A luz de chuva pisca a 4 Hz com
+    // o carro andando e fica acesa e mais forte na frenagem; os discos ganham brasa. Sem alocação.
+    race(speed, brake, time) {
+      const s = speed > 0 ? Math.min(speed, 1) : 0, b = brake > 0 ? Math.min(brake, 1) : 0;
+      const flash = s > .05 ? (Math.sin(time * 25.13) > -.3 ? 1 : .06) * s : 0;
+      const glow = Math.max(flash, b);
+      for (let i = 0; i < leds.length; i++) {
+        const led = leds[i];
+        if (glow > 0) { led.material.emissive.setRGB(1, .025, .04); led.material.emissiveIntensity = led.intensity + glow * (5 + 7 * b); led.lit = true; }
+        else if (led.lit) { led.material.emissive.copy(led.color); led.material.emissiveIntensity = led.intensity; led.lit = false; }
+      }
+      discMaterial.emissiveIntensity = b * b * 2.6;
+    },
     dispose() {
       for (const h of holders) h.holder.removeFromParent();
       for (const mesh of added) mesh.removeFromParent();
       discGeo.dispose(); caliperGeo.dispose();
-      discMaterial.map.dispose(); discMaterial.dispose(); caliperMaterial.dispose();
+      discMaterial.map.dispose(); discMaterial.emissiveMap.dispose(); discMaterial.dispose(); caliperMaterial.dispose();
       for (const m of owned) m.dispose();
     },
   };

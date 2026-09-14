@@ -26,6 +26,7 @@ const params = new URLSearchParams(location.search);
 const SHOT = ['a', 'b', 'c'].includes(params.get('shot')) ? params.get('shot') : 'a';
 const SPEED = params.has('speed') ? Math.min(1, Math.max(0, Number(params.get('speed')) || 0)) : .9;
 const MANUAL = params.has('manual');
+const BRAKE = Math.min(1, Math.max(0, Number(params.get('brake')) || 0));
 const mobile = innerWidth < 761;
 const stage = document.getElementById('stage'), hud = document.getElementById('hud');
 hud.hidden = !params.has('hud');
@@ -220,6 +221,7 @@ async function main() {
     mechanics.update(dt, time * 1000, true);
     for (const w of mechanics.wheels) w.spinPivot.rotation.x = motion.wheelAngle;
     carLook.update(dt, time, pose);
+    carLook.race(speed, BRAKE, time);
     pose.tunnel = Math.min(1, speed * 1.1);
     choreo.update(dt, time, pose);
     wheelBlur.update(speed);

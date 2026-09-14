@@ -177,6 +177,9 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   scene.add(sparks.object);
   const shake = {x: 0, y: 0, z: 0, pitch: 0, yaw: 0, roll: 0, fovKick: 0, fov: 30};
   const worlds = {garage, tunnel, track};
+  // Lights of the tunnel world (cyan rim under the floor) fade with the track's weight during the wipe.
+  const tunnelLights = [], tunnelLightBase = [];
+  tunnel?.root.traverse(o => { if (o.isLight) { tunnelLights.push(o); tunnelLightBase.push(o.intensity); } });
   const pmrem = new THREE.PMREMGenerator(renderer);
   const envGarage = pmrem.fromScene(garage.envScene, .02);
   const envTunnel = pmrem.fromScene(tunnel.envScene, .02);
@@ -277,6 +280,10 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     }
     wheelBlur.update(run);
     sparks.update(time, run * r);
+    // Arrival at the box (the track is the outgoing world): the discs glow while speed falls and the
+    // rain light stays on; it only flashes while the car runs. Fades as the box takes the frame.
+    const braking = pose.outgoing === 'track' ? Math.min(1, (1 - run) * 4) * (1 - smooth(((pose.sweep || 0) - .88) / .1)) : 0;
+    carLook.race(run, braking, time);
     floor.set(pose.highlight, time, pose.index);
     carLook.update(dt, time, pose);
     choreo.update(dt, time, pose);
@@ -318,6 +325,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       kicker.intensity = mix(kicker.intensity, .55 * e, r);
       scene.environmentIntensity = mix(scene.environmentIntensity, .95 * e, r);
     }
+    for (let i = 0; i < tunnelLights.length; i++) tunnelLights[i].intensity = tunnelLightBase[i] * (1 - r);
     const g = t > 0 ? [0, 1].map(k => gradeGarage[k].map((v, i) => mix(v, gradeTunnel[k][i], t))) : gradeGarage.map((row, k) => row.map((v, i) => mix(v, gradeDebrief[k][i], d)));
     if (r > 0) for (let k = 0; k < 2; k++) for (let i = 0; i < 3; i++) g[k][i] = mix(g[k][i], gradeTrack[k][i], r);
     post.setGrade(g[0], g[1], 1);

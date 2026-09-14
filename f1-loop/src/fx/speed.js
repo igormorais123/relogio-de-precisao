@@ -169,23 +169,33 @@ export class SpeedEffect extends Effect {
 
 // ------------------------------------------------------------- rodas
 export function createWheelBlur({THREE, mechanics}) {
+  // Roda a 250 rad/s num quadro parado: raios em média quase opacos (nada de raio nítido por
+  // trás) e arcos de giro, reflexos do raio arrastados ao longo do círculo que somem na cauda.
   const size = 256, canvas = document.createElement('canvas');
   canvas.width = canvas.height = size;
   {
-    const g = canvas.getContext('2d'), img = g.createImageData(size, size);
-    for (let y = 0; y < size; y++) for (let x = 0; x < size; x++) {
-      const r = Math.hypot(x + .5 - size / 2, y + .5 - size / 2) / (size / 2), o = (y * size + x) * 4;
-      let v = 0, a = 0;
-      if (r < .16) { v = 150 + 30 * Math.sin(r * 90); a = 255; }                       // porca central
-      else if (r < .88) { v = 34 + 9 * Math.sin(r * 160) + 14 * Math.exp(-(((r - .3) / .05) ** 2)); a = 150 + 70 * (1 - r); } // raios em média
-      else if (r < .97) { v = 105 + 25 * Math.sin(r * 400); a = 245; }                    // aro usinado
-      else if (r < 1) { v = 40; a = 255 * (1 - (r - .97) / .03); }
-      img.data[o] = v; img.data[o + 1] = v + 2; img.data[o + 2] = v + 5; img.data[o + 3] = a;
+    const g = canvas.getContext('2d'), c = size / 2;
+    let seed = 4243;
+    const random = () => { seed = (1664525 * seed + 1013904223) >>> 0; return seed / 4294967296; };
+    const base = g.createRadialGradient(c, c, 0, c, c, c);
+    base.addColorStop(0, 'rgba(118,120,124,1)'); base.addColorStop(.1, 'rgba(78,80,84,.98)'); base.addColorStop(.18, 'rgba(30,31,34,.95)');
+    base.addColorStop(.84, 'rgba(36,37,40,.94)'); base.addColorStop(.9, 'rgba(92,94,98,.97)'); base.addColorStop(.965, 'rgba(66,68,71,1)'); base.addColorStop(1, 'rgba(20,20,22,0)');
+    g.fillStyle = base; g.beginPath(); g.arc(c, c, c, 0, Math.PI * 2); g.fill();
+    g.lineCap = 'round';
+    for (let k = 0; k < 70; k++) {
+      const r = (.2 + random() * .72) * c, a0 = random() * Math.PI * 2, span = .5 + random() * 1.8;
+      const v = 130 + random() * 90 | 0, width = .6 + random() * 1.8, alpha = .08 + random() * .22;
+      g.lineWidth = width;
+      for (let s = 0; s < 10; s++) {
+        g.strokeStyle = `rgba(${v},${v},${v + 4},${(alpha * (1 - s / 10)).toFixed(3)})`;
+        g.beginPath(); g.arc(c, c, r, a0 + span * s / 10, a0 + span * (s + 1) / 10); g.stroke();
+      }
     }
-    g.putImageData(img, 0, 0);
+    g.strokeStyle = 'rgba(150,152,156,.35)'; g.lineWidth = size * .02; g.beginPath(); g.arc(c, c, c * .925, 0, Math.PI * 2); g.stroke();
   }
   const map = new THREE.CanvasTexture(canvas);
   map.colorSpace = THREE.SRGBColorSpace;
+  map.center.set(.5, .5);
   const material = new THREE.MeshStandardMaterial({map, transparent: true, depthWrite: false, metalness: .85, roughness: .34, envMapIntensity: 1.2, opacity: 0});
   material.name = 'Roda em movimento';
   const discs = [], box = new THREE.Box3(), inverse = new THREE.Matrix4(), part = new THREE.Box3();
@@ -209,8 +219,11 @@ export function createWheelBlur({THREE, mechanics}) {
     discs,
     update(amount) {
       const t = Math.min(1, Math.max(0, ((amount || 0) - .2) / .4));
-      material.opacity = t * t * (3 - 2 * t) * .95;
+      material.opacity = t * t * (3 - 2 * t) * .97;
       for (let i = 0; i < discs.length; i++) discs[i].visible = material.opacity > .01;
+      // Os arcos giram devagar (3% do ângulo da roda): parados, liam como desenho colado no aro.
+      const spin = mechanics?.wheels?.[0]?.spinPivot;
+      if (spin) map.rotation = -spin.rotation.x * .03;
     },
     dispose() { for (const d of discs) { d.removeFromParent(); d.geometry.dispose(); } material.dispose(); map.dispose(); },
   };
