@@ -1,6 +1,6 @@
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {RoundedBoxGeometry} from 'three/addons/geometries/RoundedBoxGeometry.js';
-import {emblem, glyphs} from '../../materia-prima/modulos-atualizados/identity.js';
+import {glyphs} from '../../materia-prima/modulos-atualizados/identity.js';
 import {createWipeClip, WIPE_SHADER_CHUNK} from '../fx/wipe-clip.js';
 
 // Reta de circuito à noite. O carro fica parado na origem (nariz em +Z) e o mundo
@@ -355,14 +355,13 @@ function drawAtlas(ctx, scale) {
   const S = v => v * scale;
   const font = px => `${S(px)}px ${BOARD_FONT}, "Bebas Neue", "Arial Narrow", Impact, sans-serif`;
   ctx.clearRect(0, 0, S(ATLAS.w), S(ATLAS.h));
-  // Faixa com a marca: fundo grafite, emblema e nome, nada além disso.
+  // Faixa com a marca: fundo grafite e nome, nada além disso.
   const [bx, by, bw, bh] = ATLAS.brand.map(S);
   ctx.fillStyle = '#101417'; ctx.fillRect(bx, by, bw, bh);
   ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fillRect(bx, by + S(10), bw, S(2)); ctx.fillRect(bx, by + bh - S(12), bw, S(2));
-  const k = S(1.22), logoW = 560 * k, ox = bx + (bw - logoW) / 2, oy = by + (bh - 96 * k) / 2;
+  const k = S(1.22), logoW = 390 * k, ox = bx + (bw - logoW) / 2, oy = by + (bh - 96 * k) / 2;
   ctx.save(); ctx.translate(ox, oy); ctx.scale(k, k);
-  ctx.fillStyle = '#d92135'; ctx.fill(new Path2D(emblem), 'evenodd');
-  ctx.translate(183, 16); ctx.transform(1, 0, -Math.tan(12 * Math.PI / 180), 1, 0, 0);
+  ctx.translate(18, 16); ctx.transform(1, 0, -Math.tan(12 * Math.PI / 180), 1, 0, 0);
   for (const [, d, accent] of glyphs) { ctx.fillStyle = accent ? '#d92135' : '#e8ebed'; ctx.fill(new Path2D(d), 'evenodd'); }
   ctx.restore();
   // Faixa lisa: grafite com um fio vermelho.
