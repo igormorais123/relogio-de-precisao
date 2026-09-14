@@ -1,3 +1,4 @@
+import {createFrameQuality} from './fx/frame-quality.js';
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
@@ -57,6 +58,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   const mobile = innerWidth < 761;
   const params = new URLSearchParams(location.search);
   let pixelRatio = Math.min(devicePixelRatio, mobile ? 1.25 : 1.5);
+  const frameQuality = createFrameQuality();
   const renderer = new THREE.WebGLRenderer({antialias: false, alpha: false, stencil: false, powerPreference: 'high-performance'});
   renderer.setPixelRatio(pixelRatio);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -99,7 +101,8 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   const abort = new AbortController(), timer = setTimeout(() => abort.abort(), 45000);
   // Choosing to read without 3D stops the car download instead of finishing it in the background.
   // The catch below removes the canvas; after the download the build simply finishes.
-  signal?.addEventListener('abort', () => abort.abort(), {once: true});
+  if (signal?.aborted) abort.abort();
+  else signal?.addEventListener('abort', () => abort.abort(), {once: true});
   let model;
   try {
     const names = mobile ? ['carro-aula-mobile-v2.glb', 'carro-aula-mobile.glb'] : ['carro-aula-v2.glb', 'carro-aula.glb'];
@@ -180,6 +183,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   let pose = null, width = 1, height = 1;
 
   function resize() {
+    frameQuality.reset();
     width = innerWidth; height = innerHeight;
     renderer.setPixelRatio(pixelRatio);
     renderer.setSize(width, height);
@@ -258,7 +262,12 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     post.setBloom(.5 + .35 * t + .3 * d);
     post.setBand(pose.incoming ? pose.wipe : 0, time);
     focus.fromArray(pose.focus);
-    post.focus(camera.position.distanceTo(focus), mix(3.4, 1.15, pose.bokeh), 1 + pose.bokeh * 4.4);
+    // Hold the studied surfaces sharp while their lesson reads; preserve the monitor rack focus.
+    const storyP = pose.index + pose.local;
+    const openingFocus = Math.max(1 - smooth((storyP - .5) / .15), smooth((storyP - 4.85) / .15));
+    const correctionFocus = smooth((storyP - 3.92) / .12) * (1 - smooth((storyP - 4.5) / .15));
+    const detailFocus = Math.max(openingFocus, correctionFocus);
+    post.focus(camera.position.distanceTo(focus), mix(mix(3.4, 1.15, pose.bokeh), 4, detailFocus), mix(1 + pose.bokeh * 4.4, 1.5, detailFocus));
     dustColor.lerpColors(dustWarm, dustCold, t);
     dust.update(time, pixelRatio * height / 900, 1 - .5 * t, dustColor);
     debug?.after?.();
@@ -266,16 +275,19 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   // ?debug=1 exposes the rig to tools/probe.mjs for isolating a look problem.
   const debug = params.has('debug') ? (window.__scene = {scene, key, rim, front, hemi, garage, tunnel, post, mechanics}) : null;
 
-  // Frame-time guard: long frames lower the render resolution once, never the story.
-  // Rolling 2-second windows keep watching, so a scene that only gets heavy later (the tunnel) is still caught.
+  // Adapt only after warmup and sustained slow real frames, never simulation dt.
   const adaptive = params.get('quality') !== 'high';
-  let samples = 0, accumulated = 0;
-  function adapt(dt) {
-    if (!adaptive || dt > .25) return;
-    accumulated += dt; samples++;
-    if (accumulated < 2) return;
-    if (accumulated / samples > .03 && pixelRatio > .9) { pixelRatio = Math.max(.85, pixelRatio - .2); resize(); stage.dataset.quality = String(pixelRatio); }
-    samples = 0; accumulated = 0;
+  function adapt(now) {
+    if (!adaptive) return;
+    const sample = frameQuality.observe(now, !document.hidden);
+    if (!sample) return;
+    stage.dataset.frameMeanMs = sample.meanMs.toFixed(1);
+    if (sample.reduce && pixelRatio > .9) {
+      pixelRatio = Math.max(.85, pixelRatio - .2);
+      resize();
+      stage.dataset.quality = String(pixelRatio);
+      stage.dataset.qualityReason = 'sustained-slow-frames';
+    }
   }
 
   stage.dataset.parts = String(mechanics.records.length);
@@ -312,7 +324,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
       post.render(dt);
       stage.dataset.calls = String(renderer.info.render.calls);
       if (!stage.dataset.loaded) { stage.dataset.loaded = 'true'; stage.classList.add('loaded'); }
-      adapt(dt);
+      adapt(time * 1000);
     },
     dispose() { post.dispose(); dust.dispose(); floor.dispose(); carLook.dispose(); surfaceLibrary.dispose(); carMaterials.dispose(); garage?.dispose(); tunnel?.dispose(); envGarage.dispose(); envTunnel.dispose(); renderer.dispose(); },
   };
