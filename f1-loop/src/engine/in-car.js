@@ -25,9 +25,9 @@ const aborted=()=>new DOMException('Motor cancelado','AbortError');
 export function createInCarEngine({scene,renderer,camera,model,mechanics,target,mobile=false,signal=null,offstage=()=>[]}){
  renderer.localClippingEnabled=true;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
- // Warm work light over the bay. It joins the scene only while the bay is open (the light count of every
- // material changes), and the programs for that count are compiled in prepare().
- const light=new THREE.PointLight('#ffb36b',0,3.4,1.6);light.name='Luz de trabalho do motor';light.position.set(.6,1.5,-.35);
+ // Warm work light over the bay, in the scene from the start at intensity 0: the light count never changes,
+ // so the box warm-up behind the preloader already covers it and opening or closing the bay recompiles nothing.
+ const light=new THREE.PointLight('#ffb36b',0,3.4,1.6);light.name='Luz de trabalho do motor';light.position.set(.6,1.5,-.35);scene.add(light);
  const root=new THREE.Group();root.name='Motor no compartimento';root.position.copy(ENGINE_AT);root.visible=false;scene.add(root);
 
  let state='idle',ready=false,disposed=false,split=false,reveal=0,abort=null,mixer=null;
@@ -70,7 +70,6 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
   // The open shell casts no shadow into the bay; the closed car keeps its own.
   for(const m of bodyMeshes){const base=original.get(m);m.material=on?restMaterials.get(base):base;m.castShadow=on?false:castShadow.get(m);}
   for(const r of lifted){r.hidden=on;r.root.visible=!on;}
-  if(on)scene.add(light);else light.removeFromParent();
  }
  function poseCover(open){
   const lift=smooth(open);
@@ -108,22 +107,18 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
   for(const g of groups){const swap=g.cut?sectioned:/rotating/.test(g.object.name)?satin:null;if(swap)g.object.traverse(o=>{if(o.isMesh)o.material=Array.isArray(o.material)?o.material.map(swap):swap(o.material);});}
   mixer=new THREE.AnimationMixer(unit);for(const clip of gltf.animations)mixer.clipAction(clip).play();
  }
- // First entry without a stall: programs for the open bay and the work light are compiled against the
- // composer buffer (programs are keyed by the target) without touching the frame on screen (compile walks
- // hidden objects; the light is attached only while compiling). Other worlds are left out. One compile of the
- // whole scene took 415 ms on a 4× slowed phone, so it runs one material at a time within a small budget per frame.
+ // First entry without a stall: only what is new is compiled, against the composer buffer (programs are keyed by
+ // the target): the engine, the cover copies and the cut body. Strictly one object at a time, waiting for its programs
+ // to finish linking (ANGLE links in the GPU process, where a CPU time budget does not reach), a frame in between.
  async function precompile(){
-  const skip=new Set(offstage().filter(Boolean)),seen=new Set(),queue=[];
+  const seen=new Set(),queue=[];
   const add=mesh=>{const fresh=[].concat(mesh.material).some(m=>!seen.has(m));if(!fresh)return;[].concat(mesh.material).forEach(m=>seen.add(m));queue.push(mesh);};
-  (function walk(o){if(skip.has(o))return;if(o.isMesh||o.isPoints||o.isLine||o.isSprite)add(o);for(const c of o.children)walk(c);})(scene);
+  for(const object of [root,cover])object.traverse(o=>{if(o.isMesh)add(o);});
   for(const m of bodyMeshes)add(new THREE.Mesh(m.geometry,restMaterials.get(original.get(m))));
-  // Strictly one object at a time: its programs finish linking (ANGLE compiles in the GPU process, where a CPU
-  // time budget does not reach) before the next is queued, with a frame in between. Queuing several per frame
-  // made the next main render wait 130–360 ms on a fresh desktop session (technical judge r6).
   while(queue.length&&!disposed){
    const previous=renderer.getRenderTarget();let job;
-   try{scene.add(light);renderer.setRenderTarget(target());job=renderer.compileAsync(queue.shift(),camera,scene);}
-   finally{renderer.setRenderTarget(previous);light.removeFromParent();}
+   try{renderer.setRenderTarget(target());job=renderer.compileAsync(queue.shift(),camera,scene);}
+   finally{renderer.setRenderTarget(previous);}
    await job;
    await nextFrame();
   }
@@ -211,9 +206,9 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
    const open=(shot?shot.open:0)*reveal,on=ready&&open>.001;
    if(on!==split)setSplit(on);
    root.visible=on;
+   light.intensity=on?shot.light*reveal*WORK_LIGHT:0;
    if(!on)return;
    poseCover(open);
-   light.intensity=shot.light*reveal*WORK_LIGHT;
    const cut=shot.cut;
    cutPlane.constant=THREE.MathUtils.lerp(.7,.004,smooth(cut));
    for(const g of groups)g.object.visible=!(g.hiddenWhenCut&&cut>.999);
