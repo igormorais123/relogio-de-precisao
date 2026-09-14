@@ -172,7 +172,7 @@ async function main() {
   const eye = new THREE.Vector3(), look = new THREE.Vector3(), carPoint = new THREE.Vector3(0, .45, 0), lastEye = new THREE.Vector3();
   // No retrato o quadro é estreito: o travelling lateral recua mais que as outras tomadas.
   const pull = mobile ? {a: 2.15, b: 1, c: 1.35} : {a: 1, b: 1, c: 1};
-  const B_PERIOD = 3.2;
+  const B_PERIOD = 2;
   function rig(time, speed) {
     let fov = 30, gain = 1, kick = 1, radial = .55, range = 3.2, bokeh = 2.6;
     if (SHOT === 'a') {
@@ -182,11 +182,12 @@ async function main() {
       // Bokeh contido: um desfoque redondo forte apagaria os riscos do fundo.
       radial = .35; range = 3.4; bokeh = 1.3;
     } else if (SHOT === 'b') {
-      // Câmera presa ao chão, lente longa: o carro cresce na direção dela e passa rente.
+      // Carro-câmera à frente, rente ao chão, a 72% da velocidade: o carro alcança a lente
+      // enquanto o asfalto e as luzes correm em direção a ele.
       const v = speed * TRACK_TOP_SPEED, tc = ((time % B_PERIOD) + B_PERIOD) % B_PERIOD;
-      eye.set(mobile ? -2.4 : -3.1, .2, (mobile ? 11 : 7) + v * (B_PERIOD * .62 - tc));
-      look.set(mobile ? 0 : -.4, .62, 0);
-      fov = 26; gain = .45; kick = .35; radial = .8; range = 6;
+      eye.set(mobile ? -1.2 : -1.6, .28, (mobile ? 52 : 48) - .28 * v * tc);
+      look.set(-.2, .55, 0);
+      fov = 24; gain = .6; kick = .35; radial = .9; range = 6;
     } else {
       // Acima e atrás da T-cam (entrada de ar, y≈1,2): a pista converge à frente.
       eye.set(0, 2.3, -6.3 * pull.c);
@@ -245,7 +246,7 @@ async function main() {
   };
   window.__lab = {
     ready: true, shot: SHOT, mobile, carTriangles,
-    debug: {scene, camera, track, speedFx, lights: {key, rim, front, hemi, kicker}},
+    debug: {scene, camera, track, speedFx, dof, bloom, lights: {key, rim, front, hemi, kicker}},
     step(n = 1, dt = 1 / 60) { for (let i = 0; i < n; i++) frame(dt); return {time, travel: track.motion.travel}; },
     setTime(t) { time = t; lastEye.set(1e6, 0, 0); frame(0); },
     setSpeed(v) { speed = v; },
