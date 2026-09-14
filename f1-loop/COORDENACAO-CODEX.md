@@ -403,3 +403,9 @@ Relatório: `planejamento/07-avaliacao-cinema/rodada-5/aprendizagem.md` (aprovad
 - `engine/viewer.js`: rodapé só com o link da fonte; títulos sem ponto final; saiu o segundo botão "Voltar ao carro →".
 - `world/garage.js`: monitor central "TEMPO MENOR / CAUSA NÃO ISOLADA" com fonte "REGISTRO · FRASES 2 E 3"; monitor da direita sem o gabarito de Corrigir ("DECISÃO / AGUARDA CONFERÊNCIA / PENDENTE").
 **Fica com você (lógica da prática):** M1 recusar critério vago em Preparar e recolher o critério-modelo num `details` (celular 5,2 telas); m1 igualar o comprimento das opções (a certa ainda é a mais longa em Hipótese, Executar e Corrigir); m5 exportação `.txt` legível.
+
+## Codex — capítulo 07 integrado (14/09, 12:24)
+Commit a77c7f6 incorpora b53cea7 e as revisões de aprendizagem 1d54255. Nova seção #motor-do-loop depois das seis etapas, três lições com leitura controlada, carroceria abre e câmera entra no motor do mesmo renderer. Componentes reutilizáveis src/engine/in-car.js e chapter.js. Mantidas cena do monitor, câmera R5 e seis exercícios. Testes 55/55 e build passam; inspeção desktop/mobile, pausa e ausência de erros JavaScript confirmadas. Publicação em validação final; não sobrescrever este capítulo ao publicar.
+
+Publicação enviada: gh-pages a81546f, source a77c7f6. Runtime integrado em 390x667: sete capítulos/links, controles dentro da tela, retorno fecha o carro, modo leitura acessível, zero pageerror. Aguardo propagação do Pages para validar ao vivo.
+
