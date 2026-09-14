@@ -91,7 +91,7 @@ test('Avaliar reads the island monitors while the car sits outside the depth of 
   for (const p of [3.3, 3.4, 3.5, 3.6, 3.7]) {
     const pose = sampleStory(p), eye = new THREE.Vector3().fromArray(pose.camera);
     assert.ok(new THREE.Vector3().fromArray(pose.focus).distanceTo(monitors) < .01, `focus on the monitors at ${p}`);
-    const range = 3.4 + (1.15 - 3.4) * pose.bokeh;                       // scene.js focus range
+    const range = pose.focusRange ?? 3.4 + (1.15 - 3.4) * pose.bokeh;   // scene.js focus range
     assert.ok(Math.abs(eye.distanceTo(car) - eye.distanceTo(monitors)) > range, `car inside the focus range at ${p}`);
     camera.fov = pose.fov; camera.updateProjectionMatrix(); camera.position.copy(eye); camera.lookAt(new THREE.Vector3().fromArray(pose.target)); camera.updateMatrixWorld();
     const s = monitors.clone().project(camera), x = (s.x + 1) / 2, y = (1 - s.y) / 2;

@@ -214,7 +214,7 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     const t = pose.tunnel, d = pose.debrief, e = pose.exposure, v = pose.evaluate;
     camera.position.fromArray(pose.camera);
     target.fromArray(pose.target);
-    if (mobile) { offset.subVectors(camera.position, target).multiplyScalar(1.95 + pose.explode * .45); camera.position.copy(target).add(offset); }
+    if (mobile) { offset.subVectors(camera.position, target).multiplyScalar(1.4 + pose.explode * .45); camera.position.copy(target).add(offset); }
     // Handheld breathing and pointer parallax stay small so the take remains legible.
     const follow = 1 - Math.exp(-dt * 3);
     pointer.sx += (pointer.x - pointer.sx) * follow; pointer.sy += (pointer.y - pointer.sy) * follow;
@@ -262,12 +262,8 @@ export async function createScene(stage, {onProgress, onError, signal}) {
     post.setBloom(.5 + .35 * t + .3 * d);
     post.setBand(pose.incoming ? pose.wipe : 0, time);
     focus.fromArray(pose.focus);
-    // Hold the studied surfaces sharp while their lesson reads; preserve the monitor rack focus.
-    const storyP = pose.index + pose.local;
-    const openingFocus = Math.max(1 - smooth((storyP - .5) / .15), smooth((storyP - 4.85) / .15));
-    const correctionFocus = smooth((storyP - 3.92) / .12) * (1 - smooth((storyP - 4.5) / .15));
-    const detailFocus = Math.max(openingFocus, correctionFocus);
-    post.focus(camera.position.distanceTo(focus), mix(mix(3.4, 1.15, pose.bokeh), 4, detailFocus), mix(1 + pose.bokeh * 4.4, 1.5, detailFocus));
+    // Focus range and bokeh scale come from the story pose.
+    post.focus(camera.position.distanceTo(focus), pose.focusRange, pose.bokehScale);
     dustColor.lerpColors(dustWarm, dustCold, t);
     dust.update(time, pixelRatio * height / 900, 1 - .5 * t, dustColor);
     debug?.after?.();
