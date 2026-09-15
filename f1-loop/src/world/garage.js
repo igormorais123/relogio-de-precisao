@@ -392,7 +392,8 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
   // Luzes de humor: começam apagadas e só sobem com evaluate/debrief (contagem fixa, sem recompilar shaders).
   const monitorWash = new THREE.SpotLight('#6fa4ff', 0, 6, 1.15, 1, 2);
   monitorWash.position.set(-4.55, 1.5, -1.35); monitorWash.target.position.set(-2.8, 0, -1.35);
-  const redWash = new THREE.PointLight('#ff2a40', 0, 6.5, 2);
+  // Amber-red, not magenta (cinema r6 N3): on the cabinets the saturated red read as pink neon.
+  const redWash = new THREE.PointLight('#ff5a30', 0, 6.5, 2);
   redWash.position.set(0, .75, -5.0);
   lights.add(monitorWash, monitorWash.target, redWash);
   // Leitura no monitor: a tela derrama luz fria na mesa e um lavador rasante dá à parede de ripas
@@ -520,7 +521,7 @@ export function createGarage({renderer, scene, mobile = false} = {}) {
     if (deskLamp) deskLamp.intensity = lightBase.get(deskLamp) * (1 - .8 * e) * (1 - .5 * d);
     monitorGlow.intensity = lightBase.get(monitorGlow) * (1 + 1.4 * e + .4 * d) * (1 - .6 * mon);
     monitorWash.intensity = (34 * e + 2 * d) * (1 - .4 * mon);
-    redWash.intensity = 14 * d * (1 - e);
+    redWash.intensity = 9 * d * (1 - e);
     const islandGain = 1 + .35 * e + .15 * d, rearGain = (1 + .7 * d) * (1 - .25 * e);
     for (const s of notebookScreens) s.material.color.copy(s.material.userData.base).multiplyScalar(islandGain);
     for (const s of rearScreens) s.material.color.copy(s.material.userData.base).multiplyScalar(rearGain);

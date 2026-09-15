@@ -9,7 +9,12 @@ const BAY={front:-.15,rear:-2.1,lip:.40};
 // Seated on the floor (top ≈0.14 m) with the crank on the car centreline, turbo towards the gearbox.
 const ENGINE_AT=new THREE.Vector3(0,.43,-.72),ENGINE_LENGTH=.85;
 // The authored clip turns the crank 4 times in 8 s; 1.5× reads as 45 rpm: legible, no strobing at 30 fps.
-const CLIP_RATE=1.5,WORK_LIGHT=2.6;
+const CLIP_RATE=1.5,WORK_LIGHT=2.6,FILL_LIGHT=1.6;
+// Section (cinema r6 M3): the near bank is cut along its own bore axes (a 45° plane through the crank axis),
+// only above the crank centreline, so the far bank stays whole and the V reads as a V, the pistons sit in their
+// bores and the sump keeps the engine on its mounts. Cut faces are painted in a flat cutaway orange.
+const CRANK_Y=.332,BANK=new THREE.Vector3(-1,1,0).normalize(),CUT_OPEN=.45,CUT_CLOSED=-CRANK_Y/Math.SQRT2;
+const CUT_COLOR=new THREE.Color(1,.17,.025);
 const HINGE=new THREE.Vector3(0,.75,-.9);
 // Same cut as the car (scene.js): parts under a few centimetres add shadow triangles but no readable shadow.
 const SHADOW_RADIUS=.09,UPLOAD_TRIANGLES=60000;
@@ -22,7 +27,7 @@ const aborted=()=>new DOMException('Motor cancelado','AbortError');
  * The 4.6 MB power unit is fetched only by prepare() (near the chapter), can be cancelled (reading mode,
  * the scene signal) and fails alone: until it is ready the car simply stays closed.
  */
-export function createInCarEngine({scene,renderer,camera,model,mechanics,target,mobile=false,signal=null,offstage=()=>[]}){
+export function createInCarEngine({scene,renderer,camera,model,mechanics,target,surfaces=null,mobile=false,signal=null,offstage=()=>[]}){
  renderer.localClippingEnabled=true;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
  // Warm work light over the bay, in the scene from the start at intensity 0: the light count never changes,
@@ -32,8 +37,14 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
 
  let state='idle',ready=false,disposed=false,split=false,reveal=0,abort=null,mixer=null;
  const groups=[],engineGeometries=new Set(),engineMaterials=new Set(),engineTextures=new Set(),cutMaterials=new Map(),satinMaterials=new Map();
- // Section plane: keeps x < constant; swept from outside the engine to the crank centreline.
- const cutPlane=new THREE.Plane(new THREE.Vector3(-1,0,0),.7);
+ // Section planes (world): the bank plane sweeps in from outside the engine; the sump plane is fixed at the
+ // crank centreline. clipIntersection: a fragment goes only when it is outboard of the bank plane AND above the crank.
+ const cutPlane=new THREE.Plane(BANK.clone(),CUT_OPEN),sumpPlane=new THREE.Plane(new THREE.Vector3(0,-1,0),CRANK_Y);
+ const cutAt=cut=>THREE.MathUtils.lerp(CUT_OPEN,CUT_CLOSED,smooth(cut));
+ // Cool fill from the far side of the bay (desktop): a second tone on the machined metal, so crowns and crank read as
+ // steel instead of flat grey. In the scene from the start at 0, like the work light (no light-count change).
+ const fill=mobile?null:new THREE.PointLight('#7cc4ff',0,3.2,1.5);
+ if(fill){fill.name='Contraluz fria do motor';fill.position.set(-1.05,1.05,-1.2);scene.add(fill);}
 
  const body=mechanics.records.find(r=>r.source==='main_body');
  const lifted=mechanics.records.filter(r=>/^top_intake_details/.test(r.source));
@@ -84,6 +95,33 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
  function collect(object){
   object.traverse(o=>{if(!o.isMesh)return;engineGeometries.add(o.geometry);for(const m of [].concat(o.material)){engineMaterials.add(m);for(const v of Object.values(m))if(v?.isTexture)engineTextures.add(v);}});
  }
+ // Inside a cut solid every visible face is a back face: painting them flat reads as the section fill of a cutaway
+ // drawing. Written after the material's own output (the composer grades it with the rest of the frame).
+ function capShader(material){
+  material.onBeforeCompile=shader=>{
+   shader.uniforms.uCutColor={value:CUT_COLOR};
+   shader.fragmentShader=shader.fragmentShader
+    .replace('#include <common>','#include <common>\nuniform vec3 uCutColor;')
+    .replace('#include <dithering_fragment>','#include <dithering_fragment>\nif(!gl_FrontFacing)gl_FragColor=vec4(uCutColor,1.);');
+  };
+  material.customProgramCacheKey=()=>'engine-cut-cap-v1';
+ }
+ function machined(material){
+  if(surfaces){surfaces.applyTo(material,'aluminum',{uvSpanMeters:.5});material.normalScale.setScalar(.07);}
+  material.metalness=Math.max(material.metalness,.9);material.roughness=.42;material.envMapIntensity=.9;material.needsUpdate=true;
+ }
+ // Engine mounts (cinema r6 M3): a bay plate and two rails with four mount blocks under the block, so the unit sits on
+ // the car instead of floating in the dark. Sized in the car frame, placed in the engine frame (root is scaled).
+ function buildCradle(){
+  const k=1/root.scale.x,at=(x,y,z)=>new THREE.Vector3(x-ENGINE_AT.x,y-ENGINE_AT.y,z-ENGINE_AT.z).multiplyScalar(k);
+  const plateMaterial=new THREE.MeshPhysicalMaterial({name:'Berço do motor',color:'#15181c',metalness:.15,roughness:.58,clearcoat:.25,clearcoatRoughness:.3});
+  const railMaterial=new THREE.MeshStandardMaterial({name:'Trilhos do motor',color:'#4a5058',metalness:.9,roughness:.4});
+  const cradle=new THREE.Group();cradle.name='Berço do motor';
+  const part=(w,h,d,x,y,z,material)=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w*k,h*k,d*k),material);m.position.copy(at(x,y,z));m.receiveShadow=true;cradle.add(m);return m;};
+  part(.66,.02,.78,0,.155,-.64,plateMaterial);
+  for(const x of [-.29,.29]){part(.05,.05,.72,x,.19,-.64,railMaterial);for(const z of [-.84,-.40])part(.05,.05,.05,x*.92,.225,z,railMaterial);}
+  root.add(cradle);
+ }
  function buildEngine(gltf){
   const unit=gltf.scene,bounds=new THREE.Box3().setFromObject(unit),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());
   const scale=ENGINE_LENGTH/Math.max(size.x,size.y,size.z);
@@ -98,14 +136,16 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
    }
    if(!/^assembly_/.test(o.name))return;
    // Moving parts and the turbo stay whole; the static block, heads, exhausts, intake and MGU-K are sectioned.
-   groups.push({object:o,cut:!/rotating|turbo/.test(o.name),hiddenWhenCut:/head_right|exhaust_right|electric/.test(o.name)});
+   // Only the near exhaust hides: it hangs outboard of the sectioned bank and would sit between the lens and the cut.
+   groups.push({object:o,cut:!/rotating|turbo/.test(o.name),hiddenWhenCut:/exhaust_right/.test(o.name)});
   });
-  const sectioned=m=>{if(!cutMaterials.has(m)){const c=m.clone();c.clippingPlanes=[cutPlane];c.side=THREE.DoubleSide;cutMaterials.set(m,c);}return cutMaterials.get(m);};
-  // Moving parts in polished metal (roughness 0.22–0.39) flare white under the close work light: a satin copy
-  // keeps the pistons, rods and crank readable in the section.
-  const satin=m=>{if(!satinMaterials.has(m)){const c=m.clone();c.roughness=Math.max(c.roughness,.46);c.envMapIntensity=.8;satinMaterials.set(m,c);}return satinMaterials.get(m);};
+  const sectioned=m=>{if(!cutMaterials.has(m)){const c=m.clone();c.clippingPlanes=[cutPlane,sumpPlane];c.clipIntersection=true;c.side=THREE.DoubleSide;capShader(c);cutMaterials.set(m,c);}return cutMaterials.get(m);};
+  // Moving parts in polished metal (roughness 0.22–0.39) flare white under the close work light: a satin copy with
+  // brushed bands (surface library, aluminium) keeps the pistons, rods and crank readable as machined steel.
+  const satin=m=>{if(!satinMaterials.has(m)){const c=m.clone();machined(c);satinMaterials.set(m,c);}return satinMaterials.get(m);};
   for(const g of groups){const swap=g.cut?sectioned:/rotating/.test(g.object.name)?satin:null;if(swap)g.object.traverse(o=>{if(o.isMesh)o.material=Array.isArray(o.material)?o.material.map(swap):swap(o.material);});}
   mixer=new THREE.AnimationMixer(unit);for(const clip of gltf.animations)mixer.clipAction(clip).play();
+  buildCradle();collect(root);
  }
  // First entry without a stall: only what is new is compiled, against the composer buffer (programs are keyed by
  // the target): the engine, the cover copies and the cut body. Strictly one object at a time, waiting for its programs
@@ -171,9 +211,10 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
   for(const p of [.2,.38,.61,.72,.84]){
    if(disposed)return;
    const take=engineShot(p,mobile),wasSplit=split,wasVisible=root.visible,constant=cutPlane.constant,previous=renderer.getRenderTarget();
+   light.position.fromArray(take.lightAt);
    view.copy(camera);view.position.fromArray(take.camera);view.fov=take.fov;view.updateProjectionMatrix();view.lookAt(aim.fromArray(take.target));view.updateMatrixWorld();
    try{
-    setSplit(true);root.visible=true;poseCover(take.open);cutPlane.constant=THREE.MathUtils.lerp(.7,.004,smooth(take.cut));
+    setSplit(true);root.visible=true;poseCover(take.open);cutPlane.constant=cutAt(take.cut);
     renderer.setRenderTarget(target());renderer.render(scene,view);
    }finally{
     renderer.setRenderTarget(previous);cutPlane.constant=constant;root.visible=wasVisible;if(!wasSplit)setSplit(false);
@@ -207,10 +248,12 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
    if(on!==split)setSplit(on);
    root.visible=on;
    light.intensity=on?shot.light*reveal*WORK_LIGHT:0;
+   if(fill)fill.intensity=on?shot.fill*reveal*FILL_LIGHT:0;
    if(!on)return;
+   light.position.fromArray(shot.lightAt);
    poseCover(open);
    const cut=shot.cut;
-   cutPlane.constant=THREE.MathUtils.lerp(.7,.004,smooth(cut));
+   cutPlane.constant=cutAt(cut);
    for(const g of groups)g.object.visible=!(g.hiddenWhenCut&&cut>.999);
    if(!paused&&!reduced.matches)mixer.update(dt*CLIP_RATE);
   },
@@ -221,6 +264,7 @@ export function createInCarEngine({scene,renderer,camera,model,mechanics,target,
    if(split)setSplit(false);
    cover.removeFromParent();coverMaterials.forEach(m=>m.dispose());restMaterials.forEach(m=>m.dispose());
    light.removeFromParent();light.dispose();
+   if(fill){fill.removeFromParent();fill.dispose();}
    if(mixer){mixer.stopAllAction();mixer.uncacheRoot(mixer.getRoot());}
    root.removeFromParent();
    releaseEngine();

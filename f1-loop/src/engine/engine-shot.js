@@ -21,16 +21,19 @@ const MOBILE_AIM=[0,.45,-.66];
 // are short and motivated: rise from the block to the air that enters, orbit to what is coupled at the rear.
 const KEYS=[
  [.00,[2.90,2.45,2.90],[0,.55,-.40]],   // wide 3/4 from the closing side: the cover lifts
- [.14,[2.45,2.05,1.45],[0,.50,-.60]],
- [.24,[1.60,1.35,.15],[0,.42,-.62]],    // over the sidepod, into the bay
- [.30,[1.34,.92,-.26],[0,.42,-.60]],    // 1 block: the section opens on the crank
- [.45,[1.18,.84,-.86],[0,.41,-.64]],
- [.55,[.95,1.62,.30],[0,.52,-.68]],     // 2 intake: from above and aside, where the air enters
- [.67,[.62,1.58,-.05],[0,.54,-.76]],
- [.72,[1.15,1.65,-1.05],[0,.46,-.84]],  // up and over the plenum, never through it
- [.77,[1.00,1.02,-1.85],[-.02,.42,-.92]], // 3 turbo: from the rear, what is coupled and measured
- [.90,[.78,.94,-1.70],[-.02,.40,-.90]],
- [1.0,[2.70,2.30,-1.10],[0,.50,-.62]]   // pull out while the car closes
+ // Opening (cinema r6 M2): the aim sits screen-left of the bay so the car reads on the right, clear of the copy.
+ [.14,[3.10,2.30,1.90],[-.60,.50,-.40]],
+ [.24,[1.45,1.40,.40],[0,.42,-.60]],    // over the sidepod, into the bay
+ // 1 block: from the front and above, along the crank axis, the sectioned near bank and the whole far bank read as a V.
+ [.30,[1.02,.98,.34],[.02,.42,-.56]],
+ [.45,[1.28,.88,-.18],[0,.41,-.62]],
+ [.55,[.95,1.72,.30],[0,.52,-.68]],     // 2 intake: from above and aside, where the air enters
+ [.67,[.60,1.66,-.05],[0,.54,-.76]],
+ [.72,[.45,1.65,-1.20],[0,.46,-.84]],   // up and over the plenum, never through it
+ // 3 turbo: from the rear on the far side, so the section stays behind the block and the unit reads whole around the turbo.
+ [.77,[-.55,1.00,-1.85],[-.02,.42,-.92]],
+ [.90,[-.40,.90,-1.70],[-.02,.40,-.90]],
+ [1.0,[1.70,1.80,0],[-.70,.45,-.35]]  // closing frame: pull back and open up on the closed car, copy on the left
 ];
 // Rack focus [progress, point]: equal neighbours hold, a change racks.
 const FOCUS=[
@@ -43,7 +46,9 @@ const FOCUS=[
 // Sharp depth (m) and bokeh scale: wide while the car opens, a thin slice on each part during readings.
 const RANGE=[[0,3],[.2,1.2],[.30,.36],[.45,.36],[.50,.7],[.55,.40],[.67,.40],[.72,.7],[.77,.30],[.90,.30],[1,3]];
 const BOKEH=[[0,1.2],[.2,2.2],[.30,3.6],[.45,3.6],[.50,2.6],[.55,3.4],[.67,3.4],[.72,2.6],[.77,3.8],[.90,3.8],[1,1.2]];
-const FOV=[[0,34],[.24,32],[.30,30],[.90,30],[1,34]];
+const FOV=[[0,34],[.24,32],[.30,30],[.90,30],[1,46]];
+// Work light (in-car.js) per lesson: over the section from the lens side, above the plenum, then behind the turbo.
+const LIGHT_AT=[[0,[.6,1.5,-.35]],[.24,[.6,1.5,-.35]],[.30,[.95,1.35,-.15]],[.45,[.95,1.35,-.15]],[.55,[.45,1.65,-.55]],[.67,[.45,1.65,-.55]],[.77,[-.35,1.3,-1.8]],[.90,[-.35,1.3,-1.8]],[1,[.6,1.5,-.35]]];
 
 function segment(keys,p){let i=0;while(i<keys.length-2&&p>keys[i+1][0])i++;return i;}
 // Monotone-limited Catmull-Rom tangent (as in story.js): no axis overshoots its keys.
@@ -83,6 +88,9 @@ export function engineShot(progress,mobile=false){
   open:smooth((p-.03)/.17)*(1-smooth((p-.93)/.07)),
   // The section sweeps through the block as the lens enters the bay, and closes before the cover.
   cut:smooth((p-.20)/.10)*(1-smooth((p-.905)/.05)),
-  light:smooth((p-.06)/.2)*(1-smooth((p-.94)/.06))
+  light:smooth((p-.06)/.2)*(1-smooth((p-.94)/.06)),
+  lightAt:eased(LIGHT_AT,p),
+  // Cool fill only inside the section, so the opening and the close keep the box's warm key.
+  fill:smooth((p-.22)/.1)*(1-smooth((p-.92)/.05))
  };
 }

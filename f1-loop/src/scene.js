@@ -129,10 +129,10 @@ export async function createScene(stage, {onProgress, onError, signal}) {
   for (const m of carMaterials.materials) if (m.name.toLowerCase().startsWith('pintura')) m.envMapIntensity = 1.25;
   const mechanics = createMechanics(model);
   // Chapter 07: created empty, no download here; apply() calls prepare() near Encerrar (GRAVE 2, r5).
-  const inCarEngine = createInCarEngine({scene, renderer, camera, model, mechanics, mobile, signal, target: () => post.composer.inputBuffer, offstage: () => [tunnel?.root, track.root]}), engineAim = new THREE.Vector3();
-  await applyInteiaBranding(model, mechanics);
   // Complementary finish maps; keep the canonical car rig and solid pigment.
   const surfaceLibrary = createSurfaceLibrary(THREE, {renderer, mobile});
+  const inCarEngine = createInCarEngine({scene, renderer, camera, model, mechanics, mobile, signal, surfaces: surfaceLibrary, target: () => post.composer.inputBuffer, offstage: () => [tunnel?.root, track.root]}), engineAim = new THREE.Vector3();
+  await applyInteiaBranding(model, mechanics);
   const detailedMaterials = new Set();
   model.traverse(object => { if (!object.isMesh) return;
     for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
