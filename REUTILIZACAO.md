@@ -4,7 +4,7 @@
 
 Código, documentação e modelos de autoria original INTEIA / Igor Morais Vasconcelos podem ser usados, modificados, redistribuídos e utilizados comercialmente sob a [licença MIT](LICENSE). Preserve o copyright e o texto da licença na sua cópia. Não precisa pedir autorização, ser aluno ou ter conta no GitHub para baixar.
 
-O motor `power-unit-v1.glb` também conserva sua licença CC BY 4.0 já registrada no manifesto. Fontes, bibliotecas, gravações e imagens externas mantêm os próprios avisos. A carroceria proveniente de `F1_2026_tutorial_part7_textures.blend` e seus derivados têm licença de origem não documentada: a MIT libera as contribuições originais INTEIA, mas não concede direitos sobre esse material de terceiros. Marcas não implicam endosso à sua adaptação.
+O motor `power-unit-v1.glb` também conserva sua licença CC BY 4.0 já registrada no manifesto. Fontes, bibliotecas, gravações e imagens externas mantêm os próprios avisos. Conforme declaração de autoria de Igor Morais Vasconcelos em 21/09/2026, o vídeo foi usado como referência para as funções das peças; a modelagem disponibilizada é de sua autoria. A carroceria, suas versões GLB, o master Blender e os demais modelos autorais estão incluídos na licença MIT, com permissão de uso, modificação, redistribuição e uso comercial. Marcas não implicam endosso à sua adaptação.
 
 ## Download direto
 
@@ -45,4 +45,4 @@ watch.update(1 / 60, 0, new THREE.Vector2(0, 0))
 
 Adicione câmera, iluminação e renderer da sua aplicação. `Watch` acrescenta à cena seu grupo e o fundo. O mostrador usa um canvas procedural como reserva e tenta carregar `mostrador.jpg` da pasta pública; ao reutilizar a imagem, confira sua procedência, ou remova essa chamada de textura para usar somente o mostrador procedural.
 
-A pasta `f1-loop/` é outra aplicação: execute seus próprios `npm ci` e `npm run dev` dentro dela. Os assets do carro ficam em `f1-loop/public/assets/`, com a mesma ressalva de procedência acima.
+A pasta `f1-loop/` é outra aplicação: execute seus próprios `npm ci` e `npm run dev` dentro dela. Os assets do carro ficam em `f1-loop/public/assets/`, também liberados sob MIT conforme a declaração de autoria acima.
