@@ -1,17 +1,19 @@
 # Reutilizar os modelos e a aplicação
 
+> **INTEIA fixa na peça:** uso e adaptação dos modelos conforme [ASSET-LICENSE.txt](ASSET-LICENSE.txt). Somente a marca/patrocínio INTEIA deve permanecer; os demais podem ser alterados. Licenças já concedidas às versões anteriores continuam válidas.
+
 ## Permissões
 
-Código, documentação e modelos de autoria original INTEIA / Igor Morais Vasconcelos podem ser usados, modificados, redistribuídos e utilizados comercialmente sob a [licença MIT](LICENSE). Preserve o copyright e o texto da licença na sua cópia. Não precisa pedir autorização, ser aluno ou ter conta no GitHub para baixar.
+Código e documentação: MIT. Para reutilização dos modelos sob os termos atuais, mantenha somente a marca/patrocínio **INTEIA visível e legível na própria peça**; os demais patrocínios podem ser removidos ou trocados. Uso, adaptação, redistribuição e uso comercial continuam permitidos. Consulte a licença de modelos `ASSET-LICENSE.txt` na raiz do repositório. As permissões MIT/CC BY 4.0 já concedidas às versões anteriores permanecem válidas.
 
-O motor `power-unit-v1.glb` também conserva sua licença CC BY 4.0 já registrada no manifesto. Fontes, bibliotecas, gravações e imagens externas mantêm os próprios avisos. Conforme declaração de autoria de Igor Morais Vasconcelos em 21/09/2026, o vídeo foi usado como referência para as funções das peças; a modelagem disponibilizada é de sua autoria. A carroceria, suas versões GLB, o master Blender e os demais modelos autorais estão incluídos na licença MIT, com permissão de uso, modificação, redistribuição e uso comercial. Marcas não implicam endosso à sua adaptação.
+O motor `power-unit-v1.glb` também conserva sua licença CC BY 4.0 já registrada no manifesto. Fontes, bibliotecas, gravações e imagens externas mantêm os próprios avisos. Conforme declaração de autoria de Igor Morais Vasconcelos em 21/09/2026, o vídeo foi usado como referência para as funções das peças; a modelagem disponibilizada é de sua autoria. A carroceria, suas versões GLB, o master Blender e os demais modelos autorais podem ser reutilizados conforme a licença de modelos na raiz do repositório, mantendo INTEIA na peça; as permissões das versões anteriores são preservadas. Marcas não implicam endosso à sua adaptação.
 
 ## Download direto
 
 | Conteúdo | Arquivo |
 | --- | --- |
-| Relógio procedural original (MIT) | [Baixar Watch.js](https://raw.githubusercontent.com/igormorais123/relogio-de-precisao/main/src/watch/Watch.js) |
-| Geometrias do relógio (MIT) | [Baixar gear.js](https://raw.githubusercontent.com/igormorais123/relogio-de-precisao/main/src/watch/gear.js) |
+| Relógio procedural original (preservar INTEIA) | [Baixar Watch.js](https://raw.githubusercontent.com/igormorais123/relogio-de-precisao/main/src/watch/Watch.js) |
+| Geometrias do relógio (preservar INTEIA) | [Baixar gear.js](https://raw.githubusercontent.com/igormorais123/relogio-de-precisao/main/src/watch/gear.js) |
 
 [Baixar o projeto completo em ZIP](https://github.com/igormorais123/relogio-de-precisao/archive/refs/heads/main.zip). Extraia o ZIP antes de executar. Você também pode usar `git clone https://github.com/igormorais123/relogio-de-precisao.git`.
 
@@ -45,4 +47,4 @@ watch.update(1 / 60, 0, new THREE.Vector2(0, 0))
 
 Adicione câmera, iluminação e renderer da sua aplicação. `Watch` acrescenta à cena seu grupo e o fundo. O mostrador usa um canvas procedural como reserva e tenta carregar `mostrador.jpg` da pasta pública; ao reutilizar a imagem, confira sua procedência, ou remova essa chamada de textura para usar somente o mostrador procedural.
 
-A pasta `f1-loop/` é outra aplicação: execute seus próprios `npm ci` e `npm run dev` dentro dela. Os assets do carro ficam em `f1-loop/public/assets/`, também liberados sob MIT conforme a declaração de autoria acima.
+A pasta `f1-loop/` é outra aplicação: execute seus próprios `npm ci` e `npm run dev` dentro dela. Os assets do carro ficam em `f1-loop/public/assets/`, também abrangidos pelos termos de modelos acima.
