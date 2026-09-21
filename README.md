@@ -1,5 +1,11 @@
 # Relógio de Precisão
 
+## Baixar e reutilizar
+
+Os conteúdos originais de INTEIA / Igor Morais Vasconcelos estão disponíveis sob licença MIT: qualquer pessoa pode usar, copiar, modificar, redistribuir e utilizar comercialmente, preservando o aviso de copyright e a licença. Não é necessário pedir autorização adicional. Esta concessão inclui código, documentação e geometria original, inclusive seus arquivos exportados. Materiais de terceiros conservam suas próprias licenças; o motor V6 já publicado em CC BY 4.0 mantém essa opção de uso. A carroceria derivada do tutorial tem licença de origem não documentada; a MIT cobre as contribuições originais, sem relicenciar a geometria de terceiros.
+
+[Guia de assets e reutilização](REUTILIZACAO.md) · [Licença MIT](LICENSE) · [Baixar ZIP sem conta](https://github.com/igormorais123/relogio-de-precisao/archive/refs/heads/main.zip)
+
 ## Comece aqui, aluno
 
 Você pode usar esta apresentação para estudar, apresentar uma aula e criar uma versão sobre outro tema, citando a fonte e identificando suas alterações. Leia as [condições de uso e os créditos](CREDITOS-E-USO.md), inclusive as condições dos materiais de terceiros.
