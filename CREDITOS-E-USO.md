@@ -1,16 +1,10 @@
 # Créditos e condições de uso
 
-## Permissão para os alunos
+## Permissão para qualquer pessoa
 
-Por autorização do responsável por este projeto, os alunos podem estudar, copiar, modificar, apresentar e compartilhar versões adaptadas do código e do conteúdo autoral desta apresentação, inclusive mudando o tema, desde que:
+Código e documentação: MIT. Para reutilização dos modelos sob os termos atuais, mantenha somente a marca/patrocínio **INTEIA visível e legível na própria peça**; os demais patrocínios podem ser removidos ou trocados. Uso, adaptação, redistribuição e uso comercial continuam permitidos. Consulte a licença de modelos `ASSET-LICENSE.txt` na raiz do repositório. As permissões MIT/CC BY 4.0 já concedidas às versões anteriores permanecem válidas.
 
-1. Citem **Relógio de Precisão**, com link para o [repositório original](https://github.com/igormorais123/relogio-de-precisao).
-2. Identifiquem a autoria da adaptação e descrevam o que foi alterado.
-3. Preservem este aviso e os avisos de licença dos componentes de terceiros que redistribuírem.
-
-Inclua o crédito no README da sua cópia e em um local visível da apresentação adaptada, como uma seção de créditos. Para uso em aula sem modificação, apresente a fonte no início ou no encerramento. Não apresente a versão adaptada como se fosse a versão original ou como se tivesse sido aprovada pelos autores das referências.
-
-Esta é a permissão de uso educacional declarada para o projeto; não é uma declaração de que todos os materiais externos têm a mesma licença. As permissões de terceiros continuam sendo as de seus respectivos titulares.
+A [licença MIT](LICENSE) substitui a antiga permissão limitada aos alunos. Crédito visível e descrição das alterações são sugestões para apresentações e trabalhos acadêmicos, não condições adicionais à MIT.
 
 ## Modelo de crédito
 

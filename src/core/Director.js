@@ -64,7 +64,6 @@ export class Director {
     const pose = sampleCameraPose(ch, L, { portrait: this.isPortrait, reduced: s.reduced })
     const k = 1 - Math.pow(0.0015, dt)
     this.layoutSide = lerp(this.layoutSide, pose.side, k)
-    s.layoutSide = this.layoutSide
 
     // O título cede espaço à ficha; avaliação/aprendizado têm um quadro especial depois dela.
     this.titles.forEach((title, i) => {

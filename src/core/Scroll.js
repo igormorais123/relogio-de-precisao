@@ -9,6 +9,26 @@ gsap.registerPlugin(ScrollTrigger)
 // ScrollTrigger somente observa. Os capítulos especiais reservam espaço para leitura.
 const PESOS = [2.8, 3.4, 3.4, 3.6, 5.0, 5.0]
 
+export function stitchBounds(raw) {
+  const bounds = raw.map(([a, b]) => [a, b])
+  for (let i = 0; i < bounds.length - 1; i++) bounds[i][1] = bounds[i + 1][0]
+  if (bounds.length) bounds[bounds.length - 1][1] = 1
+  return bounds
+}
+
+export function resolveChapter(progress, bounds) {
+  const n = bounds.length
+  const p = Math.min(1, Math.max(0, progress))
+  let i = bounds.findIndex(([a, b]) => p >= a && p < b)
+  if (i < 0) i = p >= 1 ? n - 1 : 0
+  const [a, b] = bounds[i]
+  return {
+    progress: p,
+    chapter: i,
+    local: Math.min(1, Math.max(0, (p - a) / Math.max(1e-6, b - a))),
+  }
+}
+
 export class Scroll {
   constructor(root) {
     this.progress = 0
@@ -31,7 +51,8 @@ export class Scroll {
       // Narrativa acessível: o canvas é decorativo; o texto real vive aqui, fora da tela.
       const hs = (c.hotspots || []).map((h) => `<li><b>${h.nome}.</b> ${h.texto}</li>`).join('')
       const ls = (c.licoes || []).map((l) => `<li><b>${l.termo}.</b> ${l.texto}</li>`).join('')
-      s.innerHTML = `<div class="sr-only"><h2 id="${c.slug}-titulo">${c.nome}. ${c.titulo.replace(/\n/g, ' ')}</h2><p>${c.corpo}</p>${hs ? `<ul>${hs}</ul>` : ''}${c.essencia ? `<h3>${c.essencia}</h3><ul>${ls}</ul>` : ''}</div>`
+      const f1 = c.f1 ? `<p>Na Fórmula 1. ${c.f1.termo}: ${c.f1.texto}</p>` : ''
+      s.innerHTML = `<div class="sr-only"><h2 id="${c.slug}-titulo">${c.nome}. ${c.titulo.replace(/\n/g, ' ')}</h2><p>${c.corpo}</p>${hs ? `<ul>${hs}</ul>` : ''}${c.essencia ? `<h3>${c.essencia}</h3><ul>${ls}</ul>` : ''}${f1}</div>`
       root.appendChild(s)
       this.sections.push(s)
     })
@@ -68,21 +89,15 @@ export class Scroll {
   measure() {
     const range = Math.max(1, document.documentElement.scrollHeight - innerHeight)
     this.range = range
-    this.bounds = this.sections.map((s) => [Math.min(1, s.offsetTop / range), Math.min(1, (s.offsetTop + s.offsetHeight) / range)])
-    // Sem sobreposição e sem buraco: o limite superior de cada capítulo é o inferior do próximo; o último fecha em 1.
-    for (let i = 0; i < N - 1; i++) this.bounds[i][1] = this.bounds[i + 1][0]
-    this.bounds[N - 1][1] = 1
+    this.bounds = stitchBounds(this.sections.map((s) => [Math.min(1, s.offsetTop / range), Math.min(1, (s.offsetTop + s.offsetHeight) / range)]))
   }
 
   apply(progress, velocity) {
-    this.progress = Math.min(1, Math.max(0, progress))
-    progress = this.progress
     this.velocity = velocity
-    let i = this.bounds.findIndex(([a, b]) => progress >= a && progress < b)
-    if (i < 0) i = progress >= 1 ? N - 1 : 0
-    const [a, b] = this.bounds[i]
-    this.chapter = i
-    this.local = Math.min(1, Math.max(0, (progress - a) / Math.max(1e-6, b - a)))
+    const resolved = resolveChapter(progress, this.bounds)
+    this.progress = resolved.progress
+    this.chapter = resolved.chapter
+    this.local = resolved.local
     for (const fn of this.listeners) fn(this)
   }
 

@@ -1,0 +1,36 @@
+name: Publicar F1 Loop
+
+# Publica f1-loop/dist na branch gh-pages, que é a fonte do GitHub Pages.
+# Enquanto os jobs do GitHub Actions estiverem bloqueados na conta, rode o
+# mesmo script localmente: bash f1-loop/tools/publicar-gh-pages.sh
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'f1-loop/**'
+      - '.github/workflows/pages-f1-loop.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pages-f1-loop
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: f1-loop/package-lock.json
+      - name: Testar, construir e publicar
+        run: bash f1-loop/tools/publicar-gh-pages.sh
+        env:
+          GH_PAGES_REMOTE: https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git

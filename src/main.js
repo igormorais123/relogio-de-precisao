@@ -1,5 +1,6 @@
 import { CAPITULOS } from './data/narrativa.js'
 import { PAGINAS } from './data/paginas.js'
+import { detectWebGL } from './core/webgl.js'
 
 // Preloader com progresso real: cada etapa pesa o que custa (fontes, módulos 3D, ambiente, compilação de shaders, primeiro quadro).
 const pct = document.getElementById('preloader-pct')
@@ -16,10 +17,6 @@ const tickProgress = () => {
 }
 tickProgress()
 
-function hasWebGL() {
-  try { const c = document.createElement('canvas'); return !!c.getContext('webgl2') } catch { return false }
-}
-
 function fallback() {
   preloader.classList.add('is-done')
   document.getElementById('gl').hidden = true
@@ -27,7 +24,7 @@ function fallback() {
   document.getElementById('dots').hidden = true
   const u = document.getElementById('unsupported'); u.hidden = false
   const list = document.getElementById('unsupported-list')
-  CAPITULOS.forEach((c) => { const li = document.createElement('li'); li.innerHTML = `<b>${c.nome}.</b> ${c.titulo.replace(/\n/g, ' ')} ${c.corpo}${c.essencia ? ` <em>${c.essencia}</em> ${(c.licoes || []).map((l) => `${l.termo}: ${l.texto}`).join(' ')}` : ''}`; list.appendChild(li) })
+  CAPITULOS.forEach((c) => { const li = document.createElement('li'); li.innerHTML = `<b>${c.nome}.</b> ${c.titulo.replace(/\n/g, ' ')} ${c.corpo}${c.essencia ? ` <em>${c.essencia}</em> ${(c.licoes || []).map((l) => `${l.termo}: ${l.texto}`).join(' ')}` : ''}${c.f1 ? ` <em>Na Fórmula 1. ${c.f1.termo}:</em> ${c.f1.texto}` : ''}`; list.appendChild(li) })
   // O conteúdo completo continua disponível mesmo sem a cena 3D.
   Object.values(PAGINAS).forEach((p) => {
     const li = document.createElement('li')
@@ -37,7 +34,7 @@ function fallback() {
 }
 
 async function boot() {
-  if (!hasWebGL()) return fallback()
+  if (!detectWebGL()) return fallback()
   setProgress(6)
   const [{ App }, { Scroll }, { Watch }, { Background }, { Director }, { Particles }, { Constellation }, { setupUI }, { preloadFonts }, fxExtra] = await Promise.all([
     import('./core/App.js'), import('./core/Scroll.js'), import('./watch/Watch.js'), import('./core/Background.js'),

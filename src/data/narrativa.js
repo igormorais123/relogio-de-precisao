@@ -22,7 +22,11 @@ export const CAPITULOS = [
         "termo": "Critério de pronto",
         "texto": "Como verificar o resultado?"
       }
-    ]
+    ],
+    "f1": {
+      "termo": "Bandeira vermelha",
+      "texto": "Antes de mexer no carro, o diretor nomeia o que parou a sessão."
+    }
   },
   {
     "id": "pesquisa",
@@ -68,7 +72,11 @@ export const CAPITULOS = [
         "nome": "Restrição",
         "texto": "Peças, orçamento e prazo."
       }
-    ]
+    ],
+    "f1": {
+      "termo": "Telemetria",
+      "texto": "Cruzar sensores, boxes e piloto antes de mudar o setup."
+    }
   },
   {
     "id": "planejamento",
@@ -114,7 +122,11 @@ export const CAPITULOS = [
         "nome": "Rubis = atrito",
         "texto": "Os rubis reduzem o atrito nos eixos. São as decisões que evitam desgaste na execução."
       }
-    ]
+    ],
+    "f1": {
+      "termo": "Estratégia de pit",
+      "texto": "Uma hipótese com pneus, voltas e janela — não um chute."
+    }
   },
   {
     "id": "execucao",
@@ -138,7 +150,11 @@ export const CAPITULOS = [
         "termo": "Passos verificáveis",
         "texto": "Prepare como desfazer quando possível."
       }
-    ]
+    ],
+    "f1": {
+      "termo": "Parada nos boxes",
+      "texto": "Intervenção cronometrada: cada parafuso tem dono e tempo."
+    }
   },
   {
     "id": "avaliacao",
@@ -181,6 +197,10 @@ export const CAPITULOS = [
         "desvio": 1.4,
         "texto": "Na vertical a gravidade puxa o balanço e altera a amplitude."
       }
+    },
+    "f1": {
+      "termo": "Delta de volta",
+      "texto": "O cronômetro manda. Sensação de velocidade não conta."
     }
   },
   {
@@ -206,7 +226,11 @@ export const CAPITULOS = [
         "termo": "Contexto recuperável",
         "texto": "Caminhos úteis; fontes conferidas."
       }
-    ]
+    ],
+    "f1": {
+      "termo": "Debrief",
+      "texto": "O que a sessão ensinou vira a próxima peça do setup."
+    }
   }
 ]
 

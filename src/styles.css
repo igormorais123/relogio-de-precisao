@@ -16,6 +16,13 @@ html.lenis, html.lenis body { height: auto; }
 .lenis.lenis-smooth { scroll-behavior: auto !important; }
 body { overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
+.skip-link {
+  position: absolute; left: 16px; top: 12px; z-index: 80; padding: 10px 14px;
+  background: var(--gold); color: #06080b; font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+  text-decoration: none; border-radius: 999px; transform: translateY(-140%);
+}
+.skip-link:focus { transform: none; outline: 2px solid var(--ink); outline-offset: 3px; }
+
 #gl { position: fixed; inset: 0; width: 100%; height: 100%; display: block; z-index: 0; }
 
 .scroll { position: relative; z-index: 1; pointer-events: none; }
