@@ -28,7 +28,7 @@ function fallback() {
   // O conteúdo completo continua disponível mesmo sem a cena 3D.
   Object.values(PAGINAS).forEach((p) => {
     const li = document.createElement('li')
-    li.innerHTML = `<h2>${p.titulo}</h2><p>${p.lead}</p><img src="${import.meta.env.BASE_URL}${p.imagem}" alt="${p.alt}" style="display:block;max-width:100%;height:auto" />${p.secoes.map((s) => `<h3>${s.titulo}</h3><ul>${s.itens.map((item) => `<li>${item}</li>`).join('')}</ul>`).join('')}`
+    li.innerHTML = `<h2>${p.titulo}</h2><p>${p.lead}</p><img src="${import.meta.env.BASE_URL}${p.imagem}" alt="${p.alt}" style="display:block;max-width:100%;height:auto" />${p.video ? `<video controls preload="none" playsinline poster="${import.meta.env.BASE_URL}${p.poster}" src="${import.meta.env.BASE_URL}${p.video}" style="display:block;max-width:100%;margin-top:12px"></video>` : ''}${p.secoes.map((s) => `<h3>${s.titulo}</h3><ul>${s.itens.map((item) => `<li>${item}</li>`).join('')}</ul>`).join('')}`
     list.appendChild(li)
   })
 }

@@ -363,3 +363,11 @@ body[data-chapter-index="1"] .ficha__list li { border-top-color: rgba(240, 233, 
 .segredo-dialog .segredo-fonte { margin-bottom:0; font-size:11px; color:#a7a49e; }
 .segredo-fechar { position:absolute; right:10px; top:8px; width:44px; height:44px; border:0; color:#d8b97e; background:transparent; font-size:27px; cursor:pointer; }
 @media(max-width:600px) { .segredo-marca { right:10px; bottom:66px; } .segredo-dialog { padding:36px 22px 22px; } .segredo-dialog h2 { font-size:24px; } }
+
+/* vídeo do aprofundamento de grafo */
+.aula-play{pointer-events:auto;display:flex;align-items:center;gap:10px;margin:18px auto 0;padding:10px 22px;background:rgba(6,8,11,.6);color:var(--gold);border:1px solid rgba(211,169,79,.6);border-radius:999px;font-family:var(--font-display);font-size:18px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .2s,color .2s}
+.aula-play:hover,.aula-play:focus-visible{background:rgba(211,169,79,.16);color:var(--ink);outline:none}
+.aula-video{width:min(1280px,92vw);padding:0;border:1px solid rgba(211,169,79,.5);border-radius:6px;background:#000;color:var(--ink);overflow:visible}
+.aula-video::backdrop{background:rgba(6,8,11,.9)}
+.aula-video video{display:block;width:100%;height:auto;border-radius:6px}
+.aula-video__fechar{position:absolute;top:-44px;right:0;width:36px;height:36px;border:1px solid rgba(211,169,79,.5);border-radius:50%;background:rgba(6,8,11,.85);color:var(--ink);font-size:22px;line-height:1;cursor:pointer}

@@ -90,8 +90,27 @@ export function setupUI(scroll, director) {
   const aula = document.createElement('aside')
   aula.id = 'aula-pagina'; aula.className = 'aula-pagina'; aula.hidden = true
   aula.setAttribute('aria-label', 'Aprofundamento da aula')
-  aula.innerHTML = Object.entries(PAGINAS).map(([id, p]) => `<article class="aula-slide" data-aula="${id}" hidden><header><small>${esc(p.rotulo)}</small><h2>${esc(p.titulo)}</h2><p class="lead">${esc(p.lead)}</p></header><figure><img src="${import.meta.env.BASE_URL}${p.imagem}" alt="${esc(p.alt)}" decoding="async" /><figcaption>${esc(p.metafora)}</figcaption></figure><div class="aula-grid">${p.secoes.map(sc => `<section><h3>${esc(sc.titulo)}</h3><ul>${sc.itens.map(it => `<li>${esc(it)}</li>`).join('')}</ul></section>`).join('')}</div><p class="aula-continue">${id === 'loop' ? 'Role para o aprendizado' : 'O aprendizado orienta o próximo ciclo'} <span aria-hidden="true">↓</span></p></article>`).join('')
+  aula.innerHTML = Object.entries(PAGINAS).map(([id, p]) => `<article class="aula-slide" data-aula="${id}" hidden><header><small>${esc(p.rotulo)}</small><h2>${esc(p.titulo)}</h2><p class="lead">${esc(p.lead)}</p></header><figure><img src="${import.meta.env.BASE_URL}${p.imagem}" alt="${esc(p.alt)}" decoding="async" /><figcaption>${esc(p.metafora)}</figcaption>${p.video ? `<button class="aula-play" type="button" data-video="${id}"><span aria-hidden="true">▶</span> Assistir ao vídeo · ${esc(p.videoDuracao ?? '')}</button>` : ''}</figure><div class="aula-grid">${p.secoes.map(sc => `<section><h3>${esc(sc.titulo)}</h3><ul>${sc.itens.map(it => `<li>${esc(it)}</li>`).join('')}</ul></section>`).join('')}</div><p class="aula-continue">${id === 'loop' ? 'Role para o aprendizado' : 'O aprendizado orienta o próximo ciclo'} <span aria-hidden="true">↓</span></p></article>`).join('')
   document.body.appendChild(aula)
+  // vídeo do aprofundamento: abre numa janela modal; fechar pausa o vídeo
+  const dlgVideo = document.createElement('dialog')
+  dlgVideo.className = 'aula-video'; dlgVideo.setAttribute('aria-label', 'Vídeo do aprofundamento')
+  dlgVideo.innerHTML = '<button class="aula-video__fechar" type="button" aria-label="Fechar vídeo">×</button><video controls playsinline preload="none"></video>'
+  document.body.appendChild(dlgVideo)
+  const vidAula = dlgVideo.querySelector('video')
+  // enquanto o vídeo está aberto, a página por trás não rola (nem pelo Lenis, nem pela rolagem nativa)
+  const travar = (sim) => { document.documentElement.style.overflow = sim ? 'hidden' : ''; sim ? scroll.lenis?.stop() : scroll.lenis?.start() }
+  const fecharVideo = () => { vidAula.pause(); if (dlgVideo.open) dlgVideo.close() }
+  aula.addEventListener('click', (e) => {
+    const b = e.target.closest('.aula-play'); if (!b) return
+    const p = PAGINAS[b.dataset.video]; if (!p?.video) return
+    vidAula.poster = `${import.meta.env.BASE_URL}${p.poster}`
+    if (!vidAula.src.endsWith(p.video)) vidAula.src = `${import.meta.env.BASE_URL}${p.video}`
+    dlgVideo.showModal(); travar(true); vidAula.play().catch(() => {})
+  })
+  dlgVideo.querySelector('.aula-video__fechar').addEventListener('click', fecharVideo)
+  dlgVideo.addEventListener('click', (e) => { if (e.target === dlgVideo) fecharVideo() })
+  dlgVideo.addEventListener('close', () => { vidAula.pause(); travar(false) })
   const openPagina = (id) => {
     if (!PAGINAS[id]) return
     if (!mapa.hidden) closeMapa()

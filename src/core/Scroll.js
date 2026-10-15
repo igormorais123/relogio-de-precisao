@@ -57,7 +57,7 @@ export class Scroll {
       this.sections.push(s)
     })
 
-    this.lenis = new Lenis({ lerp: this.reduced ? 1 : 0.11, wheelMultiplier: 1, touchMultiplier: 1, smoothWheel: !this.reduced, syncTouch: false, prevent: (node) => !!node.closest?.('.pagina, .mapa, .registro, .menu') })
+    this.lenis = new Lenis({ lerp: this.reduced ? 1 : 0.11, wheelMultiplier: 1, touchMultiplier: 1, smoothWheel: !this.reduced, syncTouch: false, prevent: (node) => !!node.closest?.('.pagina, .mapa, .registro, .menu, .aula-video') })
     this.lenis.on('scroll', ScrollTrigger.update)
     gsap.ticker.add((t) => this.lenis.raf(t * 1000))
     gsap.ticker.lagSmoothing(0)

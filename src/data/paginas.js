@@ -15,6 +15,7 @@ export const PAGINAS = {
   grafo: {
     rotulo: 'Aprendizado · aprofundamento', titulo: 'Engenharia de grafo',
     lead: 'Um segundo cérebro para conectar o que você sabe.', imagem: 'pagina-grafo-final.png',
+    video: 'grafo-cerebro.mp4', poster: 'grafo-cerebro-capa.jpg', videoDuracao: '3 min',
     alt: 'Grafo de conhecimento em forma de cérebro, com comunidades, nós centrais e um caminho destacado entre memórias e ideias.',
     metafora: 'Conecte memórias. Recupere caminhos.',
     secoes: [
